@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"bacon/pork"
+	"bacon/client"
 	"fmt"
 	"os"
 
@@ -24,12 +24,12 @@ this can be handy when building dynamic DNS clients.`,
 }
 
 func ping() {
-	auth := pork.Auth{
+	auth := client.Auth{
 		ApiKey:       os.Getenv("PORKBUN_API_KEY"),
 		SecretApiKey: os.Getenv("PORKBUN_SECRET_KEY"),
 	}
 
-	msg, err := pork.Ping(auth)
+	msg, err := client.Ping(auth)
 	if err != nil {
 		msg := fmt.Errorf("couldn't ping Porkbun: %w", err)
 		fmt.Println(msg)

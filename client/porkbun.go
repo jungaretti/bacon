@@ -1,4 +1,4 @@
-package pork
+package client
 
 func Ping(auth Auth) (string, error) {
 	body, err := postAndDecode(auth, PK_PING)

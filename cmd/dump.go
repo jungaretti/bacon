@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"bacon/pork"
+	"bacon/client"
 	"fmt"
 	"os"
 
@@ -24,12 +24,12 @@ or a single record for a particular record ID.`,
 }
 
 func dump(domain string) {
-	auth := pork.Auth{
+	auth := client.Auth{
 		ApiKey:       os.Getenv("PORKBUN_API_KEY"),
 		SecretApiKey: os.Getenv("PORKBUN_SECRET_KEY"),
 	}
 
-	msg, err := pork.RetrieveRecords(auth, domain)
+	msg, err := client.RetrieveRecords(auth, domain)
 	if err != nil {
 		msg := fmt.Errorf("couldn't ping Porkbun: %w", err)
 		fmt.Println(msg)

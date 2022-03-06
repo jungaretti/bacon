@@ -1,4 +1,4 @@
-package pork
+package client
 
 import (
 	"bytes"
