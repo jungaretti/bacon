@@ -15,42 +15,54 @@ type Auth struct {
 	SecretApiKey string `json:"secretapikey"`
 }
 
-type Ack struct {
+type Record struct {
+	Id       string `json:"id"`
+	Name     string `json:"name"`
+	Type     string `json:"type"`
+	Content  string `json:"content"`
+	Ttl      string `json:"ttl"`
+	Priority string `json:"prio"`
+	Notes    string `json:"notes"`
+}
+
+type PingRes struct {
 	Status   string `json:"status"`
 	ClientIp string `json:"yourIp"`
 }
 
-func (a *Ack) Ok() bool {
-	switch a.Status {
-	case "SUCCESS":
-		return true
-	default:
-		return false
-	}
+type RecordRes struct {
+	Status  string    `json:"status"`
+	Records *[]Record `json:"records"`
 }
 
-func Ping(auth Auth) (*Ack, error) {
+func Ping(auth Auth) (*PingRes, error) {
 	body, err := postAndDecode(auth, PK_PING)
 	if err != nil {
 		return nil, err
 	}
 
-	ack := Ack{}
-	err = json.Unmarshal(body, &ack)
+	res := PingRes{}
+	err = json.Unmarshal(body, &res)
 	if err != nil {
 		return nil, err
 	}
 
-	return &ack, nil
+	return &res, nil
 }
 
-func RetrieveRecords(auth Auth, domain string) (string, error) {
+func RetrieveRecords(auth Auth, domain string) (*[]Record, error) {
 	body, err := postAndDecode(auth, PK_DNS_RETRIEVE+domain)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return string(body), nil
+	res := RecordRes{}
+	err = json.Unmarshal(body, &res)
+	if err != nil {
+		return nil, err
+	}
+
+	return res.Records, nil
 }
 
 func postAndDecode(auth Auth, url string) ([]byte, error) {

@@ -29,11 +29,12 @@ func dump(domain string) {
 		SecretApiKey: os.Getenv("PORKBUN_SECRET_KEY"),
 	}
 
-	msg, err := client.RetrieveRecords(auth, domain)
+	records, err := client.RetrieveRecords(auth, domain)
 	if err != nil {
-		msg := fmt.Errorf("couldn't ping Porkbun: %w", err)
-		fmt.Println(msg)
+		fmt.Println(fmt.Errorf("couldn't ping Porkbun: %w", err))
 	}
 
-	fmt.Println(msg)
+	for index, element := range *records {
+		fmt.Printf("%d: %s\n", index, element)
+	}
 }
