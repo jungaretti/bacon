@@ -18,6 +18,7 @@ var pingCmd = &cobra.Command{
 	Long: `You can test communication with the API using the ping endpoint.
 The ping endpoint will also return your IP address,
 this can be handy when building dynamic DNS clients.`,
+	Args: cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		ping()
 	},
