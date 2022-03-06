@@ -1,24 +1,16 @@
 package pork
 
-import (
-	"bytes"
-	"encoding/json"
-	"io/ioutil"
-	"net/http"
-)
-
 func Ping(auth Auth) (string, error) {
-	json, err := json.Marshal(auth)
+	body, err := postAndDecode(auth, PK_PING)
 	if err != nil {
 		return "", err
 	}
 
-	resp, err := http.Post(PORKBUN_PING, "application/json", bytes.NewBuffer(json))
-	if err != nil {
-		return "", err
-	}
+	return string(body), nil
+}
 
-	body, err := ioutil.ReadAll(resp.Body)
+func RetrieveRecords(auth Auth, domain string) (string, error) {
+	body, err := postAndDecode(auth, PK_DNS_RETRIEVE+domain)
 	if err != nil {
 		return "", err
 	}
