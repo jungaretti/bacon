@@ -15,9 +15,8 @@ func init() {
 var dumpCmd = &cobra.Command{
 	Use:   "dump <domain>",
 	Short: "Retrieve DNS records for a domain",
-	Long: `Retrieve all editable DNS records associated with a domain
-or a single record for a particular record ID.`,
-	Args: cobra.ExactArgs(1),
+	Long:  `Retrieve all editable DNS records associated with a domain.`,
+	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		dump(args[0])
 	},
@@ -29,12 +28,12 @@ func dump(domain string) {
 		SecretApiKey: os.Getenv("PORKBUN_SECRET_KEY"),
 	}
 
-	records, err := client.RetrieveRecords(auth, domain)
+	records, err := client.GetRecords(&auth, domain)
 	if err != nil {
-		fmt.Println(fmt.Errorf("couldn't ping Porkbun: %w", err))
+		fmt.Println(fmt.Errorf("couldn't dump from Porkbun: %w", err))
 	}
 
-	for index, element := range *records {
-		fmt.Printf("%d: %s\n", index, element)
+	for _, element := range *records {
+		fmt.Printf("%s: Name=%s, Type=%s, Content=%s, TTL=%s, Priority=%s, Notes=%s\n", element.Id, element.Name, element.Type, element.Content, element.Ttl, element.Priority, element.Notes)
 	}
 }

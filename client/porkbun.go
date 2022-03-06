@@ -3,16 +3,23 @@ package client
 import (
 	"bytes"
 	"encoding/json"
-	"io/ioutil"
+	"fmt"
+	"io"
 	"net/http"
 )
 
-var PK_PING = "https://porkbun.com/api/json/v3/ping"
-var PK_DNS_RETRIEVE = "https://porkbun.com/api/json/v3/dns/retrieve/"
+var PORK_PING = "https://porkbun.com/api/json/v3/ping"
+var PORK_GET_RECORDS = "https://porkbun.com/api/json/v3/dns/retrieve/"
+var PORK_CREATE_RECORD = "https://porkbun.com/api/json/v3/dns/create/"
+var PORK_DELETE_RECORD = "https://porkbun.com/api/json/v3/dns/delete/"
 
 type Auth struct {
 	ApiKey       string `json:"apikey"`
 	SecretApiKey string `json:"secretapikey"`
+}
+
+type Ack struct {
+	Success bool
 }
 
 type Record struct {
@@ -25,56 +32,72 @@ type Record struct {
 	Notes    string `json:"notes"`
 }
 
-type PingRes struct {
+type pingRes struct {
 	Status   string `json:"status"`
 	ClientIp string `json:"yourIp"`
 }
 
-type RecordRes struct {
-	Status  string    `json:"status"`
-	Records *[]Record `json:"records"`
+type recordsRes struct {
+	Status  string   `json:"status"`
+	Records []Record `json:"records"`
 }
 
-func Ping(auth Auth) (*PingRes, error) {
-	body, err := postAndDecode(auth, PK_PING)
+func Ping(auth *Auth) (*Ack, error) {
+	res := pingRes{}
+	err := postAndRead(auth, PORK_PING, &res)
 	if err != nil {
 		return nil, err
 	}
 
-	res := PingRes{}
-	err = json.Unmarshal(body, &res)
-	if err != nil {
-		return nil, err
+	ack := Ack{
+		Success: parseStatus(res.Status),
 	}
 
-	return &res, nil
+	return &ack, nil
 }
 
-func RetrieveRecords(auth Auth, domain string) (*[]Record, error) {
-	body, err := postAndDecode(auth, PK_DNS_RETRIEVE+domain)
+func GetRecords(auth *Auth, domain string) (*[]Record, error) {
+	res := recordsRes{}
+	err := postAndRead(auth, PORK_GET_RECORDS+domain, &res)
 	if err != nil {
 		return nil, err
 	}
 
-	res := RecordRes{}
-	err = json.Unmarshal(body, &res)
-	if err != nil {
-		return nil, err
-	}
-
-	return res.Records, nil
+	return &res.Records, nil
 }
 
-func postAndDecode(auth Auth, url string) ([]byte, error) {
-	json, err := json.Marshal(auth)
+func CreateRecord(auth *Auth, domain string, record *Record) (bool, error) {
+	return false, fmt.Errorf("couldn't create record")
+}
+
+func DeleteRecord(auth *Auth, domain string, id string) (bool, error) {
+	return false, fmt.Errorf("couldn't delete record")
+}
+
+func postAndRead(body interface{}, url string, value interface{}) error {
+	encoded, err := json.Marshal(body)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	resp, err := http.Post(url, "application/json", bytes.NewBuffer(json))
+	res, err := http.Post(url, "application/json", bytes.NewBuffer(encoded))
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return ioutil.ReadAll(resp.Body)
+	raw, err := io.ReadAll(res.Body)
+	if err != nil {
+		return err
+	}
+
+	return json.Unmarshal(raw, &value)
+}
+
+func parseStatus(status string) bool {
+	switch status {
+	case "SUCCESS":
+		return true
+	default:
+		return false
+	}
 }
