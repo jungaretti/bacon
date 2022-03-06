@@ -10,11 +10,8 @@ import (
 var rootCmd = &cobra.Command{
 	Use:   "bacon",
 	Short: "Bacon is a DNS manager",
-	Long: `A flexible DNS record manager for Porkbun.
-Complete documentation is available at http://www.jungaretti.com`,
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Let's cook some bacon")
-	},
+	Long: `A flexible DNS record manager for Porkbun. Complete documentation
+is available at https://github.com/jungaretti/bacon.`,
 }
 
 func Execute() {

@@ -10,6 +10,10 @@ Bacon uses Porkbun's API to help you manage DNS records from the command line. I
 
 Use `make` to build `bin/bacon`.
 
+## Usage
+
+Create a new `.env` file with your Porkbun API keys. Use the same format as `.env.example`.
+
 ## Built With
 
 - [Cobra](https://cobra.dev/)
