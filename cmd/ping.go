@@ -15,13 +15,15 @@ func init() {
 var pingCmd = &cobra.Command{
 	Use:   "ping",
 	Short: "Say hello to Porkbun",
-	Long:  `Does this really need a long description?`,
+	Long: `You can test communication with the API using the ping endpoint.
+The ping endpoint will also return your IP address,
+this can be handy when building dynamic DNS clients.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		executePing()
+		ping()
 	},
 }
 
-func executePing() {
+func ping() {
 	auth := pork.Auth{
 		ApiKey:       os.Getenv("PORKBUN_API_KEY"),
 		SecretApiKey: os.Getenv("PORKBUN_SECRET_KEY"),
@@ -29,7 +31,8 @@ func executePing() {
 
 	msg, err := pork.Ping(auth)
 	if err != nil {
-		fmt.Errorf("couldn't ping Porkbun: %w", err)
+		msg := fmt.Errorf("couldn't ping Porkbun: %w", err)
+		fmt.Println(msg)
 	}
 
 	fmt.Println(msg)
