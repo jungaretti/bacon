@@ -30,11 +30,11 @@ func ping() {
 		SecretApiKey: os.Getenv("PORKBUN_SECRET_KEY"),
 	}
 
-	msg, err := client.Ping(auth)
+	ack, err := client.Ping(auth)
 	if err != nil {
 		msg := fmt.Errorf("couldn't ping Porkbun: %w", err)
 		fmt.Println(msg)
 	}
 
-	fmt.Println(msg)
+	fmt.Println(ack.Status)
 }

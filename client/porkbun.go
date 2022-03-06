@@ -15,13 +15,33 @@ type Auth struct {
 	SecretApiKey string `json:"secretapikey"`
 }
 
-func Ping(auth Auth) (string, error) {
+type Ack struct {
+	Status   string `json:"status"`
+	ClientIp string `json:"yourIp"`
+}
+
+func (a *Ack) Ok() bool {
+	switch a.Status {
+	case "SUCCESS":
+		return true
+	default:
+		return false
+	}
+}
+
+func Ping(auth Auth) (*Ack, error) {
 	body, err := postAndDecode(auth, PK_PING)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return string(body), nil
+	ack := Ack{}
+	err = json.Unmarshal(body, &ack)
+	if err != nil {
+		return nil, err
+	}
+
+	return &ack, nil
 }
 
 func RetrieveRecords(auth Auth, domain string) (string, error) {
