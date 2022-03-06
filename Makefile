@@ -1,4 +1,4 @@
-bin/gh:
+bacon:
 	go build -o bin/bacon
 
 clean:

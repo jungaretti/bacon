@@ -8,7 +8,7 @@ Bacon uses Porkbun's API to help you manage DNS records from the command line. I
 
 ### Installation
 
-Build Bacon with `make`. Once done, you'll find Bacon at `bin/bacon`.
+Use `make` to build `bin/bacon`.
 
 ## Built With
 
