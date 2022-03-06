@@ -35,8 +35,8 @@ func ping() {
 	}
 
 	if ack.Success {
-		fmt.Println("Success!")
+		fmt.Printf("Success!\n")
 	} else {
-		fmt.Println("Failure.")
+		fmt.Printf("Failure. %s\n", ack.Message)
 	}
 }

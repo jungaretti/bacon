@@ -20,6 +20,7 @@ type Auth struct {
 
 type Ack struct {
 	Success bool
+	Message string
 }
 
 type Record struct {
@@ -35,6 +36,7 @@ type Record struct {
 type pingRes struct {
 	Status   string `json:"status"`
 	ClientIp string `json:"yourIp"`
+	Message  string `josn:"message"`
 }
 
 type recordsRes struct {
@@ -51,6 +53,7 @@ func Ping(auth *Auth) (*Ack, error) {
 
 	ack := Ack{
 		Success: parseStatus(res.Status),
+		Message: res.Message,
 	}
 
 	return &ack, nil
