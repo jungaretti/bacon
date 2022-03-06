@@ -6,6 +6,10 @@ Manage DNS records on Porkbun from your favorite terminal.
 
 Bacon uses Porkbun's API to help you manage DNS records from the command line. I built Bacon in order to deploy DNS records from source control.
 
+### Installation
+
+Build Bacon with `make`. Once done, you'll find Bacon at `bin/bacon`.
+
 ## Built With
 
 - [Cobra](https://cobra.dev/)
