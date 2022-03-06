@@ -3,7 +3,6 @@ package client
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 )
@@ -18,89 +17,34 @@ type Auth struct {
 	SecretApiKey string `json:"secretapikey"`
 }
 
-type Ack struct {
-	Success bool
-	Message string
+func PingJSON(auth *Auth) (string, error) {
+	raw, err := postAndRead(PORK_PING, auth)
+	if err != nil {
+		return "", err
+	}
+
+	return string(raw), nil
 }
 
-type Record struct {
-	Id       string `json:"id"`
-	Name     string `json:"name"`
-	Type     string `json:"type"`
-	Content  string `json:"content"`
-	Ttl      string `json:"ttl"`
-	Priority string `json:"prio"`
-	Notes    string `json:"notes"`
+func GetRecordsJSON(auth *Auth, domain string) (string, error) {
+	raw, err := postAndRead(PORK_GET_RECORDS+domain, auth)
+	if err != nil {
+		return "", err
+	}
+
+	return string(raw), nil
 }
 
-type pingRes struct {
-	Status   string `json:"status"`
-	ClientIp string `json:"yourIp"`
-	Message  string `josn:"message"`
-}
-
-type recordsRes struct {
-	Status  string   `json:"status"`
-	Records []Record `json:"records"`
-}
-
-func Ping(auth *Auth) (*Ack, error) {
-	res := pingRes{}
-	err := postAndRead(auth, PORK_PING, &res)
+func postAndRead(url string, body interface{}) ([]byte, error) {
+	enc, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 
-	ack := Ack{
-		Success: parseStatus(res.Status),
-		Message: res.Message,
-	}
-
-	return &ack, nil
-}
-
-func GetRecords(auth *Auth, domain string) (*[]Record, error) {
-	res := recordsRes{}
-	err := postAndRead(auth, PORK_GET_RECORDS+domain, &res)
+	res, err := http.Post(url, "application/json", bytes.NewBuffer(enc))
 	if err != nil {
 		return nil, err
 	}
 
-	return &res.Records, nil
-}
-
-func CreateRecord(auth *Auth, domain string, record *Record) (bool, error) {
-	return false, fmt.Errorf("couldn't create record")
-}
-
-func DeleteRecord(auth *Auth, domain string, id string) (bool, error) {
-	return false, fmt.Errorf("couldn't delete record")
-}
-
-func postAndRead(body interface{}, url string, value interface{}) error {
-	encoded, err := json.Marshal(body)
-	if err != nil {
-		return err
-	}
-
-	res, err := http.Post(url, "application/json", bytes.NewBuffer(encoded))
-	if err != nil {
-		return err
-	}
-
-	raw, err := io.ReadAll(res.Body)
-	if err != nil {
-		return err
-	}
-
-	return json.Unmarshal(raw, &value)
-}
-
-func parseStatus(status string) bool {
-	switch status {
-	case "SUCCESS":
-		return true
-	default:
-		return false
-	}
+	return io.ReadAll(res.Body)
 }

@@ -28,12 +28,11 @@ func dump(domain string) {
 		SecretApiKey: os.Getenv("PORKBUN_SECRET_KEY"),
 	}
 
-	records, err := client.GetRecords(&auth, domain)
+	msg, err := client.GetRecordsJSON(&auth, domain)
 	if err != nil {
-		fmt.Println(fmt.Errorf("couldn't dump from Porkbun: %w", err))
+		errMsg := fmt.Errorf("error sending request: %w", err)
+		fmt.Println(errMsg)
 	}
 
-	for _, element := range *records {
-		fmt.Printf("%s: Name=%s, Type=%s, Content=%s, TTL=%s, Priority=%s, Notes=%s\n", element.Id, element.Name, element.Type, element.Content, element.Ttl, element.Priority, element.Notes)
-	}
+	fmt.Println(msg)
 }

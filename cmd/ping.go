@@ -28,15 +28,11 @@ func ping() {
 		SecretApiKey: os.Getenv("PORKBUN_SECRET_KEY"),
 	}
 
-	ack, err := client.Ping(&auth)
+	msg, err := client.PingJSON(&auth)
 	if err != nil {
-		msg := fmt.Errorf("couldn't ping Porkbun: %w", err)
-		fmt.Println(msg)
+		errMsg := fmt.Errorf("error sending request: %w", err)
+		fmt.Println(errMsg)
 	}
 
-	if ack.Success {
-		fmt.Printf("Success!\n")
-	} else {
-		fmt.Printf("Failure. %s\n", ack.Message)
-	}
+	fmt.Println(msg)
 }
