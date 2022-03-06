@@ -34,5 +34,5 @@ func ping() {
 		fmt.Println(errMsg)
 	}
 
-	fmt.Println(msg)
+	fmt.Printf("%s\n", msg)
 }

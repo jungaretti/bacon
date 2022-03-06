@@ -17,22 +17,22 @@ type Auth struct {
 	SecretApiKey string `json:"secretapikey"`
 }
 
-func PingJSON(auth *Auth) (string, error) {
+func PingJSON(auth *Auth) ([]byte, error) {
 	raw, err := postAndRead(PORK_PING, auth)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return string(raw), nil
+	return raw, nil
 }
 
-func GetRecordsJSON(auth *Auth, domain string) (string, error) {
+func GetRecordsJSON(auth *Auth, domain string) ([]byte, error) {
 	raw, err := postAndRead(PORK_GET_RECORDS+domain, auth)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return string(raw), nil
+	return raw, nil
 }
 
 func postAndRead(url string, body interface{}) ([]byte, error) {

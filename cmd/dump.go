@@ -34,5 +34,5 @@ func dump(domain string) {
 		fmt.Println(errMsg)
 	}
 
-	fmt.Println(msg)
+	fmt.Printf("%s\n", msg)
 }
