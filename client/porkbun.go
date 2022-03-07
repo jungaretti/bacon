@@ -73,6 +73,15 @@ func CreateRecordJSON(auth *Auth, domain string, record *Record) ([]byte, error)
 	return raw, nil
 }
 
+func DeleteRecordJSON(auth *Auth, domain string, id string) ([]byte, error) {
+	raw, err := postAndRead(PORK_DELETE_RECORD+domain+"/"+id, auth)
+	if err != nil {
+		return nil, err
+	}
+
+	return raw, nil
+}
+
 func postAndRead(url string, body interface{}) ([]byte, error) {
 	enc, err := json.Marshal(body)
 	if err != nil {
