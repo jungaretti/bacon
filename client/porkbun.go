@@ -20,12 +20,12 @@ type Auth struct {
 }
 
 type Record struct {
-	Type     string
-	Host     string
-	Content  string
-	TTL      string
-	Priority string
-	Notes    string
+	Type     string `yaml:"type"`
+	Host     string `yaml:"host"`
+	Content  string `yaml:"content"`
+	TTL      string `yaml:"ttl"`
+	Priority string `yaml:"priority"`
+	Notes    string `yaml:"notes"`
 }
 
 func PingJSON(auth *Auth) ([]byte, error) {

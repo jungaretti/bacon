@@ -1,0 +1,7 @@
+records:
+- type: TXT
+  content: buckybadger
+- type: TXT
+  content: seahawks
+  host: sub1
+  ttl: 600
