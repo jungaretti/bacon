@@ -14,7 +14,7 @@ func init() {
 
 var dumpCmd = &cobra.Command{
 	Use:   "dump <domain>",
-	Short: "Retrieve DNS records for a domain",
+	Short: "Retrieve DNS records for domain",
 	Long:  `Retrieve all editable DNS records associated with a domain.`,
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
