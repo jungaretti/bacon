@@ -23,16 +23,16 @@ var dumpCmd = &cobra.Command{
 }
 
 func dump(domain string) {
-	auth := client.Auth{
+	pork := client.Pork{
 		ApiKey:       os.Getenv("PORKBUN_API_KEY"),
 		SecretApiKey: os.Getenv("PORKBUN_SECRET_KEY"),
 	}
 
-	msg, err := client.GetRecordsJSON(&auth, domain)
+	msg, err := pork.GetRecords(domain)
 	if err != nil {
 		errMsg := fmt.Errorf("error sending request: %w", err)
 		fmt.Println(errMsg)
 	}
 
-	fmt.Printf("%s\n", msg)
+	fmt.Println(msg)
 }

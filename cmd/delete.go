@@ -23,16 +23,16 @@ var deleteCmd = &cobra.Command{
 }
 
 func delete(domain string, id string) {
-	auth := client.Auth{
+	pork := client.Pork{
 		ApiKey:       os.Getenv("PORKBUN_API_KEY"),
 		SecretApiKey: os.Getenv("PORKBUN_SECRET_KEY"),
 	}
 
-	msg, err := client.DeleteRecordJSON(&auth, domain, id)
+	msg, err := pork.DeleteRecord(domain, id)
 	if err != nil {
 		errMsg := fmt.Errorf("error deleting record: %w", err)
 		fmt.Println(errMsg)
 	}
 
-	fmt.Printf("%s\n", msg)
+	fmt.Println(msg)
 }

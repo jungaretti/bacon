@@ -1,10 +1,8 @@
 package client
 
 import (
-	"bytes"
-	"encoding/json"
-	"io"
-	"net/http"
+	"fmt"
+	"strconv"
 )
 
 const (
@@ -14,84 +12,91 @@ const (
 	PORK_DELETE_RECORD = "https://porkbun.com/api/json/v3/dns/delete/"
 )
 
-type Auth struct {
+type Pork struct {
 	ApiKey       string `json:"apikey"`
 	SecretApiKey string `json:"secretapikey"`
 }
 
-type Record struct {
-	Type     string `yaml:"type"`
-	Host     string `yaml:"host"`
-	Content  string `yaml:"content"`
-	TTL      string `yaml:"ttl"`
-	Priority string `yaml:"priority"`
-	Notes    string `yaml:"notes"`
+type porkRecord struct {
+	Id       string `json:"id"`
+	Type     string `json:"type"`
+	Host     string `json:"name"`
+	Content  string `json:"content"`
+	TTL      string `json:"ttl"`
+	Priority string `json:"prio"`
 }
 
-func PingJSON(auth *Auth) ([]byte, error) {
-	raw, err := postAndRead(PORK_PING, auth)
+type porkCreation struct {
+	Pork
+	porkRecord
+}
+
+func (pork *Pork) Ping() (string, error) {
+	raw, err := postAndRead(PORK_PING, pork)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return raw, nil
+	return string(raw), nil
 }
 
-func GetRecordsJSON(auth *Auth, domain string) ([]byte, error) {
-	raw, err := postAndRead(PORK_GET_RECORDS+domain, auth)
+func (pork *Pork) GetRecords(domain string) (string, error) {
+	raw, err := postAndRead(PORK_GET_RECORDS+domain, pork)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return raw, nil
+	return string(raw), nil
 }
 
-func CreateRecordJSON(auth *Auth, domain string, record *Record) ([]byte, error) {
-	body := struct {
-		ApiKey       string `json:"apikey"`
-		SecretApiKey string `json:"secretapikey"`
-		Host         string `json:"name"`
-		Type         string `json:"type"`
-		Content      string `json:"content"`
-		TTL          string `json:"ttl"`
-		Priority     string `json:"prio"`
-	}{
-		ApiKey:       auth.ApiKey,
-		SecretApiKey: auth.SecretApiKey,
-		Host:         record.Host,
-		Type:         record.Type,
-		Content:      record.Content,
-		TTL:          record.TTL,
-		Priority:     record.Priority,
+func (pork *Pork) CreateRecord(domain string, record *Record) (string, error) {
+	body := porkCreation{
+		Pork:       *pork,
+		porkRecord: *record.toPorkRecord(),
 	}
 
 	raw, err := postAndRead(PORK_CREATE_RECORD+domain, body)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return raw, nil
+	return string(raw), nil
 }
 
-func DeleteRecordJSON(auth *Auth, domain string, id string) ([]byte, error) {
-	raw, err := postAndRead(PORK_DELETE_RECORD+domain+"/"+id, auth)
+func (pork *Pork) DeleteRecord(domain string, id string) (string, error) {
+	raw, err := postAndRead(PORK_DELETE_RECORD+domain+"/"+id, pork)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return raw, nil
+	return string(raw), nil
 }
 
-func postAndRead(url string, body interface{}) ([]byte, error) {
-	enc, err := json.Marshal(body)
+func (record *Record) toPorkRecord() *porkRecord {
+	return &porkRecord{
+		Type:     record.Type,
+		Host:     record.Host,
+		Content:  record.Content,
+		TTL:      fmt.Sprint(record.TTL),
+		Priority: fmt.Sprint(record.Priority),
+	}
+}
+
+func (porkRecord *porkRecord) toRecord() (*Record, error) {
+	ttlInt, err := strconv.Atoi(porkRecord.TTL)
+	if err != nil {
+		return nil, err
+	}
+	priorityInt, err := strconv.Atoi(porkRecord.Priority)
 	if err != nil {
 		return nil, err
 	}
 
-	res, err := http.Post(url, "application/json", bytes.NewBuffer(enc))
-	if err != nil {
-		return nil, err
-	}
-
-	return io.ReadAll(res.Body)
+	return &Record{
+		Type:     porkRecord.Type,
+		Host:     porkRecord.Host,
+		Content:  porkRecord.Content,
+		TTL:      ttlInt,
+		Priority: priorityInt,
+	}, nil
 }

@@ -1,0 +1,33 @@
+domain: borkbork.buzz
+records:
+- type: ALIAS
+  content: pixie.porkbun.com
+  ttl: 300
+- type: ALIAS
+  content: pixie.porkbun.com
+  host: www
+  ttl: 300
+- type: CNAME
+  content: webmail.porkbun.com
+  host: autodiscover
+  ttl: 300
+- type: CNAME
+  content: pixie.porkbun.com
+  host: "*"
+  ttl: 300
+- type: MX
+  content: fwd1.porkbun.com
+  ttl: 300
+  priority: 10
+- type: MX
+  content: fwd2.porkbun.com
+  ttl: 300
+  priority: 20
+- type: SRV
+  content: 10 443 webmail.porkbun.com
+  host: _autodiscover._tcp
+  ttl: 300
+  priority: 10
+- type: TXT
+  content: v=spf1 mx ~all
+  ttl: 300

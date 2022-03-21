@@ -14,8 +14,8 @@ func init() {
 	createCmd.Flags().StringVarP(&record.Type, "type", "t", "", "type of DNS record")
 	createCmd.Flags().StringVarP(&record.Host, "host", "H", "", "subdomain of DNS record")
 	createCmd.Flags().StringVarP(&record.Content, "content", "c", "", "content of DNS record")
-	createCmd.Flags().StringVarP(&record.TTL, "ttl", "l", "", "TTL of DNS record")
-	createCmd.Flags().StringVarP(&record.Priority, "priority", "p", "", "priority of DNS record")
+	createCmd.Flags().IntVarP(&record.TTL, "ttl", "l", 300, "TTL of DNS record")
+	createCmd.Flags().IntVarP(&record.Priority, "priority", "p", 20, "priority of DNS record")
 
 	createCmd.MarkFlagRequired("type")
 	createCmd.MarkFlagRequired("content")
@@ -34,16 +34,16 @@ var createCmd = &cobra.Command{
 }
 
 func create(domain string) {
-	auth := client.Auth{
+	pork := client.Pork{
 		ApiKey:       os.Getenv("PORKBUN_API_KEY"),
 		SecretApiKey: os.Getenv("PORKBUN_SECRET_KEY"),
 	}
 
-	msg, err := client.CreateRecordJSON(&auth, domain, &record)
+	msg, err := pork.CreateRecord(domain, &record)
 	if err != nil {
 		errMsg := fmt.Errorf("error creating record: %w", err)
 		fmt.Println(errMsg)
 	}
 
-	fmt.Printf("%s\n", msg)
+	fmt.Println(msg)
 }

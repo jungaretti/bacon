@@ -3,11 +3,9 @@ package cmd
 import (
 	"bacon/client"
 	"fmt"
-	"io"
 	"os"
 
 	"github.com/spf13/cobra"
-	"gopkg.in/yaml.v3"
 )
 
 func init() {
@@ -29,25 +27,12 @@ type Config struct {
 }
 
 func deploy(domain string, configFile string) {
-	auth := client.Auth{
+	pork := client.Pork{
 		ApiKey:       os.Getenv("PORKBUN_API_KEY"),
 		SecretApiKey: os.Getenv("PORKBUN_SECRET_KEY"),
 	}
 
-	file, err := os.Open(configFile)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	raw, err := io.ReadAll(file)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	config := Config{}
-	err = yaml.Unmarshal(raw, &config)
+	config, err := client.ReadConfig(configFile)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -57,12 +42,12 @@ func deploy(domain string, configFile string) {
 	// TODO: Create new records
 
 	for _, record := range config.Records {
-		msg, err := client.CreateRecordJSON(&auth, domain, &record)
+		msg, err := pork.CreateRecord(domain, &record)
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
 
-		fmt.Printf("%s\n", msg)
+		fmt.Println(msg)
 	}
 }
