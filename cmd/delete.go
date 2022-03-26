@@ -24,6 +24,7 @@ func delete(app *App, domain string, id string) {
 	if err != nil {
 		errMsg := fmt.Errorf("error deleting record: %w", err)
 		fmt.Println(errMsg)
+		return
 	}
 
 	fmt.Println(msg)
