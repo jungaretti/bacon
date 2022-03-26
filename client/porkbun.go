@@ -102,27 +102,40 @@ func (pork *Pork) GetRecords(domain string) ([]Record, error) {
 	return records, nil
 }
 
-// func CreateRecord(string, *Record) (*Ack, error) { return nil, nil }
-// func DeleteRecord(string, *Record) (*Ack, error) { return nil, nil }
-
-type porkCreation struct {
-	Pork
-	porkRecord
-}
-
-func (pork *Pork) CreateRecord(domain string, record *Record) (string, error) {
-	body := porkCreation{
+func (pork *Pork) CreateRecord(domain string, record *Record) (*Ack, error) {
+	create := struct {
+		Pork
+		porkRecord
+	}{
 		Pork:       *pork,
 		porkRecord: record.toPorkRecord(),
 	}
 
-	raw, err := postAndRead(PORK_CREATE_RECORD+domain, body)
+	raw, err := postAndRead(PORK_CREATE_RECORD+domain, create)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return string(raw), nil
+	var resp struct {
+		// TODO: Report this bug, should be a string
+		Id int `json:"id"`
+		porkBaseResp
+	}
+	err = json.Unmarshal(raw, &resp)
+	if err != nil {
+		return nil, err
+	}
+	if !parseStatus(resp.Status) {
+		return nil, fmt.Errorf(resp.Message)
+	}
+
+	return &Ack{
+		Ok:      parseStatus(resp.Status),
+		Message: parseMessage(resp.Status, fmt.Sprint(resp.Id), resp.Message),
+	}, nil
 }
+
+// func DeleteRecord(string, *Record) (*Ack, error) { return nil, nil }
 
 func (pork *Pork) DeleteRecord(domain string, id string) (string, error) {
 	raw, err := postAndRead(PORK_DELETE_RECORD+domain+"/"+id, pork)
