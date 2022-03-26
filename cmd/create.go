@@ -43,6 +43,7 @@ func create(app *App, domain string, record *client.Record) {
 	if err != nil {
 		errMsg := fmt.Errorf("error creating record: %w", err)
 		fmt.Println(errMsg)
+		return
 	}
 
 	fmt.Println(msg)
