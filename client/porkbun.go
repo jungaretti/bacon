@@ -165,6 +165,92 @@ func (pork *Pork) DeleteRecord(domain string, id string) (*Ack, error) {
 	}, nil
 }
 
+func findId(target *Record, all []porkRecord) (string, error) {
+	for _, porkRec := range all {
+		rec, err := porkRec.toRecord()
+		if err != nil {
+			return "", err
+		}
+
+		if rec == *target {
+			return porkRec.Id, nil
+		}
+	}
+
+	return "", fmt.Errorf("didn't find a matching Porkbun record")
+}
+
+func (pork *Pork) SyncRecords(domain string, new []Record, create, delete bool) (*Ack, error) {
+	old, err := pork.GetRecords(domain)
+	if err != nil {
+		return nil, err
+	}
+
+	toDelete := difference(old, new)
+	toCreate := difference(new, old)
+
+	porkRecords, err := pork.getPorkRecords(domain)
+	if err != nil {
+		return nil, err
+	}
+
+	// Delete records
+	for _, record := range toDelete {
+		id, err := findId(&record, porkRecords)
+		if err != nil {
+			return nil, err
+		}
+
+		if delete {
+			ack, err := pork.DeleteRecord(domain, id)
+			if err != nil {
+				return nil, err
+			}
+			if !ack.Ok {
+				return nil, fmt.Errorf(ack.Message)
+			}
+		} else {
+			fmt.Printf("Would delete record %s: ", id)
+			fmt.Println(record)
+		}
+	}
+
+	// Create records
+	for _, record := range toCreate {
+		if create {
+			ack, err := pork.CreateRecord(domain, &record)
+			if err != nil {
+				return nil, err
+			}
+			if !ack.Ok {
+				return nil, fmt.Errorf(ack.Message)
+			}
+		} else {
+			fmt.Printf("Would create record")
+			fmt.Println(record)
+		}
+	}
+
+	return &Ack{
+		Ok:      true,
+		Message: "Synced records with Porkbun",
+	}, nil
+}
+
+func difference(a, b []Record) (diff []Record) {
+	m := make(map[Record]bool)
+
+	for _, item := range b {
+		m[item] = true
+	}
+	for _, item := range a {
+		if _, ok := m[item]; !ok {
+			diff = append(diff, item)
+		}
+	}
+	return
+}
+
 func (record *Record) toPorkRecord() porkRecord {
 	return porkRecord{
 		Type:     record.Type,

@@ -8,35 +8,45 @@ import (
 )
 
 func newDeployCmd(app *App) *cobra.Command {
+	var create bool
+	var delete bool
+
 	deploy := &cobra.Command{
 		Use:   "deploy <domain> <config>",
 		Short: "Deploy DNS records from a file",
 		Long:  `Deploy all DNS records from a config file.`,
 		Args:  cobra.ExactArgs(2),
 		Run: func(cmd *cobra.Command, args []string) {
-			deploy(app, args[0], args[1])
+			deploy(app, args[0], args[1], &create, &delete)
 		},
 	}
+
+	deploy.Flags().BoolVarP(&create, "create", "c", false, "create new records")
+	deploy.Flags().BoolVarP(&delete, "delete", "d", false, "delete old records")
+
 	return deploy
 }
 
-func deploy(app *App, domain string, configFile string) {
+func deploy(app *App, domain string, configFile string, create *bool, delete *bool) {
 	config, err := client.ReadConfig(configFile)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	// TODO: Delete old records
-	// TODO: Create new records
-
-	for _, record := range config.Records {
-		msg, err := app.Client.CreateRecord(domain, &record)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-
-		fmt.Println(msg)
+	if !*create {
+		fmt.Println("Not creating new records!")
 	}
+	if !*delete {
+		fmt.Println("Not deleting old records!")
+	}
+
+	ack, err := app.Client.SyncRecords(domain, config.Records, *create, *delete)
+	if err != nil {
+		errMsg := fmt.Errorf("error sending request: %w", err)
+		fmt.Println(errMsg)
+		return
+	}
+
+	fmt.Println(ack)
 }
