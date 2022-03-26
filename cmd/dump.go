@@ -9,8 +9,7 @@ import (
 func newDumpCmd(app *App) *cobra.Command {
 	dump := &cobra.Command{
 		Use:   "dump <domain>",
-		Short: "Retrieve DNS records for domain",
-		Long:  `Retrieve all editable DNS records associated with a domain.`,
+		Short: "Fetch all of a domain's DNS records",
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			dump(app, args[0])

@@ -10,7 +10,6 @@ func newPingCmd(app *App) *cobra.Command {
 	ping := &cobra.Command{
 		Use:   "ping",
 		Short: "Say hello to Porkbun",
-		Long:  `You can test communication with the API using the ping endpoint.`,
 		Args:  cobra.NoArgs,
 		Run: func(cmd *cobra.Command, args []string) {
 			ping(app)

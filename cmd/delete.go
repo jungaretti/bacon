@@ -9,8 +9,7 @@ import (
 func newDeleteCmd(app *App) *cobra.Command {
 	delete := &cobra.Command{
 		Use:   "delete <domain> <id>",
-		Short: "Delete existing DNS record for domain",
-		Long:  `Delete an existing DNS record for a domain.`,
+		Short: "Delete an existing DNS record",
 		Args:  cobra.ExactArgs(2),
 		Run: func(cmd *cobra.Command, args []string) {
 			delete(app, args[0], args[1])

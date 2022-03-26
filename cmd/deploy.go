@@ -13,8 +13,7 @@ func newDeployCmd(app *App) *cobra.Command {
 
 	deploy := &cobra.Command{
 		Use:   "deploy <domain> <config>",
-		Short: "Deploy DNS records from a file",
-		Long:  `Deploy all DNS records from a config file.`,
+		Short: "Deploy DNS records from a config file",
 		Args:  cobra.ExactArgs(2),
 		Run: func(cmd *cobra.Command, args []string) {
 			deploy(app, args[0], args[1], &create, &delete)

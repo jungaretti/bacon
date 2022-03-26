@@ -13,8 +13,7 @@ func newCreateCmd(app *App) *cobra.Command {
 
 	create := &cobra.Command{
 		Use:   "create <domain>",
-		Short: "Create new DNS record for domain",
-		Long:  `Create a new DNS record for a domain.`,
+		Short: "Create a new DNS record",
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			create(app, args[0], &record)

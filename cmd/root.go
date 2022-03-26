@@ -19,7 +19,7 @@ func Execute(app *App) {
 func newRootCmd(app *App) *cobra.Command {
 	root := &cobra.Command{
 		Use:   "bacon",
-		Short: "Bacon is a fast and flexible DNS manager",
+		Short: "Bacon is a tasty DNS manager for Porkbun",
 	}
 
 	// Use command constructors to share one client
