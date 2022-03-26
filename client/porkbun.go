@@ -72,7 +72,7 @@ func (pork *Pork) Ping() (*Ack, error) {
 	}, nil
 }
 
-func (pork *Pork) GetRecords(domain string) ([]Record, error) {
+func (pork *Pork) getPorkRecords(domain string) ([]porkRecord, error) {
 	raw, err := postAndRead(PORK_GET_RECORDS+domain, pork)
 	if err != nil {
 		return nil, err
@@ -90,8 +90,17 @@ func (pork *Pork) GetRecords(domain string) ([]Record, error) {
 		return nil, fmt.Errorf(resp.Message)
 	}
 
+	return resp.Records, nil
+}
+
+func (pork *Pork) GetRecords(domain string) ([]Record, error) {
+	porkRecords, err := pork.getPorkRecords(domain)
+	if err != nil {
+		return nil, err
+	}
+
 	var records []Record
-	for _, porkRec := range resp.Records {
+	for _, porkRec := range porkRecords {
 		rec, err := porkRec.toRecord()
 		if err != nil {
 			return nil, err
@@ -135,15 +144,25 @@ func (pork *Pork) CreateRecord(domain string, record *Record) (*Ack, error) {
 	}, nil
 }
 
-// func DeleteRecord(string, *Record) (*Ack, error) { return nil, nil }
-
-func (pork *Pork) DeleteRecord(domain string, id string) (string, error) {
+func (pork *Pork) DeleteRecord(domain string, id string) (*Ack, error) {
 	raw, err := postAndRead(PORK_DELETE_RECORD+domain+"/"+id, pork)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return string(raw), nil
+	resp := porkBaseResp{}
+	err = json.Unmarshal(raw, &resp)
+	if err != nil {
+		return nil, err
+	}
+	if !parseStatus(resp.Status) {
+		return nil, fmt.Errorf(resp.Message)
+	}
+
+	return &Ack{
+		Ok:      parseStatus(resp.Status),
+		Message: parseMessage(resp.Status, fmt.Sprint(id), resp.Message),
+	}, nil
 }
 
 func (record *Record) toPorkRecord() porkRecord {

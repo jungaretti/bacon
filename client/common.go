@@ -32,7 +32,7 @@ type Client interface {
 	Ping() (*Ack, error)
 	GetRecords(string) ([]Record, error)
 	CreateRecord(string, *Record) (*Ack, error)
-	DeleteRecord(string, *Record) (*Ack, error)
+	DeleteRecord(string, string) (*Ack, error)
 }
 
 func ReadConfig(filename string) (*Config, error) {
