@@ -7,16 +7,26 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var rootCmd = &cobra.Command{
-	Use:   "bacon",
-	Short: "Bacon is a DNS manager",
-	Long: `A flexible DNS record manager for Porkbun. Complete documentation
-is available at https://github.com/jungaretti/bacon.`,
-}
+func Execute(app *App) {
+	root := newRootCmd(app)
 
-func Execute() {
-	if err := rootCmd.Execute(); err != nil {
+	if err := root.Execute(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+}
+
+func newRootCmd(app *App) *cobra.Command {
+	root := &cobra.Command{
+		Use:   "bacon",
+		Short: "Bacon is a fast and flexible DNS manager",
+	}
+
+	root.AddCommand(newCreateCmd(app))
+	root.AddCommand(newDeleteCmd(app))
+	root.AddCommand(newDeployCmd(app))
+	root.AddCommand(newDumpCmd(app))
+	root.AddCommand(newPingCmd(app))
+
+	return root
 }
