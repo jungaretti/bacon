@@ -11,6 +11,14 @@
             "mode": "auto",
             "program": "main.go",
             "args": ["ping"]
+        },
+        {
+            "name": "bacon deploy",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "main.go",
+            "args": ["deploy", "borkbork.buzz", "config.example.yml"]
         }
     ]
 }

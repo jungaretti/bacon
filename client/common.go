@@ -31,6 +31,7 @@ type Config struct {
 type Client interface {
 	Ping() (*Ack, error)
 	GetRecords(string) ([]Record, error)
+	SyncRecords(string, []Record, bool, bool) (*Ack, error)
 	CreateRecord(string, *Record) (*Ack, error)
 	DeleteRecord(string, string) (*Ack, error)
 }
