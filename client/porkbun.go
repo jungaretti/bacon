@@ -1,6 +1,7 @@
 package client
 
 import (
+	"encoding/json"
 	"fmt"
 	"strconv"
 )
@@ -19,25 +20,59 @@ type Pork struct {
 
 type porkRecord struct {
 	Id       string `json:"id"`
+	Name     string `json:"name"`
 	Type     string `json:"type"`
-	Host     string `json:"name"`
 	Content  string `json:"content"`
 	TTL      string `json:"ttl"`
 	Priority string `json:"prio"`
+	Notes    string `json:"notes"`
 }
+
+func (pork *Pork) Ping() (*Ack, error) {
+	raw, err := postAndRead(PORK_PING, pork)
+	if err != nil {
+		return nil, err
+	}
+
+	var resp struct {
+		Status  string `json:"status"`
+		YourIp  string `json:"yourIp"`
+		Message string `json:"message"`
+	}
+	err = json.Unmarshal(raw, &resp)
+	if err != nil {
+		return nil, err
+	}
+
+	var ok bool
+	switch resp.Status {
+	case "SUCCESS":
+		ok = true
+	default:
+		ok = false
+	}
+
+	var msg string
+	switch ok {
+	case true:
+		msg = resp.YourIp
+	default:
+		msg = resp.Message
+	}
+
+	return &Ack{
+		Ok:      ok,
+		Message: msg,
+	}, nil
+}
+
+// func GetRecords(string) ([]Record, error)        { return nil, nil }
+// func CreateRecord(string, *Record) (*Ack, error) { return nil, nil }
+// func DeleteRecord(string, *Record) (*Ack, error) { return nil, nil }
 
 type porkCreation struct {
 	Pork
 	porkRecord
-}
-
-func (pork *Pork) Ping() (string, error) {
-	raw, err := postAndRead(PORK_PING, pork)
-	if err != nil {
-		return "", err
-	}
-
-	return string(raw), nil
 }
 
 func (pork *Pork) GetRecords(domain string) (string, error) {
@@ -75,7 +110,7 @@ func (pork *Pork) DeleteRecord(domain string, id string) (string, error) {
 func (record *Record) toPorkRecord() *porkRecord {
 	return &porkRecord{
 		Type:     record.Type,
-		Host:     record.Host,
+		Name:     record.Host,
 		Content:  record.Content,
 		TTL:      fmt.Sprint(record.TTL),
 		Priority: fmt.Sprint(record.Priority),
@@ -94,7 +129,7 @@ func (porkRecord *porkRecord) toRecord() (*Record, error) {
 
 	return &Record{
 		Type:     porkRecord.Type,
-		Host:     porkRecord.Host,
+		Host:     porkRecord.Name,
 		Content:  porkRecord.Content,
 		TTL:      ttlInt,
 		Priority: priorityInt,

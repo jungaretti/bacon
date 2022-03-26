@@ -31,8 +31,8 @@ type Config struct {
 type Client interface {
 	Ping() (*Ack, error)
 	GetRecords(string) ([]Record, error)
-	CreateRecord(string, *Record) error
-	DeleteRecord(string, *Record) error
+	CreateRecord(string, *Record) (*Ack, error)
+	DeleteRecord(string, *Record) (*Ack, error)
 }
 
 func ReadConfig(filename string) (*Config, error) {
