@@ -24,6 +24,7 @@ func ping(app *App) {
 	if err != nil {
 		errMsg := fmt.Errorf("error sending request: %w", err)
 		fmt.Println(errMsg)
+		return
 	}
 
 	fmt.Println(msg)
