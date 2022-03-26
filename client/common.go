@@ -24,8 +24,15 @@ type Record struct {
 }
 
 type Config struct {
-	Domain  string `yaml:"domain"`
-	Records []Record
+	Domain  string   `yaml:"domain"`
+	Records []Record `yaml:"records"`
+}
+
+type Client interface {
+	Ping() (*Ack, error)
+	GetRecords(string) ([]Record, error)
+	CreateRecord(string, *Record) (*Ack, error)
+	DeleteRecord(string, string) (*Ack, error)
 }
 
 func ReadConfig(filename string) (*Config, error) {

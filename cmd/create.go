@@ -8,41 +8,42 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var record = client.Record{}
+func newCreateCmd(app *App) *cobra.Command {
+	record := client.Record{}
 
-func init() {
-	createCmd.Flags().StringVarP(&record.Type, "type", "t", "", "type of DNS record")
-	createCmd.Flags().StringVarP(&record.Host, "host", "H", "", "subdomain of DNS record")
-	createCmd.Flags().StringVarP(&record.Content, "content", "c", "", "content of DNS record")
-	createCmd.Flags().IntVarP(&record.TTL, "ttl", "l", 300, "TTL of DNS record")
-	createCmd.Flags().IntVarP(&record.Priority, "priority", "p", 20, "priority of DNS record")
+	create := &cobra.Command{
+		Use:   "create <domain>",
+		Short: "Create new DNS record for domain",
+		Long:  `Create a new DNS record for a domain.`,
+		Args:  cobra.ExactArgs(1),
+		Run: func(cmd *cobra.Command, args []string) {
+			create(app, args[0], &record)
+		},
+	}
 
-	createCmd.MarkFlagRequired("type")
-	createCmd.MarkFlagRequired("content")
+	create.Flags().StringVarP(&record.Type, "type", "t", "", "type of DNS record")
+	create.Flags().StringVarP(&record.Host, "host", "H", "", "subdomain of DNS record")
+	create.Flags().StringVarP(&record.Content, "content", "c", "", "content of DNS record")
+	create.Flags().IntVarP(&record.TTL, "ttl", "l", 300, "TTL of DNS record")
+	create.Flags().IntVarP(&record.Priority, "priority", "p", 20, "priority of DNS record")
 
-	rootCmd.AddCommand(createCmd)
+	create.MarkFlagRequired("type")
+	create.MarkFlagRequired("content")
+
+	return create
 }
 
-var createCmd = &cobra.Command{
-	Use:   "create <domain>",
-	Short: "Create new DNS record for domain",
-	Long:  `Create a new DNS record for a domain.`,
-	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		create(args[0])
-	},
-}
-
-func create(domain string) {
+func create(app *App, domain string, record *client.Record) {
 	pork := client.Pork{
 		ApiKey:       os.Getenv("PORKBUN_API_KEY"),
 		SecretApiKey: os.Getenv("PORKBUN_SECRET_KEY"),
 	}
 
-	msg, err := pork.CreateRecord(domain, &record)
+	msg, err := pork.CreateRecord(domain, record)
 	if err != nil {
 		errMsg := fmt.Errorf("error creating record: %w", err)
 		fmt.Println(errMsg)
+		return
 	}
 
 	fmt.Println(msg)
