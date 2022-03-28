@@ -18,39 +18,6 @@ type PorkClient struct {
 	SecretApiKey string `json:"secretapikey"`
 }
 
-type porkRecord struct {
-	Id       string `json:"id"`
-	Name     string `json:"name"`
-	Type     string `json:"type"`
-	Content  string `json:"content"`
-	TTL      string `json:"ttl"`
-	Priority string `json:"prio"`
-	Notes    string `json:"notes"`
-}
-
-type porkBaseResp struct {
-	Status  string `json:"status"`
-	Message string `json:"message"`
-}
-
-func parseStatus(status string) bool {
-	switch status {
-	case "SUCCESS":
-		return true
-	default:
-		return false
-	}
-}
-
-func parseMessage(status string, success string, failure string) string {
-	switch parseStatus(status) {
-	case true:
-		return success
-	default:
-		return failure
-	}
-}
-
 func (pork *PorkClient) Ping() (*Ack, error) {
 	raw, err := postAndRead(PORK_PING, pork)
 	if err != nil {
@@ -70,27 +37,6 @@ func (pork *PorkClient) Ping() (*Ack, error) {
 		Ok:      parseStatus(resp.Status),
 		Message: parseMessage(resp.Status, resp.YourIp, resp.Message),
 	}, nil
-}
-
-func (pork *PorkClient) getPorkRecords(domain string) ([]porkRecord, error) {
-	raw, err := postAndRead(PORK_GET_RECORDS+domain, pork)
-	if err != nil {
-		return nil, err
-	}
-
-	var resp struct {
-		Records []porkRecord `json:"records"`
-		porkBaseResp
-	}
-	err = json.Unmarshal(raw, &resp)
-	if err != nil {
-		return nil, err
-	}
-	if !parseStatus(resp.Status) {
-		return nil, fmt.Errorf(resp.Message)
-	}
-
-	return resp.Records, nil
 }
 
 func (pork *PorkClient) GetRecords(domain string) ([]Record, error) {
@@ -165,21 +111,6 @@ func (pork *PorkClient) DeleteRecord(domain string, id string) (*Ack, error) {
 	}, nil
 }
 
-func findId(target *Record, all []porkRecord) (string, error) {
-	for _, porkRec := range all {
-		rec, err := porkRec.toRecord()
-		if err != nil {
-			return "", err
-		}
-
-		if rec == *target {
-			return porkRec.Id, nil
-		}
-	}
-
-	return "", fmt.Errorf("didn't find a matching Porkbun record")
-}
-
 func (pork *PorkClient) SyncRecords(domain string, new []Record, create, delete bool) (*Ack, error) {
 	old, err := pork.GetRecords(domain)
 	if err != nil {
@@ -237,28 +168,14 @@ func (pork *PorkClient) SyncRecords(domain string, new []Record, create, delete 
 	}, nil
 }
 
-func difference(a, b []Record) (diff []Record) {
-	m := make(map[Record]bool)
-
-	for _, item := range b {
-		m[item] = true
-	}
-	for _, item := range a {
-		if _, ok := m[item]; !ok {
-			diff = append(diff, item)
-		}
-	}
-	return
-}
-
-func (record *Record) toPorkRecord() porkRecord {
-	return porkRecord{
-		Type:     record.Type,
-		Name:     record.Host,
-		Content:  record.Content,
-		TTL:      fmt.Sprint(record.TTL),
-		Priority: fmt.Sprint(record.Priority),
-	}
+type porkRecord struct {
+	Id       string `json:"id"`
+	Name     string `json:"name"`
+	Type     string `json:"type"`
+	Content  string `json:"content"`
+	TTL      string `json:"ttl"`
+	Priority string `json:"prio"`
+	Notes    string `json:"notes"`
 }
 
 func (porkRecord *porkRecord) toRecord() (Record, error) {
@@ -278,4 +195,87 @@ func (porkRecord *porkRecord) toRecord() (Record, error) {
 		TTL:      ttlInt,
 		Priority: priorityInt,
 	}, nil
+}
+
+func (record *Record) toPorkRecord() porkRecord {
+	return porkRecord{
+		Type:     record.Type,
+		Name:     record.Host,
+		Content:  record.Content,
+		TTL:      fmt.Sprint(record.TTL),
+		Priority: fmt.Sprint(record.Priority),
+	}
+}
+
+type porkBaseResp struct {
+	Status  string `json:"status"`
+	Message string `json:"message"`
+}
+
+func (pork *PorkClient) getPorkRecords(domain string) ([]porkRecord, error) {
+	raw, err := postAndRead(PORK_GET_RECORDS+domain, pork)
+	if err != nil {
+		return nil, err
+	}
+
+	var resp struct {
+		Records []porkRecord `json:"records"`
+		porkBaseResp
+	}
+	err = json.Unmarshal(raw, &resp)
+	if err != nil {
+		return nil, err
+	}
+	if !parseStatus(resp.Status) {
+		return nil, fmt.Errorf(resp.Message)
+	}
+
+	return resp.Records, nil
+}
+
+func parseStatus(status string) bool {
+	switch status {
+	case "SUCCESS":
+		return true
+	default:
+		return false
+	}
+}
+
+func parseMessage(status string, success string, failure string) string {
+	switch parseStatus(status) {
+	case true:
+		return success
+	default:
+		return failure
+	}
+}
+
+func findId(target *Record, all []porkRecord) (string, error) {
+	for _, porkRec := range all {
+		rec, err := porkRec.toRecord()
+		if err != nil {
+			return "", err
+		}
+
+		if rec == *target {
+			return porkRec.Id, nil
+		}
+	}
+
+	return "", fmt.Errorf("didn't find a matching Porkbun record")
+}
+
+func difference(a, b []Record) (diff []Record) {
+	m := make(map[Record]bool)
+
+	for _, item := range b {
+		m[item] = true
+	}
+	for _, item := range a {
+		if _, ok := m[item]; !ok {
+			diff = append(diff, item)
+		}
+	}
+	return
 }
