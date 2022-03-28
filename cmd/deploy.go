@@ -33,12 +33,7 @@ func deploy(app *App, domain string, configFile string, create *bool, delete *bo
 		return
 	}
 
-	if !*create {
-		fmt.Println("Not creating new records!")
-	}
-	if !*delete {
-		fmt.Println("Not deleting old records!")
-	}
+	fmt.Printf("create records: %t, delete records: %t\n", *create, *delete)
 
 	ack, err := app.Client.SyncRecords(domain, config.Records, *create, *delete)
 	if err != nil {
