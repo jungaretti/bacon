@@ -13,7 +13,7 @@ const (
 	PORK_DELETE_RECORD = "https://porkbun.com/api/json/v3/dns/delete/"
 )
 
-type Pork struct {
+type PorkClient struct {
 	ApiKey       string `json:"apikey"`
 	SecretApiKey string `json:"secretapikey"`
 }
@@ -51,7 +51,7 @@ func parseMessage(status string, success string, failure string) string {
 	}
 }
 
-func (pork *Pork) Ping() (*Ack, error) {
+func (pork *PorkClient) Ping() (*Ack, error) {
 	raw, err := postAndRead(PORK_PING, pork)
 	if err != nil {
 		return nil, err
@@ -72,7 +72,7 @@ func (pork *Pork) Ping() (*Ack, error) {
 	}, nil
 }
 
-func (pork *Pork) getPorkRecords(domain string) ([]porkRecord, error) {
+func (pork *PorkClient) getPorkRecords(domain string) ([]porkRecord, error) {
 	raw, err := postAndRead(PORK_GET_RECORDS+domain, pork)
 	if err != nil {
 		return nil, err
@@ -93,7 +93,7 @@ func (pork *Pork) getPorkRecords(domain string) ([]porkRecord, error) {
 	return resp.Records, nil
 }
 
-func (pork *Pork) GetRecords(domain string) ([]Record, error) {
+func (pork *PorkClient) GetRecords(domain string) ([]Record, error) {
 	porkRecords, err := pork.getPorkRecords(domain)
 	if err != nil {
 		return nil, err
@@ -111,12 +111,12 @@ func (pork *Pork) GetRecords(domain string) ([]Record, error) {
 	return records, nil
 }
 
-func (pork *Pork) CreateRecord(domain string, record *Record) (*Ack, error) {
+func (pork *PorkClient) CreateRecord(domain string, record *Record) (*Ack, error) {
 	create := struct {
-		Pork
+		PorkClient
 		porkRecord
 	}{
-		Pork:       *pork,
+		PorkClient: *pork,
 		porkRecord: record.toPorkRecord(),
 	}
 
@@ -144,7 +144,7 @@ func (pork *Pork) CreateRecord(domain string, record *Record) (*Ack, error) {
 	}, nil
 }
 
-func (pork *Pork) DeleteRecord(domain string, id string) (*Ack, error) {
+func (pork *PorkClient) DeleteRecord(domain string, id string) (*Ack, error) {
 	raw, err := postAndRead(PORK_DELETE_RECORD+domain+"/"+id, pork)
 	if err != nil {
 		return nil, err
@@ -180,7 +180,7 @@ func findId(target *Record, all []porkRecord) (string, error) {
 	return "", fmt.Errorf("didn't find a matching Porkbun record")
 }
 
-func (pork *Pork) SyncRecords(domain string, new []Record, create, delete bool) (*Ack, error) {
+func (pork *PorkClient) SyncRecords(domain string, new []Record, create, delete bool) (*Ack, error) {
 	old, err := pork.GetRecords(domain)
 	if err != nil {
 		return nil, err
