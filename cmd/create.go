@@ -16,8 +16,8 @@ func newCreateCmd(app *App) *cobra.Command {
 		Use:   "create <domain>",
 		Short: "Create a new DNS record",
 		Args:  cobra.ExactArgs(1),
-		Run: func(cmd *cobra.Command, args []string) {
-			create(app, args[0], &record)
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return create(app, args[0], &record)
 		},
 	}
 
@@ -33,18 +33,21 @@ func newCreateCmd(app *App) *cobra.Command {
 	return create
 }
 
-func create(app *App, domain string, record *client.Record) {
+func create(app *App, domain string, record *client.Record) error {
 	pork := porkbun.PorkClient{
 		ApiKey:       os.Getenv("PORKBUN_API_KEY"),
 		SecretApiKey: os.Getenv("PORKBUN_SECRET_KEY"),
 	}
 
-	msg, err := pork.CreateRecord(domain, record)
+	ack, err := pork.CreateRecord(domain, record)
 	if err != nil {
-		errMsg := fmt.Errorf("error creating record: %w", err)
-		fmt.Println(errMsg)
-		return
+		return err
 	}
 
-	fmt.Println(msg)
+	if ack.Ok {
+		fmt.Println(ack.Message)
+		return nil
+	} else {
+		return fmt.Errorf(ack.Message)
+	}
 }

@@ -11,20 +11,23 @@ func newDeleteCmd(app *App) *cobra.Command {
 		Use:   "delete <domain> <id>",
 		Short: "Delete an existing DNS record",
 		Args:  cobra.ExactArgs(2),
-		Run: func(cmd *cobra.Command, args []string) {
-			delete(app, args[0], args[1])
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return delete(app, args[0], args[1])
 		},
 	}
 	return delete
 }
 
-func delete(app *App, domain string, id string) {
-	msg, err := app.Client.DeleteRecord(domain, id)
+func delete(app *App, domain string, id string) error {
+	ack, err := app.Client.DeleteRecord(domain, id)
 	if err != nil {
-		errMsg := fmt.Errorf("error deleting record: %w", err)
-		fmt.Println(errMsg)
-		return
+		return err
 	}
 
-	fmt.Println(msg)
+	if ack.Ok {
+		fmt.Println(ack.Message)
+		return nil
+	} else {
+		return fmt.Errorf(ack.Message)
+	}
 }

@@ -11,20 +11,23 @@ func newPingCmd(app *App) *cobra.Command {
 		Use:   "ping",
 		Short: "Say hello to Porkbun",
 		Args:  cobra.NoArgs,
-		Run: func(cmd *cobra.Command, args []string) {
-			ping(app)
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return ping(app)
 		},
 	}
 	return ping
 }
 
-func ping(app *App) {
-	msg, err := app.Client.Ping()
+func ping(app *App) error {
+	ack, err := app.Client.Ping()
 	if err != nil {
-		errMsg := fmt.Errorf("error sending request: %w", err)
-		fmt.Println(errMsg)
-		return
+		return err
 	}
 
-	fmt.Println(msg)
+	if ack.Ok {
+		fmt.Println("Success! %s is ready to use.", app.Client.Name())
+		return nil
+	} else {
+		return fmt.Errorf(ack.Message)
+	}
 }
