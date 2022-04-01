@@ -17,12 +17,7 @@ const (
 	PORK_DELETE_RECORD = "https://porkbun.com/api/json/v3/dns/delete/"
 )
 
-type PorkClient struct {
-	ApiKey       string `json:"apikey"`
-	SecretApiKey string `json:"secretapikey"`
-}
-
-func (pork *PorkClient) Ping() (*client.Ack, error) {
+func (pork *PorkClient) ping() (*client.Ack, error) {
 	raw, err := postAndRead(PORK_PING, pork)
 	if err != nil {
 		return nil, err
@@ -43,7 +38,7 @@ func (pork *PorkClient) Ping() (*client.Ack, error) {
 	}, nil
 }
 
-func (pork *PorkClient) GetRecords(domain string) ([]client.Record, error) {
+func (pork *PorkClient) getRecords(domain string) ([]client.Record, error) {
 	porkRecords, err := pork.getPorkRecords(domain)
 	if err != nil {
 		return nil, err
@@ -61,7 +56,7 @@ func (pork *PorkClient) GetRecords(domain string) ([]client.Record, error) {
 	return records, nil
 }
 
-func (pork *PorkClient) CreateRecord(domain string, record *client.Record) (*client.Ack, error) {
+func (pork *PorkClient) createRecord(domain string, record *client.Record) (*client.Ack, error) {
 	create := struct {
 		PorkClient
 		porkRecord
@@ -94,7 +89,7 @@ func (pork *PorkClient) CreateRecord(domain string, record *client.Record) (*cli
 	}, nil
 }
 
-func (pork *PorkClient) DeleteRecord(domain string, id string) (*client.Ack, error) {
+func (pork *PorkClient) deleteRecord(domain string, id string) (*client.Ack, error) {
 	raw, err := postAndRead(PORK_DELETE_RECORD+domain+"/"+id, pork)
 	if err != nil {
 		return nil, err
@@ -115,7 +110,7 @@ func (pork *PorkClient) DeleteRecord(domain string, id string) (*client.Ack, err
 	}, nil
 }
 
-func (pork *PorkClient) SyncRecords(domain string, new []client.Record, create, delete bool) (*client.Ack, error) {
+func (pork *PorkClient) syncRecords(domain string, new []client.Record, create, delete bool) (*client.Ack, error) {
 	old, err := pork.GetRecords(domain)
 	if err != nil {
 		return nil, err
