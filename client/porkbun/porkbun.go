@@ -1,8 +1,12 @@
-package client
+package porkbun
 
 import (
+	"bacon/client"
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
 	"strconv"
 )
 
@@ -18,7 +22,7 @@ type PorkClient struct {
 	SecretApiKey string `json:"secretapikey"`
 }
 
-func (pork *PorkClient) Ping() (*Ack, error) {
+func (pork *PorkClient) Ping() (*client.Ack, error) {
 	raw, err := postAndRead(PORK_PING, pork)
 	if err != nil {
 		return nil, err
@@ -33,19 +37,19 @@ func (pork *PorkClient) Ping() (*Ack, error) {
 		return nil, err
 	}
 
-	return &Ack{
+	return &client.Ack{
 		Ok:      parseStatus(resp.Status),
 		Message: parseMessage(resp.Status, resp.YourIp, resp.Message),
 	}, nil
 }
 
-func (pork *PorkClient) GetRecords(domain string) ([]Record, error) {
+func (pork *PorkClient) GetRecords(domain string) ([]client.Record, error) {
 	porkRecords, err := pork.getPorkRecords(domain)
 	if err != nil {
 		return nil, err
 	}
 
-	var records []Record
+	var records []client.Record
 	for _, porkRec := range porkRecords {
 		rec, err := porkRec.toRecord()
 		if err != nil {
@@ -57,13 +61,13 @@ func (pork *PorkClient) GetRecords(domain string) ([]Record, error) {
 	return records, nil
 }
 
-func (pork *PorkClient) CreateRecord(domain string, record *Record) (*Ack, error) {
+func (pork *PorkClient) CreateRecord(domain string, record *client.Record) (*client.Ack, error) {
 	create := struct {
 		PorkClient
 		porkRecord
 	}{
 		PorkClient: *pork,
-		porkRecord: record.toPorkRecord(),
+		porkRecord: toPorkRecord(record),
 	}
 
 	raw, err := postAndRead(PORK_CREATE_RECORD+domain, create)
@@ -84,13 +88,13 @@ func (pork *PorkClient) CreateRecord(domain string, record *Record) (*Ack, error
 		return nil, fmt.Errorf(resp.Message)
 	}
 
-	return &Ack{
+	return &client.Ack{
 		Ok:      parseStatus(resp.Status),
 		Message: parseMessage(resp.Status, fmt.Sprint(resp.Id), resp.Message),
 	}, nil
 }
 
-func (pork *PorkClient) DeleteRecord(domain string, id string) (*Ack, error) {
+func (pork *PorkClient) DeleteRecord(domain string, id string) (*client.Ack, error) {
 	raw, err := postAndRead(PORK_DELETE_RECORD+domain+"/"+id, pork)
 	if err != nil {
 		return nil, err
@@ -105,13 +109,13 @@ func (pork *PorkClient) DeleteRecord(domain string, id string) (*Ack, error) {
 		return nil, fmt.Errorf(resp.Message)
 	}
 
-	return &Ack{
+	return &client.Ack{
 		Ok:      parseStatus(resp.Status),
 		Message: parseMessage(resp.Status, fmt.Sprint(id), resp.Message),
 	}, nil
 }
 
-func (pork *PorkClient) SyncRecords(domain string, new []Record, create, delete bool) (*Ack, error) {
+func (pork *PorkClient) SyncRecords(domain string, new []client.Record, create, delete bool) (*client.Ack, error) {
 	old, err := pork.GetRecords(domain)
 	if err != nil {
 		return nil, err
@@ -162,7 +166,7 @@ func (pork *PorkClient) SyncRecords(domain string, new []Record, create, delete 
 		}
 	}
 
-	return &Ack{
+	return &client.Ack{
 		Ok:      true,
 		Message: "Synced records with Porkbun",
 	}, nil
@@ -178,17 +182,17 @@ type porkRecord struct {
 	Notes    string `json:"notes"`
 }
 
-func (porkRecord *porkRecord) toRecord() (Record, error) {
+func (porkRecord *porkRecord) toRecord() (client.Record, error) {
 	ttlInt, err := strconv.Atoi(porkRecord.TTL)
 	if err != nil {
-		return Record{}, err
+		return client.Record{}, err
 	}
 	priorityInt, err := strconv.Atoi(porkRecord.Priority)
 	if err != nil {
-		return Record{}, err
+		return client.Record{}, err
 	}
 
-	return Record{
+	return client.Record{
 		Type:     porkRecord.Type,
 		Host:     porkRecord.Name,
 		Content:  porkRecord.Content,
@@ -197,7 +201,7 @@ func (porkRecord *porkRecord) toRecord() (Record, error) {
 	}, nil
 }
 
-func (record *Record) toPorkRecord() porkRecord {
+func toPorkRecord(record *client.Record) porkRecord {
 	return porkRecord{
 		Type:     record.Type,
 		Name:     record.Host,
@@ -251,7 +255,7 @@ func parseMessage(status string, success string, failure string) string {
 	}
 }
 
-func findId(target *Record, all []porkRecord) (string, error) {
+func findId(target *client.Record, all []porkRecord) (string, error) {
 	for _, porkRec := range all {
 		rec, err := porkRec.toRecord()
 		if err != nil {
@@ -266,8 +270,8 @@ func findId(target *Record, all []porkRecord) (string, error) {
 	return "", fmt.Errorf("didn't find a matching Porkbun record")
 }
 
-func difference(a, b []Record) (diff []Record) {
-	m := make(map[Record]bool)
+func difference(a, b []client.Record) (diff []client.Record) {
+	m := make(map[client.Record]bool)
 
 	for _, item := range b {
 		m[item] = true
@@ -278,4 +282,18 @@ func difference(a, b []Record) (diff []Record) {
 		}
 	}
 	return
+}
+
+func postAndRead(url string, body interface{}) ([]byte, error) {
+	enc, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := http.Post(url, "application/json", bytes.NewBuffer(enc))
+	if err != nil {
+		return nil, err
+	}
+
+	return io.ReadAll(res.Body)
 }

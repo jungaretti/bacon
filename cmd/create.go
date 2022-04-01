@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"bacon/client"
+	"bacon/client/porkbun"
 	"fmt"
 	"os"
 
@@ -33,7 +34,7 @@ func newCreateCmd(app *App) *cobra.Command {
 }
 
 func create(app *App, domain string, record *client.Record) {
-	pork := client.PorkClient{
+	pork := porkbun.PorkClient{
 		ApiKey:       os.Getenv("PORKBUN_API_KEY"),
 		SecretApiKey: os.Getenv("PORKBUN_SECRET_KEY"),
 	}

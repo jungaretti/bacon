@@ -1,10 +1,7 @@
 package client
 
 import (
-	"bytes"
-	"encoding/json"
 	"io"
-	"net/http"
 	"os"
 
 	"gopkg.in/yaml.v3"
@@ -63,18 +60,4 @@ func WriteConfig(filename string, config *Config) error {
 	}
 
 	return os.WriteFile(filename, raw, 0664)
-}
-
-func postAndRead(url string, body interface{}) ([]byte, error) {
-	enc, err := json.Marshal(body)
-	if err != nil {
-		return nil, err
-	}
-
-	res, err := http.Post(url, "application/json", bytes.NewBuffer(enc))
-	if err != nil {
-		return nil, err
-	}
-
-	return io.ReadAll(res.Body)
 }
