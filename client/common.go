@@ -26,6 +26,7 @@ type Config struct {
 }
 
 type Client interface {
+	Name() string
 	Ping() (*Ack, error)
 	GetRecords(string) ([]Record, error)
 	CreateRecord(string, *Record) (*Ack, error)

@@ -9,6 +9,10 @@ type PorkClient struct {
 	SecretApiKey string `json:"secretapikey"`
 }
 
+func (pork *PorkClient) Name() string {
+	return "Porkbun"
+}
+
 func (pork *PorkClient) Ping() (*client.Ack, error) {
 	return pork.ping()
 }
