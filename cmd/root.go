@@ -22,7 +22,7 @@ func newRootCmd(app *App) *cobra.Command {
 		Short: "Bacon is a tasty DNS manager for Porkbun",
 	}
 
-	// Use command constructors to share one client
+	// Use command constructors to share one app
 	root.AddCommand(newCreateCmd(app))
 	root.AddCommand(newDeleteCmd(app))
 	root.AddCommand(newDeployCmd(app))

@@ -1,4 +1,4 @@
-bacon:
+bin/bacon: */**/*.go
 	go build -o bin/bacon
 
 clean:
