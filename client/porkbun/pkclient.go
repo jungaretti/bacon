@@ -9,7 +9,7 @@ type PorkClient struct {
 	SecretApiKey string `json:"secretapikey"`
 }
 
-func (pork *PorkClient) Name() string {
+func (pork *PorkClient) GetName() string {
 	return "Porkbun"
 }
 

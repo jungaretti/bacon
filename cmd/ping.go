@@ -25,7 +25,7 @@ func ping(app *App) error {
 	}
 
 	if ack.Ok {
-		fmt.Println("Success! %s is ready to use.", app.Client.Name())
+		fmt.Printf("Success! %s is ready to use.\n", app.Client.GetName())
 		return nil
 	} else {
 		return fmt.Errorf(ack.Message)
