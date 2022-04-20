@@ -1,8 +1,8 @@
 package cmd
 
 import (
-	"bacon/client"
-	"bacon/client/porkbun"
+	"bacon/pkg/client"
+	"bacon/pkg/porkbun"
 	"fmt"
 	"os"
 

@@ -1,8 +1,6 @@
 package porkbun
 
-import (
-	"bacon/client"
-)
+import "bacon/pkg/client"
 
 type PorkClient struct {
 	ApiKey       string `json:"apikey"`

@@ -1,8 +1,8 @@
 package main
 
 import (
-	"bacon/client/porkbun"
 	"bacon/cmd"
+	"bacon/pkg/porkbun"
 	"os"
 
 	"github.com/subosito/gotenv"

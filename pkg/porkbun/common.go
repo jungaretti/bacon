@@ -1,7 +1,7 @@
 package porkbun
 
 import (
-	"bacon/client"
+	"bacon/pkg/client"
 	"bytes"
 	"encoding/json"
 	"fmt"

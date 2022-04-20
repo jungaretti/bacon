@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"bacon/client"
+	"bacon/pkg/client"
 	"fmt"
 
 	"github.com/spf13/cobra"

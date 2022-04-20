@@ -1,6 +1,6 @@
 package cmd
 
-import "bacon/client"
+import "bacon/pkg/client"
 
 type App struct {
 	Client client.Client
