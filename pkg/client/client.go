@@ -16,8 +16,8 @@ type Record struct {
 	Type     string `yaml:"type"`
 	Host     string `yaml:"host"`
 	Content  string `yaml:"content"`
-	TTL      int    `yaml:"ttl"`
-	Priority int    `yaml:"priority"`
+	TTL      string `yaml:"ttl"`
+	Priority string `yaml:"priority"`
 }
 
 type Config struct {

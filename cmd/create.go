@@ -24,8 +24,8 @@ func newCreateCmd(app *App) *cobra.Command {
 	create.Flags().StringVarP(&record.Type, "type", "t", "", "type of DNS record")
 	create.Flags().StringVarP(&record.Host, "host", "H", "", "subdomain of DNS record")
 	create.Flags().StringVarP(&record.Content, "content", "c", "", "content of DNS record")
-	create.Flags().IntVarP(&record.TTL, "ttl", "l", 300, "TTL of DNS record")
-	create.Flags().IntVarP(&record.Priority, "priority", "p", 20, "priority of DNS record")
+	create.Flags().StringVarP(&record.TTL, "ttl", "l", "", "TTL of DNS record")
+	create.Flags().StringVarP(&record.Priority, "priority", "p", "", "priority of DNS record")
 
 	create.MarkFlagRequired("type")
 	create.MarkFlagRequired("content")
