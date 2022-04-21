@@ -4,18 +4,22 @@ records:
   host: borkbork.buzz
   content: pixie.porkbun.com
   ttl: "600"
+  priority: "0"
 - type: ALIAS
   host: www.borkbork.buzz
   content: pixie.porkbun.com
   ttl: "600"
+  priority: "0"
 - type: CNAME
   host: autodiscover.borkbork.buzz
   content: webmail.porkbun.com
   ttl: "600"
+  priority: "0"
 - type: CNAME
   host: "*.borkbork.buzz"
   content: pixie.porkbun.com
   ttl: "600"
+  priority: "0"
 - type: MX
   host: borkbork.buzz
   content: fwd1.porkbun.com
@@ -35,3 +39,4 @@ records:
   host: borkbork.buzz
   content: v=spf1 mx ~all
   ttl: "600"
+  priority: "0"
