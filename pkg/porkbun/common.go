@@ -88,8 +88,7 @@ func (pork *PorkClient) createRecord(domain string, record *client.Record) (*cli
 		PorkRecord: ToPorkRecord(record),
 	}
 
-	// trim domain from name
-	create.Name = trimDomain(domain, create.Name)
+	create.Name = trimDomainFromHost(domain, create.Name)
 
 	raw, err := postAndRead(PORK_CREATE_RECORD+domain, create)
 	if err != nil {
@@ -222,12 +221,12 @@ func findId(target *client.Record, all []PorkRecord) (string, error) {
 	return "", fmt.Errorf("didn't find a matching Porkbun record")
 }
 
-func trimDomain(domain, host string) (trimmed string) {
-	// test.borkbork.buzz needs to become test
-	trimmed = strings.Replace(host, "."+domain, "", 1)
-	trimmed = strings.Replace(trimmed, domain, "", 1)
-
-	return trimmed
+func trimDomainFromHost(domain, host string) string {
+	if host == domain {
+		return ""
+	} else {
+		return strings.Replace(host, "."+domain, "", 1)
+	}
 }
 
 func difference(a, b []client.Record) (diff []client.Record) {
