@@ -28,24 +28,23 @@ type Client interface {
 	Ping() error
 }
 
-func ReadConfig(filename string) (*Config, error) {
+func ReadConfig(filename string, config *Config) error {
 	file, err := os.Open(filename)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	raw, err := io.ReadAll(file)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	config := Config{}
 	err = yaml.Unmarshal(raw, &config)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return &config, nil
+	return nil
 }
 
 func WriteConfig(filename string, config *Config) error {
