@@ -15,8 +15,10 @@ func main() {
 	// Only supports Porkbun... for now :D
 	app := cmd.App{
 		Client: &porkbun.PorkClient{
-			ApiKey:       os.Getenv("PORKBUN_API_KEY"),
-			SecretApiKey: os.Getenv("PORKBUN_SECRET_KEY"),
+			Auth: porkbun.PorkAuth{
+				ApiKey:       os.Getenv("PORKBUN_API_KEY"),
+				SecretApiKey: os.Getenv("PORKBUN_SECRET_KEY"),
+			},
 		},
 	}
 

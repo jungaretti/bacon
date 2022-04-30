@@ -1,10 +1,12 @@
 package porkbun
 
-import "fmt"
+type PorkAuth struct {
+	ApiKey       string `json:"apikey"`
+	SecretApiKey string `json:"secretapikey"`
+}
 
 type PorkClient struct {
-	ApiKey       string
-	SecretApiKey string
+	Auth PorkAuth
 }
 
 func (client *PorkClient) Name() string {
@@ -12,5 +14,5 @@ func (client *PorkClient) Name() string {
 }
 
 func (client *PorkClient) Ping() error {
-	return fmt.Errorf("haven't implemented ping yet")
+	return ping(client.Auth)
 }
