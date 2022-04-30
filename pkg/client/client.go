@@ -7,11 +7,6 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-type Ack struct {
-	Ok      bool
-	Message string
-}
-
 type Record struct {
 	Type     string `yaml:"type"`
 	Host     string `yaml:"host"`
@@ -26,12 +21,8 @@ type Config struct {
 }
 
 type Client interface {
-	GetName() string
-	Ping() (*Ack, error)
-	GetRecords(string) ([]Record, error)
-	CreateRecord(string, *Record) (*Ack, error)
-	DeleteRecord(string, string) (*Ack, error)
-	SyncRecords(string, []Record, bool, bool) (*Ack, error)
+	Name() string
+	Ping() error
 }
 
 func ReadConfig(filename string) (*Config, error) {
