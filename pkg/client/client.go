@@ -26,6 +26,7 @@ type Config struct {
 type Client interface {
 	Name() string
 	Ping() error
+	Deploy(domain string, records []Record, shouldCreate bool, shouldDelete bool) error
 }
 
 func ReadConfig(filename string, config *Config) error {

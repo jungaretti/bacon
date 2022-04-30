@@ -1,30 +1,37 @@
 package cmd
 
 import (
+	"bacon/pkg/client"
 	"fmt"
 
 	"github.com/spf13/cobra"
 )
 
 func newDeployCmd(app *App) *cobra.Command {
-	var create bool
-	var delete bool
+	var shouldCreate bool
+	var shouldDelete bool
 
 	deploy := &cobra.Command{
 		Use:   "deploy <domain> <config>",
 		Short: "Deploy DNS records from a config file",
-		Args:  cobra.ExactArgs(2),
+		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return deploy(app, args[0], args[1], &create, &delete)
+			return deploy(app, args[0], shouldCreate, shouldDelete)
 		},
 	}
 
-	deploy.Flags().BoolVarP(&create, "create", "c", false, "create new records")
-	deploy.Flags().BoolVarP(&delete, "delete", "d", false, "delete old records")
+	deploy.Flags().BoolVarP(&shouldCreate, "create", "c", false, "create new records")
+	deploy.Flags().BoolVarP(&shouldDelete, "delete", "d", false, "delete old records")
 
 	return deploy
 }
 
-func deploy(app *App, domain string, configFile string, create *bool, delete *bool) error {
-	return fmt.Errorf("haven't implemented deploy yet")
+func deploy(app *App, configFile string, shouldCreate bool, shouldDelete bool) error {
+	config := client.Config{}
+	err := client.ReadConfig(configFile, &config)
+	if err != nil {
+		return fmt.Errorf("failed to read config file: %w", err)
+	}
+
+	return app.Client.Deploy(config.Domain, config.Records, shouldCreate, shouldDelete)
 }

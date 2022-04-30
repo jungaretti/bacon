@@ -7,6 +7,7 @@ import (
 	"io"
 )
 
+// https://porkbun.com/api/json/v3/documentation
 const PING = "https://porkbun.com/api/json/v3/ping"
 
 type baseRes struct {
@@ -72,4 +73,8 @@ func ping(auth PorkAuth) error {
 	}
 
 	return nil
+}
+
+func deploy(auth PorkAuth, domain string, shouldCreate bool, shouldDelete bool) error {
+	return fmt.Errorf("haven't implemented sync yet")
 }
