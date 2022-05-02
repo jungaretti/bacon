@@ -73,7 +73,7 @@ func ping(auth PorkAuth) error {
 func create(auth PorkAuth, domain string, record client.Record) (string, error) {
 	type createBody struct {
 		PorkAuth
-		porkbunRecord
+		PorkbunRecord
 	}
 
 	type createRes struct {
@@ -81,9 +81,11 @@ func create(auth PorkAuth, domain string, record client.Record) (string, error) 
 		Id string `json:"id"`
 	}
 
+	porkRecord := ConvertToPorkbunRecord(record)
+
 	toCreate := createBody{
 		PorkAuth:      auth,
-		porkbunRecord: ConvertToPorkbunRecord(record),
+		PorkbunRecord: porkRecord,
 	}
 
 	body, err := helpers.PostJsonAndRead(CREATE+"/"+domain, toCreate)
