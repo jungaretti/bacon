@@ -16,6 +16,36 @@ type PorkbunRecord struct {
 	Notes    string `json:"notes"`
 }
 
+func (left *PorkbunRecord) FuzzyCompare(right *PorkbunRecord) bool {
+	// Ignore IDs and notes
+	return (left.Name == right.Name &&
+		left.Type == right.Type &&
+		left.Content == right.Content &&
+		left.TTL == right.TTL &&
+		left.Priority == right.Priority)
+}
+
+func (left *PorkbunRecord) FuzzyCompareToClientRecord(right *client.Record) bool {
+	// Left must be a valid int and equal to right
+	if left.TTL != "" && right.TTL != 0 {
+		ttl, err := strconv.Atoi(left.TTL)
+		if err != nil || int(ttl) != right.TTL {
+			return false
+		}
+	}
+	if left.Priority != "" && right.Priority != 0 {
+		priority, err := strconv.Atoi(left.Priority)
+		if err != nil || int(priority) != right.Priority {
+			return false
+		}
+	}
+
+	// Ignore IDs and notes
+	return (left.Name == right.Host &&
+		left.Type == right.Type &&
+		left.Content == right.Content)
+}
+
 func ConvertToPorkbunRecord(src client.Record) (out PorkbunRecord) {
 	out.Name = src.Host
 	out.Type = src.Type
@@ -33,14 +63,14 @@ func ConvertToClientRecord(src PorkbunRecord) (out client.Record, err error) {
 	out.Content = src.Content
 
 	if src.TTL != "" {
-		ttl, err := strconv.ParseInt(src.TTL, 10, 0)
+		ttl, err := strconv.Atoi(src.TTL)
 		if err != nil {
 			return out, err
 		}
 		out.TTL = int(ttl)
 	}
 	if src.Priority != "" {
-		priority, err := strconv.ParseInt(src.Priority, 10, 0)
+		priority, err := strconv.Atoi(src.Priority)
 		if err != nil {
 			return out, err
 		}

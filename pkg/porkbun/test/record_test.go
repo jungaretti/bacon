@@ -75,3 +75,99 @@ func TestConvertToClientRecord(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestFuzzyCompare(t *testing.T) {
+	left := porkbun.PorkbunRecord{
+		Id:      "abc",
+		Name:    "www.example.com",
+		Type:    "A",
+		Content: "123.456.789.112",
+		TTL:     "600",
+		Notes:   "note1",
+	}
+	right := porkbun.PorkbunRecord{
+		Id:      "xyz",
+		Name:    "www.example.com",
+		Type:    "A",
+		Content: "123.456.789.112",
+		TTL:     "600",
+		Notes:   "note2",
+	}
+
+	if !left.FuzzyCompare(&right) {
+		t.Log("left", left)
+		t.Log("right", right)
+		t.Fail()
+	}
+}
+
+func TestFuzzyCompareDistinct(t *testing.T) {
+	left := porkbun.PorkbunRecord{
+		Id:      "abc",
+		Name:    "mail.example.com",
+		Type:    "A",
+		Content: "112.123.789.456",
+		TTL:     "600",
+		Notes:   "note3",
+	}
+	right := porkbun.PorkbunRecord{
+		Id:      "xyz",
+		Name:    "www.example.com",
+		Type:    "A",
+		Content: "123.456.789.112",
+		TTL:     "600",
+		Notes:   "note2",
+	}
+
+	if left.FuzzyCompare(&right) {
+		t.Log("left", left)
+		t.Log("right", right)
+		t.Fail()
+	}
+}
+
+func TestFuzzyCompareToClientRecord(t *testing.T) {
+	left := porkbun.PorkbunRecord{
+		Id:      "abc",
+		Name:    "www.example.com",
+		Type:    "A",
+		Content: "123.456.789.112",
+		TTL:     "600",
+		Notes:   "note3",
+	}
+	right := client.Record{
+		Host:    "www.example.com",
+		Type:    "A",
+		Content: "123.456.789.112",
+		TTL:     600,
+	}
+
+	if !left.FuzzyCompareToClientRecord(&right) {
+		t.Log("left", left)
+		t.Log("right", right)
+		t.Fail()
+	}
+}
+
+func TestFuzzyCompareToClientRecordDistinct(t *testing.T) {
+	left := porkbun.PorkbunRecord{
+		Id:      "abc",
+		Name:    "mail.example.com",
+		Type:    "A",
+		Content: "112.123.789.456",
+		TTL:     "600",
+		Notes:   "note3",
+	}
+	right := client.Record{
+		Host:    "www.example.com",
+		Type:    "A",
+		Content: "123.456.789.112",
+		TTL:     600,
+	}
+
+	if left.FuzzyCompareToClientRecord(&right) {
+		t.Log("left", left)
+		t.Log("right", right)
+		t.Fail()
+	}
+}
