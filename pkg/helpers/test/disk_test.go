@@ -69,29 +69,3 @@ func TestWriteYamlFile(t *testing.T) {
 		t.FailNow()
 	}
 }
-
-func TestPostJson(t *testing.T) {
-	body := profile{
-		Name: "Virgilio",
-		Age:  36,
-		Cantiche: []canto{
-			{
-				Name: "inferno",
-			},
-			{
-				Name: "purgatorio",
-			},
-		},
-	}
-
-	resp, err := helpers.PostJson("https://ptsv2.com/t/tg7o8-1651468588/post", body)
-	if err != nil {
-		t.Log(err)
-		t.FailNow()
-	}
-
-	if resp.StatusCode != 200 {
-		t.Log(resp.StatusCode)
-		t.FailNow()
-	}
-}
