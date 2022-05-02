@@ -4,20 +4,19 @@ import (
 	"bacon/pkg/helpers"
 	"encoding/json"
 	"fmt"
-	"io"
 )
 
 // https://porkbun.com/api/json/v3/documentation
 const PING = "https://porkbun.com/api/json/v3/ping"
 
-type baseRes struct {
-	Status  string `json:"status"`
-	Message string `json:"message"`
-}
-
 type checkable interface {
 	checkStatus() bool
 	messageAsError() error
+}
+
+type baseRes struct {
+	Status  string `json:"status"`
+	Message string `json:"message"`
 }
 
 func (res *baseRes) checkStatus() bool {
@@ -31,15 +30,6 @@ func (res *baseRes) checkStatus() bool {
 
 func (res *baseRes) messageAsError() error {
 	return fmt.Errorf("%s", res.Message)
-}
-
-func postAndRead(domain string, body interface{}) ([]byte, error) {
-	res, err := helpers.PostJson(PING, body)
-	if err != nil {
-		return nil, err
-	}
-
-	return io.ReadAll(res.Body)
 }
 
 func unmarshalAndCheckStatus(data []byte, body checkable) error {
@@ -61,7 +51,7 @@ func ping(auth PorkAuth) error {
 		YourIp string `json:"yourIp"`
 	}
 
-	body, err := postAndRead(PING, auth)
+	body, err := helpers.PostJsonAndRead(PING, auth)
 	if err != nil {
 		return err
 	}
