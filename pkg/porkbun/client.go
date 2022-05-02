@@ -19,6 +19,14 @@ func (client *PorkClient) Ping() error {
 	return ping(client.Auth)
 }
 
+func (client *PorkClient) Create(domain string, record client.Record) error {
+	return nil
+}
+
+func (client *PorkClient) Delete(domain string, record client.Record) error {
+	return nil
+}
+
 func (client *PorkClient) Deploy(domain string, records []client.Record, shouldCreate bool, shouldDelete bool) error {
 	return deploy(client.Auth, domain, shouldCreate, shouldDelete)
 }

@@ -1,13 +1,18 @@
 package porkbun
 
 import (
+	"bacon/pkg/client"
 	"bacon/pkg/helpers"
 	"encoding/json"
 	"fmt"
 )
 
 // https://porkbun.com/api/json/v3/documentation
-const PING = "https://porkbun.com/api/json/v3/ping"
+const (
+	PING   = "https://porkbun.com/api/json/v3/ping"
+	CREATE = "https://porkbun.com/api/json/v3/dns/create"
+	DELETE = "https://porkbun.com/api/json/v3/dns/delete"
+)
 
 type checkable interface {
 	checkStatus() bool
@@ -58,6 +63,51 @@ func ping(auth PorkAuth) error {
 
 	ping := pingRes{}
 	err = unmarshalAndCheckStatus(body, &ping)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func create(auth PorkAuth, domain string, record client.Record) (string, error) {
+	type createBody struct {
+		PorkAuth
+		porkbunRecord
+	}
+
+	type createRes struct {
+		baseRes
+		Id string `json:"id"`
+	}
+
+	toCreate := createBody{
+		PorkAuth:      auth,
+		porkbunRecord: ConvertToPorkbunRecord(record),
+	}
+
+	body, err := helpers.PostJsonAndRead(CREATE+"/"+domain, toCreate)
+	if err != nil {
+		return "", err
+	}
+
+	created := createRes{}
+	err = unmarshalAndCheckStatus(body, &created)
+	if err != nil {
+		return "", err
+	}
+
+	return created.Id, nil
+}
+
+func delete(auth PorkAuth, domain string, id string) error {
+	body, err := helpers.PostJsonAndRead(DELETE+"/"+domain+"/"+id, auth)
+	if err != nil {
+		return err
+	}
+
+	deleted := baseRes{}
+	err = unmarshalAndCheckStatus(body, &deleted)
 	if err != nil {
 		return err
 	}
