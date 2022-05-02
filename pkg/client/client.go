@@ -6,7 +6,6 @@ type Record struct {
 	Content  string `yaml:"content"`
 	TTL      int    `yaml:"ttl"`
 	Priority int    `yaml:"priority"`
-	Notes    string `yaml:"notes"`
 }
 
 type Config struct {
