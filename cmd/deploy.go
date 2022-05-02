@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"bacon/pkg/client"
+	"bacon/pkg/helpers"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -28,7 +29,7 @@ func newDeployCmd(app *App) *cobra.Command {
 
 func deploy(app *App, configFile string, shouldCreate bool, shouldDelete bool) error {
 	config := client.Config{}
-	err := client.ReadConfig(configFile, &config)
+	err := helpers.ReadAndParseYamlFile(configFile, &config)
 	if err != nil {
 		return fmt.Errorf("failed to read config file: %w", err)
 	}

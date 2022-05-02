@@ -1,7 +1,7 @@
 package porkbun
 
 import (
-	"bacon/pkg/client"
+	"bacon/pkg/helpers"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -34,7 +34,7 @@ func (res *baseRes) messageAsError() error {
 }
 
 func postAndRead(domain string, body interface{}) ([]byte, error) {
-	res, err := client.PostJson(PING, body)
+	res, err := helpers.PostJson(PING, body)
 	if err != nil {
 		return nil, err
 	}
