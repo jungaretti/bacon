@@ -30,6 +30,11 @@ func TestReadConfig(t *testing.T) {
 	fmt.Fprintf(writer, "  host: %s\n", RECORD_HOST)
 	fmt.Fprintf(writer, "  content: %s\n", RECORD_CONTENT)
 	fmt.Fprintf(writer, "  ttl: \"%s\"\n", RECORD_TTL)
+	err = temp.Close()
+	if err != nil {
+		t.Log(err)
+		t.FailNow()
+	}
 
 	config := client.Config{}
 	err = client.ReadConfig(temp.Name(), &config)

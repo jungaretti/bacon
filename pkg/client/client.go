@@ -40,6 +40,11 @@ func ReadConfig(filename string, config *Config) error {
 		return err
 	}
 
+	err = file.Close()
+	if err != nil {
+		return err
+	}
+
 	err = yaml.Unmarshal(raw, &config)
 	if err != nil {
 		return err
