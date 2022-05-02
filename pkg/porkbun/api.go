@@ -117,6 +117,6 @@ func delete(auth PorkAuth, domain string, id string) error {
 	return nil
 }
 
-func deploy(auth PorkAuth, domain string, shouldCreate bool, shouldDelete bool) error {
+func deploy(auth PorkAuth, domain string, records []client.Record, shouldCreate bool, shouldDelete bool) error {
 	return fmt.Errorf("haven't implemented sync yet")
 }

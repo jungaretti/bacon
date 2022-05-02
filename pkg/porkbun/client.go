@@ -28,5 +28,5 @@ func (client *PorkClient) Delete(domain string, record client.Record) error {
 }
 
 func (client *PorkClient) Deploy(domain string, records []client.Record, shouldCreate bool, shouldDelete bool) error {
-	return deploy(client.Auth, domain, shouldCreate, shouldDelete)
+	return deploy(client.Auth, domain, records, shouldCreate, shouldDelete)
 }
