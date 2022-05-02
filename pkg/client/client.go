@@ -4,8 +4,9 @@ type Record struct {
 	Type     string `yaml:"type"`
 	Host     string `yaml:"host"`
 	Content  string `yaml:"content"`
-	TTL      string `yaml:"ttl"`
-	Priority string `yaml:"priority"`
+	TTL      int    `yaml:"ttl"`
+	Priority int    `yaml:"priority"`
+	Notes    string `yaml:"notes"`
 }
 
 type Config struct {
