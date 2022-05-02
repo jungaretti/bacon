@@ -46,6 +46,10 @@ func (left *PorkbunRecord) FuzzyCompareToClientRecord(right *client.Record) bool
 		left.Content == right.Content)
 }
 
+func (src *PorkbunRecord) FuzzyHash() string {
+	return fmt.Sprint(src.Name, src.Type, src.Content, src.TTL, src.Priority)
+}
+
 func ConvertToPorkbunRecord(src client.Record) (out PorkbunRecord) {
 	out.Name = src.Host
 	out.Type = src.Type

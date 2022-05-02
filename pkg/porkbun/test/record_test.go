@@ -171,3 +171,28 @@ func TestFuzzyCompareToClientRecordDistinct(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestFuzzyHash(t *testing.T) {
+	left := porkbun.PorkbunRecord{
+		Id:      "abc",
+		Name:    "www.example.com",
+		Type:    "A",
+		Content: "123.456.789.112",
+		TTL:     "600",
+		Notes:   "note1",
+	}
+	right := porkbun.PorkbunRecord{
+		Id:      "xyz",
+		Name:    "www.example.com",
+		Type:    "A",
+		Content: "123.456.789.112",
+		TTL:     "600",
+		Notes:   "note2",
+	}
+
+	if left.FuzzyHash() != right.FuzzyHash() {
+		t.Log("left", left)
+		t.Log("right", right)
+		t.Fail()
+	}
+}
