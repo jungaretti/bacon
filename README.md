@@ -73,7 +73,7 @@ Deleting 2 records...
 Creating 2 records...
 - 225823565
 - 225823566
-Partial deployment complete!
+Deployment complete!
 ```
 
 ## Configuration

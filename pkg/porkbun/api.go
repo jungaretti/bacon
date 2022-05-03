@@ -203,10 +203,10 @@ func deploy(auth PorkAuth, domain string, records []client.Record, shouldCreate 
 
 	if !shouldCreate && !shouldDelete {
 		fmt.Println("Mock deployment complete")
-	} else if shouldCreate || shouldDelete {
-		fmt.Println("Partial deployment complete!")
-	} else {
+	} else if shouldCreate && shouldDelete {
 		fmt.Println("Deployment complete!")
+	} else {
+		fmt.Println("Partial deployment complete!")
 	}
 	return nil
 }
