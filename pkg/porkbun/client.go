@@ -1,6 +1,8 @@
 package porkbun
 
-import "bacon/pkg/client"
+import (
+	"bacon/pkg/client"
+)
 
 type PorkAuth struct {
 	ApiKey       string `json:"apikey"`
@@ -17,14 +19,6 @@ func (client *PorkClient) Name() string {
 
 func (client *PorkClient) Ping() error {
 	return ping(client.Auth)
-}
-
-func (client *PorkClient) Create(domain string, record client.Record) error {
-	return nil
-}
-
-func (client *PorkClient) Delete(domain string, record client.Record) error {
-	return nil
 }
 
 func (client *PorkClient) Deploy(domain string, records []client.Record, shouldCreate bool, shouldDelete bool) error {
