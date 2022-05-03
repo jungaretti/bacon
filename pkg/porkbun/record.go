@@ -4,6 +4,7 @@ import (
 	"bacon/pkg/client"
 	"fmt"
 	"strconv"
+	"strings"
 )
 
 type PorkbunRecord struct {
@@ -50,6 +51,15 @@ func ConvertToClientRecord(src PorkbunRecord) (out client.Record, err error) {
 	return out, nil
 }
 
-func (src *PorkbunRecord) HashFuzzy() string {
+func (src PorkbunRecord) HashFuzzy() string {
 	return fmt.Sprint(src.Name, src.Type, src.Content, src.TTL, src.Priority)
+}
+
+// Trims anything.domain.tld to anything
+func trimDomain(name string, domain string) string {
+	if name == domain {
+		return ""
+	}
+
+	return strings.Replace(name, "."+domain, "", 1)
 }

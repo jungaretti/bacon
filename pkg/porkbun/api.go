@@ -10,6 +10,7 @@ import (
 // https://porkbun.com/api/json/v3/documentation
 const (
 	PING   = "https://porkbun.com/api/json/v3/ping"
+	GET    = "https://porkbun.com/api/json/v3/dns/retrieve"
 	CREATE = "https://porkbun.com/api/json/v3/dns/create"
 	DELETE = "https://porkbun.com/api/json/v3/dns/delete"
 )
@@ -70,23 +71,54 @@ func ping(auth PorkAuth) error {
 	return nil
 }
 
-func create(auth PorkAuth, domain string, record client.Record) (string, error) {
+func getRecordsBytes(auth PorkAuth, domain string) ([]byte, error) {
+	body, err := helpers.PostJsonAndRead(GET+"/"+domain, auth)
+	if err != nil {
+		return nil, err
+	}
+
+	return body, nil
+}
+
+func getRecords(auth PorkAuth, domain string) ([]PorkbunRecord, error) {
+	type recordsRes struct {
+		baseRes
+		Records []PorkbunRecord `json:"records"`
+	}
+
+	bytes, err := getRecordsBytes(auth, domain)
+	if err != nil {
+		return nil, err
+	}
+
+	allRecords := recordsRes{}
+	err = unmarshalAndCheckStatus(bytes, &allRecords)
+	if err != nil {
+		return nil, fmt.Errorf("error parsing records response: %w", err)
+	}
+
+	return allRecords.Records, nil
+}
+
+func createFromPorkbunRecord(auth PorkAuth, domain string, porkRecord PorkbunRecord) (string, error) {
 	type createBody struct {
 		PorkAuth
 		PorkbunRecord
 	}
 
+	// Porkbun says that id is a string, but it's actually an int
 	type createRes struct {
 		baseRes
-		Id string `json:"id"`
+		Id int `json:"id"`
 	}
-
-	porkRecord := ConvertToPorkbunRecord(record)
 
 	toCreate := createBody{
 		PorkAuth:      auth,
 		PorkbunRecord: porkRecord,
 	}
+
+	// Don't include the domain in create requests
+	toCreate.Name = trimDomain(toCreate.Name, domain)
 
 	body, err := helpers.PostJsonAndRead(CREATE+"/"+domain, toCreate)
 	if err != nil {
@@ -99,7 +131,13 @@ func create(auth PorkAuth, domain string, record client.Record) (string, error) 
 		return "", err
 	}
 
-	return created.Id, nil
+	return fmt.Sprint(created.Id), nil
+}
+
+func createFromClientRecord(auth PorkAuth, domain string, record client.Record) (string, error) {
+	porkRecord := ConvertToPorkbunRecord(record)
+
+	return createFromPorkbunRecord(auth, domain, porkRecord)
 }
 
 func delete(auth PorkAuth, domain string, id string) error {
@@ -117,6 +155,58 @@ func delete(auth PorkAuth, domain string, id string) error {
 	return nil
 }
 
-func deploy(auth PorkAuth, domain string, records []client.Record, shouldCreate bool, shouldDelete bool) error {
-	return fmt.Errorf("haven't implemented sync yet")
+func deploy(auth PorkAuth, domain string, records []client.Record, shouldCreate bool, shouldDelete bool) (err error) {
+	old, err := getRecords(auth, domain)
+	if err != nil {
+		return fmt.Errorf("error getting records: %w", err)
+	}
+
+	new := make([]PorkbunRecord, len(records))
+	for i, clientRecord := range records {
+		new[i] = ConvertToPorkbunRecord(clientRecord)
+	}
+
+	toDelete := helpers.DifferenceByHasher(old, new, PorkbunRecord.HashFuzzy)
+	toCreate := helpers.DifferenceByHasher(new, old, PorkbunRecord.HashFuzzy)
+
+	if shouldDelete {
+		fmt.Printf("Deleting %d records...\n", len(toDelete))
+		for _, target := range toDelete {
+			// These always have an ID from Porkbun
+			err = delete(auth, domain, target.Id)
+			if err != nil {
+				return err
+			}
+			fmt.Println("-", target)
+		}
+	} else {
+		fmt.Printf("Would delete %d records:\n", len(toDelete))
+		for _, target := range toDelete {
+			fmt.Println("-", target)
+		}
+	}
+	if shouldCreate {
+		fmt.Printf("Creating %d records...\n", len(toCreate))
+		for _, target := range toCreate {
+			id, err := createFromPorkbunRecord(auth, domain, target)
+			if err != nil {
+				return err
+			}
+			fmt.Println("-", id)
+		}
+	} else {
+		fmt.Printf("Would create %d records:\n", len(toCreate))
+		for _, target := range toCreate {
+			fmt.Println("-", target)
+		}
+	}
+
+	if !shouldCreate && !shouldDelete {
+		fmt.Println("Mock deployment complete")
+	} else if shouldCreate || shouldDelete {
+		fmt.Println("Partial deployment complete!")
+	} else {
+		fmt.Println("Deployment complete!")
+	}
+	return nil
 }

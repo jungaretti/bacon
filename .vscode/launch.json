@@ -18,7 +18,7 @@
             "request": "launch",
             "mode": "auto",
             "program": "main.go",
-            "args": ["deploy", "borkbork.buzz", "config.example.yml"]
+            "args": ["deploy", "config.example.yml"]
         }
     ]
 }

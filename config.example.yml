@@ -1,42 +1,37 @@
 domain: borkbork.buzz
 records:
-- type: ALIAS
-  host: borkbork.buzz
-  content: pixie.porkbun.com
-  ttl: "600"
-  priority: "0"
-- type: ALIAS
-  host: www.borkbork.buzz
-  content: pixie.porkbun.com
-  ttl: "600"
-  priority: "0"
-- type: CNAME
-  host: autodiscover.borkbork.buzz
-  content: webmail.porkbun.com
-  ttl: "600"
-  priority: "0"
-- type: CNAME
-  host: "*.borkbork.buzz"
-  content: pixie.porkbun.com
-  ttl: "600"
-  priority: "0"
-- type: MX
-  host: borkbork.buzz
-  content: fwd1.porkbun.com
-  ttl: "600"
-  priority: "10"
-- type: MX
-  host: borkbork.buzz
-  content: fwd2.porkbun.com
-  ttl: "600"
-  priority: "20"
-- type: SRV
-  host: _autodiscover._tcp.borkbork.buzz
-  content: 10 443 webmail.porkbun.com
-  ttl: "600"
-  priority: "10"
-- type: TXT
-  host: borkbork.buzz
-  content: v=spf1 mx ~all
-  ttl: "600"
-  priority: "0"
+  - type: ALIAS
+    host: borkbork.buzz
+    content: pixie.porkbun.com
+    ttl: 600
+  - type: ALIAS
+    host: www.borkbork.buzz
+    content: pixie.porkbun.com
+    ttl: 600
+  - type: CNAME
+    host: autodiscover.borkbork.buzz
+    content: webmail.porkbun.com
+    ttl: 600
+  - type: CNAME
+    host: "*.borkbork.buzz"
+    content: pixie.porkbun.com
+    ttl: 600
+  - type: MX
+    host: borkbork.buzz
+    content: fwd1.porkbun.com
+    ttl: 600
+    priority: 10
+  - type: MX
+    host: borkbork.buzz
+    content: fwd2.porkbun.com
+    ttl: 600
+    priority: 20
+  - type: SRV
+    host: _autodiscover._tcp.borkbork.buzz
+    content: 10 443 webmail.porkbun.com
+    ttl: 600
+    priority: 10
+  - type: TXT
+    host: borkbork.buzz
+    content: v=spf1 mx ~all
+    ttl: 600
