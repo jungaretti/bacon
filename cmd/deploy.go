@@ -13,9 +13,11 @@ func newDeployCmd(app *App) *cobra.Command {
 	var shouldDelete bool
 
 	deploy := &cobra.Command{
-		Use:   "deploy <domain> <config>",
-		Short: "Deploy DNS records from a config file",
-		Args:  cobra.ExactArgs(1),
+		Use:   "deploy <config>",
+		Short: "Deploy records from a config file",
+		Long: `Deploys DNS records from a YAML config file by deleting existing records and
+creating new records.`,
+		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return deploy(app, args[0], shouldCreate, shouldDelete)
 		},
