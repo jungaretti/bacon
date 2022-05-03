@@ -63,7 +63,7 @@ Mock deployment complete
 Use the `--delete` flag to delete existing records and the `--create` flag to create new records:
 
 ```shell
-bacon deploy borkbork.buzz.yml -cd
+bacon deploy borkbork.buzz.yml --delete --create
 ```
 
 ```txt
@@ -97,6 +97,21 @@ records:
     content: fizzbuzz
     ttl: 600
 ```
+
+### Schema
+
+#### Record
+
+- `type`
+- `host`
+- `content`
+- `ttl`
+- `priority`
+
+#### Config
+
+- `domain`
+- `records`
 
 ## Built With
 
