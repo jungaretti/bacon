@@ -76,16 +76,16 @@ func TestConvertToClientRecord(t *testing.T) {
 	}
 }
 
-func TestFuzzyHash(t *testing.T) {
-	left := porkbun.PorkbunRecord{
+func TestHashFuzzy(t *testing.T) {
+	one := porkbun.PorkbunRecord{
 		Id:      "abc",
 		Name:    "www.example.com",
 		Type:    "A",
 		Content: "123.456.789.112",
 		TTL:     "600",
-		Notes:   "note1",
+		Notes:   "note2",
 	}
-	right := porkbun.PorkbunRecord{
+	two := porkbun.PorkbunRecord{
 		Id:      "xyz",
 		Name:    "www.example.com",
 		Type:    "A",
@@ -93,10 +93,23 @@ func TestFuzzyHash(t *testing.T) {
 		TTL:     "600",
 		Notes:   "note2",
 	}
+	three := porkbun.PorkbunRecord{
+		Id:      "xyz",
+		Name:    "www.example.org",
+		Type:    "A",
+		Content: "123.456.789.112",
+		TTL:     "600",
+		Notes:   "note2",
+	}
 
-	if left.FuzzyHash() != right.FuzzyHash() {
-		t.Log("left", left)
-		t.Log("right", right)
+	if one.HashFuzzy() != two.HashFuzzy() {
+		t.Log("left", one)
+		t.Log("right", two)
+		t.Fail()
+	}
+	if two.HashFuzzy() == three.HashFuzzy() {
+		t.Log("left", two)
+		t.Log("right", three)
 		t.Fail()
 	}
 }

@@ -16,10 +16,6 @@ type PorkbunRecord struct {
 	Notes    string `json:"notes"`
 }
 
-func (src *PorkbunRecord) FuzzyHash() string {
-	return fmt.Sprint(src.Name, src.Type, src.Content, src.TTL, src.Priority)
-}
-
 func ConvertToPorkbunRecord(src client.Record) (out PorkbunRecord) {
 	out.Name = src.Host
 	out.Type = src.Type
@@ -52,4 +48,8 @@ func ConvertToClientRecord(src PorkbunRecord) (out client.Record, err error) {
 	}
 
 	return out, nil
+}
+
+func (src *PorkbunRecord) HashFuzzy() string {
+	return fmt.Sprint(src.Name, src.Type, src.Content, src.TTL, src.Priority)
 }
