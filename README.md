@@ -2,7 +2,7 @@
 
 Tasty DNS record manager for Porkbun
 
-![Demo of Bacon](https://user-images.githubusercontent.com/19893438/166407773-8eb27040-7438-48fc-b5b5-435298b6eb63.gif)
+![Demo of bacon deploy](https://user-images.githubusercontent.com/19893438/167117976-7342a418-7918-4619-976a-20f83f65b3b8.gif)
 
 Bacon deploys DNS records from a YAML config file. You can use Bacon to check DNS records into source control and deploy them to Porkbun with GitHub Actions.
 
