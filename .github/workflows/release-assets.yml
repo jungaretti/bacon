@@ -1,0 +1,26 @@
+name: Release Assets
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  release:
+    name: Build and Release Assets
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # build and publish in parallel: linux/amd64, linux/arm64, darwin/amd64, darwin/arm64, windows/amd64
+        goos: [linux, darwin, windows]
+        goarch: [amd64, arm64]
+        exclude:
+          - goarch: arm64
+            goos: windows
+    steps:
+      - uses: actions/checkout@v3
+      - uses: wangyoucao577/go-release-action@b3f2406d88324d0d89e7246ce26327b00174c46c # v1.28
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          goos: ${{ matrix.goos }}
+          goarch: ${{ matrix.goarch }}
+          extra_files: LICENSE README.md
