@@ -12,7 +12,16 @@ The easiest way to use Bacon is with the [Bacon Deploy Action](https://github.co
 
 ### Installation
 
-Clone this repo and use `make` to build `bin/bacon`.
+[Download the latest release from GitHub.](https://github.com/jungaretti/bacon/releases)
+
+[![Status of release assets](https://github.com/jungaretti/bacon/actions/workflows/release-assets.yml/badge.svg)](https://github.com/jungaretti/bacon/actions/workflows/release-assets.yml)
+
+#### Build it Yourself
+
+1. Install Bacon's prerequisites:
+   - [Go](https://go.dev/dl/)
+   - [GNU Make](https://ftp.gnu.org/gnu/make/)
+2. Clone this repo and use `make` to build `bin/bacon`
 
 ### Authentication
 
