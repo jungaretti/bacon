@@ -2,5 +2,5 @@
 // https://github.com/microsoft/vscode-dev-containers/tree/v0.222.0/containers/go
 {
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "go version",
+	"postCreateCommand": ".devcontainer/scripts/postcreate.sh",
 }
