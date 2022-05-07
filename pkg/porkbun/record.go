@@ -22,8 +22,12 @@ func ConvertToPorkbunRecord(src client.Record) (out PorkbunRecord) {
 	out.Type = src.Type
 	out.Content = src.Content
 
-	out.TTL = fmt.Sprint(src.TTL)
-	out.Priority = fmt.Sprint(src.Priority)
+	if src.TTL > 0 {
+		out.TTL = fmt.Sprint(src.TTL)
+	}
+	if src.Priority > 0 {
+		out.Priority = fmt.Sprint(src.Priority)
+	}
 
 	return out
 }
