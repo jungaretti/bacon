@@ -56,7 +56,13 @@ func ConvertToClientRecord(src PorkbunRecord) (out client.Record, err error) {
 }
 
 func (src PorkbunRecord) HashFuzzy() string {
-	return fmt.Sprint(src.Name, src.Type, src.Content, src.TTL, src.Priority)
+	// Treat "" and "0" as the same value
+	priority := src.Priority
+	if priority == "" {
+		priority = "0"
+	}
+
+	return fmt.Sprint(src.Name, src.Type, src.Content, src.TTL, priority)
 }
 
 // Trims anything.domain.tld to anything
