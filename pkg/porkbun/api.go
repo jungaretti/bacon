@@ -9,10 +9,10 @@ import (
 
 // https://porkbun.com/api/json/v3/documentation
 const (
-	PING   = "https://porkbun.com/api/json/v3/ping"
-	GET    = "https://porkbun.com/api/json/v3/dns/retrieve"
-	CREATE = "https://porkbun.com/api/json/v3/dns/create"
-	DELETE = "https://porkbun.com/api/json/v3/dns/delete"
+	PING   string = "https://porkbun.com/api/json/v3/ping"
+	GET    string = "https://porkbun.com/api/json/v3/dns/retrieve"
+	CREATE string = "https://porkbun.com/api/json/v3/dns/create"
+	DELETE string = "https://porkbun.com/api/json/v3/dns/delete"
 )
 
 type checkable interface {
@@ -132,12 +132,6 @@ func createFromPorkbunRecord(auth PorkAuth, domain string, porkRecord PorkbunRec
 	}
 
 	return fmt.Sprint(created.Id), nil
-}
-
-func createFromClientRecord(auth PorkAuth, domain string, record client.Record) (string, error) {
-	porkRecord := ConvertToPorkbunRecord(record)
-
-	return createFromPorkbunRecord(auth, domain, porkRecord)
 }
 
 func delete(auth PorkAuth, domain string, id string) error {
