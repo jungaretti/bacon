@@ -57,6 +57,14 @@ func ping(auth PorkAuth) error {
 		YourIp string `json:"yourIp"`
 	}
 
+	// Show a more helpful error message when keys are missing
+	if auth.ApiKey == "" {
+		return fmt.Errorf("API key is missing")
+	}
+	if auth.SecretApiKey == "" {
+		return fmt.Errorf("secret API key is missing")
+	}
+
 	body, err := helpers.PostJsonAndRead(PING, auth)
 	if err != nil {
 		return err
