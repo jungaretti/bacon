@@ -39,7 +39,7 @@ func TestConvertToPorkbun(t *testing.T) {
 	}
 }
 
-func TestConvertToClientSimple(t *testing.T) {
+func TestConvertToClient(t *testing.T) {
 	porkRecord := porkbun.PorkbunRecord{
 		Id:      "abcxyz",
 		Name:    "www.example.com",
