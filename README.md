@@ -98,10 +98,10 @@ Deployment complete!
 See [`config.example.yml`](https://github.com/jungaretti/bacon/blob/main/config.example.yml) for a complete example.
 
 ```yaml
-domain: borkbork.buzz
+domain: example.com
 records:
   - type: A
-    host: example.com
+    host: blog.example.com
     content: 123.456.789.112
     ttl: 600
   - type: A
