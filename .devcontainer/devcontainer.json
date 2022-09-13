@@ -1,6 +1,10 @@
-// For format details, see https://aka.ms/devcontainer.json. For config options, see the README at:
-// https://github.com/microsoft/vscode-dev-containers/tree/v0.222.0/containers/go
 {
-  // Use 'postCreateCommand' to run commands after the container is created.
-  "postCreateCommand": "./.devcontainer/scripts/postcreate.sh"
+  "image": "mcr.microsoft.com/devcontainers/base:debian",
+  "remoteUser": "vscode",
+  "postCreateCommand": "./.devcontainer/scripts/postcreate.sh",
+  "features": {
+    "ghcr.io/devcontainers/features/go:1": {
+      "version": "1.19"
+    }
+  }
 }
