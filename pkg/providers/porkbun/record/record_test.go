@@ -1,4 +1,4 @@
-package porkbun
+package record
 
 import (
 	"testing"
