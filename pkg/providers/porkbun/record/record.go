@@ -12,20 +12,20 @@ type Record struct {
 	Notes    string `json:"notes"`
 }
 
-func (r Record) GetContent() string {
-	return r.Content
-}
-
-func (r Record) GetHost() string {
+func (r Record) GetName() string {
 	return r.Name
-}
-
-func (r Record) GetTTL() string {
-	return r.TTL
 }
 
 func (r Record) GetType() string {
 	return r.Type
+}
+
+func (r Record) GetTtl() string {
+	return r.TTL
+}
+
+func (r Record) GetData() string {
+	return r.Content
 }
 
 var _ dns.Record = Record{}

@@ -32,10 +32,10 @@ func (p PorkProvider) AllRecords(domain string) ([]dns.Record, error) {
 
 func (p PorkProvider) CreateRecord(domain string, newRecord dns.Record) error {
 	porkRecord := record.Record{
+		Name:    newRecord.GetName(),
 		Type:    newRecord.GetType(),
-		Name:    newRecord.GetHost(),
-		Content: newRecord.GetContent(),
-		TTL:     newRecord.GetTTL(),
+		TTL:     newRecord.GetTtl(),
+		Content: newRecord.GetData(),
 	}
 
 	_, err := p.Api.CreateRecord(domain, porkRecord)
