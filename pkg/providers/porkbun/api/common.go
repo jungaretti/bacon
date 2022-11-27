@@ -24,8 +24,6 @@ func (r baseRes) checkStatus() error {
 	return fmt.Errorf("unsuccessful Porkbun request: %s", r.Message)
 }
 
-var _ checkable = baseRes{}
-
 func makeRequest(url string, req interface{}, out checkable) error {
 	res, err := network.PostJson(url, req)
 	if err != nil {
