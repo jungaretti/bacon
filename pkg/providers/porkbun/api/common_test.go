@@ -4,8 +4,7 @@ import "testing"
 
 func TestBaseResSuccess(t *testing.T) {
 	res := baseRes{
-		Status:  "SUCCESS",
-		Message: "",
+		Status: "SUCCESS",
 	}
 
 	if res.checkStatus() != nil {

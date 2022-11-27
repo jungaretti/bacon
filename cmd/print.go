@@ -26,9 +26,14 @@ func print(app *App, domain string) error {
 		return err
 	}
 
+	configRecords := make([]dns.ConfigRecord, len(records))
+	for i, record := range records {
+		configRecords[i] = dns.ConfigFromRecord(record)
+	}
+
 	config := dns.Config{
 		Domain:  domain,
-		Records: records,
+		Records: configRecords,
 	}
 
 	out, err := yaml.Marshal(config)
