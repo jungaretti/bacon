@@ -9,7 +9,7 @@ import (
 func newPingCmd(app *App) *cobra.Command {
 	ping := &cobra.Command{
 		Use:   "ping",
-		Short: "Check authentication configuration",
+		Short: "Check authentication status",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return ping(app)
@@ -19,11 +19,11 @@ func newPingCmd(app *App) *cobra.Command {
 }
 
 func ping(app *App) error {
-	err := app.Client.Ping()
+	err := app.Provider.CheckAuth()
 	if err != nil {
 		return err
 	}
 
-	fmt.Printf("Success! %s is ready to use.\n", app.Client.Name())
+	fmt.Printf("Success! %s is ready to use.\n", "Porkbun")
 	return nil
 }

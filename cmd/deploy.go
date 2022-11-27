@@ -1,10 +1,6 @@
 package cmd
 
 import (
-	"bacon/pkg/client"
-	"bacon/pkg/helpers"
-	"fmt"
-
 	"github.com/spf13/cobra"
 )
 
@@ -30,11 +26,5 @@ creating new records.`,
 }
 
 func deploy(app *App, configFile string, shouldCreate bool, shouldDelete bool) error {
-	config := client.Config{}
-	err := helpers.ReadAndParseYamlFile(configFile, &config)
-	if err != nil {
-		return fmt.Errorf("failed to read config file: %w", err)
-	}
-
-	return app.Client.Deploy(config.Domain, config.Records, shouldCreate, shouldDelete)
+	panic("Haven't implemented yet")
 }

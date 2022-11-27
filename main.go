@@ -2,8 +2,8 @@ package main
 
 import (
 	"bacon/cmd"
-	"bacon/pkg/porkbun"
-	"os"
+	"bacon/pkg/providers/porkbun"
+	"bacon/pkg/secrets"
 
 	"github.com/subosito/gotenv"
 )
@@ -14,12 +14,7 @@ func main() {
 
 	// Only supports Porkbun... for now :D
 	app := cmd.App{
-		Client: &porkbun.PorkClient{
-			Auth: porkbun.PorkAuth{
-				ApiKey:       os.Getenv("PORKBUN_API_KEY"),
-				SecretApiKey: os.Getenv("PORKBUN_SECRET_KEY"),
-			},
-		},
+		Provider: porkbun.NewPorkbunProvider(secrets.Provider{}),
 	}
 
 	cmd.Execute(&app)
