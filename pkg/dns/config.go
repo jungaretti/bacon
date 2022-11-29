@@ -1,5 +1,10 @@
 package dns
 
+import (
+	"fmt"
+	"strconv"
+)
+
 type Config struct {
 	Domain  string         `yaml:"domain"`
 	Records []ConfigRecord `yaml:"records"`
@@ -8,7 +13,7 @@ type Config struct {
 type ConfigRecord struct {
 	Name string `yaml:"name"`
 	Type string `yaml:"type"`
-	Ttl  string `yaml:"ttl"`
+	Ttl  *int   `yaml:"ttl"`
 	Data string `yaml:"data"`
 }
 
@@ -21,7 +26,11 @@ func (r ConfigRecord) GetType() string {
 }
 
 func (r ConfigRecord) GetTtl() string {
-	return r.Ttl
+	if r.Ttl == nil {
+		return ""
+	}
+
+	return fmt.Sprint(r.Ttl)
 }
 
 func (r ConfigRecord) GetData() string {
@@ -31,10 +40,12 @@ func (r ConfigRecord) GetData() string {
 var _ Record = ConfigRecord{}
 
 func ConfigFromRecord(r Record) ConfigRecord {
+	ttl, _ := strconv.Atoi(r.GetTtl())
+
 	return ConfigRecord{
 		Name: r.GetName(),
 		Type: r.GetType(),
-		Ttl:  r.GetTtl(),
+		Ttl:  &ttl,
 		Data: r.GetData(),
 	}
 }
