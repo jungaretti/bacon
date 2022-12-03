@@ -28,4 +28,12 @@ func (r Record) GetData() string {
 	return r.Content
 }
 
+func (left Record) Equals(right dns.Record) bool {
+	return dns.RecordEquals(left, right)
+}
+
+func (record Record) Hash() string {
+	return dns.RecordHash(record)
+}
+
 var _ dns.Record = Record{}

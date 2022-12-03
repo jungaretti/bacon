@@ -8,12 +8,19 @@ type Record interface {
 	GetType() string
 	GetTtl() string
 	GetData() string
+	Equals(Record) bool
+	Hash() string
 }
 
-func RecordEquals(l Record, r Record) (equal bool) {
+func RecordEquals(l Record, r Record) bool {
+	equal := true
 	equal = equal && l.GetName() == r.GetName()
 	equal = equal && l.GetType() == r.GetType()
 	equal = equal && l.GetTtl() == r.GetTtl()
 	equal = equal && l.GetData() == r.GetData()
-	return
+	return equal
+}
+
+func RecordHash(r Record) string {
+	return r.GetName() + r.GetType() + r.GetTtl() + r.GetData()
 }

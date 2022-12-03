@@ -37,6 +37,14 @@ func (r ConfigRecord) GetData() string {
 	return r.Data
 }
 
+func (left ConfigRecord) Equals(right Record) bool {
+	return RecordEquals(left, right)
+}
+
+func (record ConfigRecord) Hash() string {
+	return RecordHash(record)
+}
+
 var _ Record = ConfigRecord{}
 
 func ConfigFromRecord(r Record) ConfigRecord {
