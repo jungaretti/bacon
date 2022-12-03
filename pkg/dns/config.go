@@ -11,10 +11,10 @@ type Config struct {
 }
 
 type ConfigRecord struct {
-	Name string `yaml:"name"`
+	Name string `yaml:"host"`
 	Type string `yaml:"type"`
 	Ttl  *int   `yaml:"ttl"`
-	Data string `yaml:"data"`
+	Data string `yaml:"content"`
 }
 
 func (r ConfigRecord) GetName() string {
@@ -30,7 +30,7 @@ func (r ConfigRecord) GetTtl() string {
 		return ""
 	}
 
-	return fmt.Sprint(r.Ttl)
+	return fmt.Sprint(*r.Ttl)
 }
 
 func (r ConfigRecord) GetData() string {

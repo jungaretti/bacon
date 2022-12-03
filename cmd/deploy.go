@@ -1,7 +1,13 @@
 package cmd
 
 import (
+	"bacon/pkg/dns"
+	"fmt"
+	"io"
+	"os"
+
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v3"
 )
 
 func newDeployCmd(app *App) *cobra.Command {
@@ -26,5 +32,62 @@ creating new records.`,
 }
 
 func deploy(app *App, configFile string, shouldCreate bool, shouldDelete bool) error {
-	panic("Haven't implemented yet")
+	config, err := readConfig(configFile)
+	if err != nil {
+		return fmt.Errorf("reading config: %v", err)
+	}
+
+	from, err := app.Provider.AllRecords(config.Domain)
+	if err != nil {
+		return fmt.Errorf("fetching existing records: %v", err)
+	}
+
+	configRecords := config.Records
+	to := make([]dns.Record, len(configRecords))
+	for i, record := range configRecords {
+		to[i] = record
+	}
+
+	added, removed := dns.DiffRecords(from, to)
+	if shouldDelete {
+	} else {
+		fmt.Println("Would delete", len(removed), "records:")
+		for _, record := range removed {
+			fmt.Println("-", record)
+		}
+	}
+	if shouldCreate {
+	} else {
+		fmt.Println("Would create", len(added), "records:")
+		for _, record := range added {
+			fmt.Println("-", record)
+		}
+	}
+
+	return nil
+}
+
+func readConfig(configFile string) (*dns.Config, error) {
+	file, err := os.Open(configFile)
+	if err != nil {
+		return nil, err
+	}
+
+	raw, err := io.ReadAll(file)
+	if err != nil {
+		return nil, err
+	}
+
+	err = file.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	config := dns.Config{}
+	err = yaml.Unmarshal(raw, &config)
+	if err != nil {
+		return nil, err
+	}
+
+	return &config, nil
 }
