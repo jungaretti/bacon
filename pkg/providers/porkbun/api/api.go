@@ -2,6 +2,7 @@ package api
 
 import (
 	porkbun "bacon/pkg/providers/porkbun/record"
+	"fmt"
 	"strings"
 )
 
@@ -55,13 +56,14 @@ func (p Api) CreateRecord(domain string, toCreate porkbun.Record) (string, error
 
 	type createRes struct {
 		baseRes
-		Id string `json:"id"`
+		Id int `json:"id"`
 	}
 
 	request := createReq{
 		Auth:   p.Auth,
 		Record: toCreate,
 	}
+	request.Name = trimDomain(toCreate.Name, domain)
 
 	response := createRes{}
 	err := makeRequest(CREATE+"/"+domain, request, &response)
@@ -69,7 +71,7 @@ func (p Api) CreateRecord(domain string, toCreate porkbun.Record) (string, error
 		return "", err
 	}
 
-	return response.Id, nil
+	return fmt.Sprint(response.Id), nil
 }
 
 func (p Api) DeleteRecord(domain string, id string) error {
@@ -96,4 +98,15 @@ func ignoreRecords(input []porkbun.Record) []porkbun.Record {
 	}
 
 	return records
+}
+
+// Trims a root domain from a longer subdomain. For example, trims
+// host.example.com to host. If the subdomain is example.com, then
+// returns an empty string
+func trimDomain(name string, domain string) string {
+	if name == domain {
+		return ""
+	}
+
+	return strings.Replace(name, "."+domain, "", 1)
 }
