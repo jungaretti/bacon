@@ -1,7 +1,9 @@
 package cmd
 
-import "bacon/pkg/client"
+import (
+	"bacon/pkg/dns"
+)
 
 type App struct {
-	Client client.Client
+	Provider dns.Provider
 }

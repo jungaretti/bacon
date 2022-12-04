@@ -25,6 +25,7 @@ func newRootCmd(app *App) *cobra.Command {
 	// Use command constructors to share one app
 	root.AddCommand(newPingCmd(app))
 	root.AddCommand(newDeployCmd(app))
+	root.AddCommand(newPrintCmd(app))
 
 	return root
 }

@@ -1,14 +1,14 @@
 module bacon
 
-go 1.18
+go 1.19
 
 require (
-	github.com/spf13/cobra v1.3.0
-	github.com/subosito/gotenv v1.2.0
-	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
+	github.com/spf13/cobra v1.6.1
+	github.com/subosito/gotenv v1.4.1
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
-	github.com/inconshreveable/mousetrap v1.0.0 // indirect
+	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 )
