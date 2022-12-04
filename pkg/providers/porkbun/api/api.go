@@ -1,6 +1,9 @@
 package api
 
-import porkbun "bacon/pkg/providers/porkbun/record"
+import (
+	porkbun "bacon/pkg/providers/porkbun/record"
+	"strings"
+)
 
 const (
 	PING     string = "https://porkbun.com/api/json/v3/ping"
@@ -40,7 +43,8 @@ func (p Api) RetrieveRecords(domain string) ([]porkbun.Record, error) {
 		return nil, err
 	}
 
-	return response.Records, nil
+	records := ignoreRecords(response.Records)
+	return records, nil
 }
 
 func (p Api) CreateRecord(domain string, toCreate porkbun.Record) (string, error) {
@@ -76,4 +80,20 @@ func (p Api) DeleteRecord(domain string, id string) error {
 	}
 
 	return nil
+}
+
+func ignoreRecords(input []porkbun.Record) []porkbun.Record {
+	records := make([]porkbun.Record, 0)
+	for _, record := range input {
+		if record.Type == "NS" {
+			continue
+		}
+		if strings.HasPrefix(record.Name, "_acme-challenge") {
+			continue
+		}
+
+		records = append(records, record)
+	}
+
+	return records
 }
