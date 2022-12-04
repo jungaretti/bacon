@@ -50,6 +50,14 @@ func deploy(app *App, configFile string, shouldCreate bool, shouldDelete bool) e
 
 	added, removed := dns.DiffRecords(from, to)
 	if shouldDelete {
+		fmt.Println("Deleting", len(removed), "records...")
+		for _, record := range removed {
+			err := app.Provider.DeleteRecord(config.Domain, record)
+			if err != nil {
+				return fmt.Errorf("couldn't delete record: %v", err)
+			}
+			fmt.Println("-", record)
+		}
 	} else {
 		fmt.Println("Would delete", len(removed), "records:")
 		for _, record := range removed {
@@ -57,6 +65,14 @@ func deploy(app *App, configFile string, shouldCreate bool, shouldDelete bool) e
 		}
 	}
 	if shouldCreate {
+		fmt.Println("Creating", len(added), "records...")
+		for _, record := range added {
+			err := app.Provider.CreateRecord(config.Domain, record)
+			if err != nil {
+				return fmt.Errorf("couldn't create record: %v", err)
+			}
+			fmt.Println("-", record)
+		}
 	} else {
 		fmt.Println("Would create", len(added), "records:")
 		for _, record := range added {
@@ -64,6 +80,13 @@ func deploy(app *App, configFile string, shouldCreate bool, shouldDelete bool) e
 		}
 	}
 
+	if shouldCreate && shouldDelete {
+		fmt.Println("Deployment complete!")
+	} else if shouldCreate || shouldDelete {
+		fmt.Println("Partial deployment complete!")
+	} else {
+		fmt.Println("Mock deployment complete")
+	}
 	return nil
 }
 
