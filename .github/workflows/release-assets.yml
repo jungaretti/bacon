@@ -2,7 +2,7 @@ name: Release Assets
 
 on:
   release:
-    types: [created]
+    types: [published]
 
 jobs:
   release:
@@ -18,7 +18,7 @@ jobs:
             goos: windows
     steps:
       - uses: actions/checkout@v3
-      - uses: wangyoucao577/go-release-action@b3f2406d88324d0d89e7246ce26327b00174c46c # v1.28
+      - uses: wangyoucao577/go-release-action@8e2116aa9c424a511d927c3be0210853cbf78016 # v1.33
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           goos: ${{ matrix.goos }}
