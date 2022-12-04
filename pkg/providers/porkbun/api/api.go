@@ -59,6 +59,10 @@ func (p Api) CreateRecord(domain string, toCreate porkbun.Record) (string, error
 		Id int `json:"id"`
 	}
 
+	if isIgnored(toCreate) {
+		return "", fmt.Errorf("cannot create an ignored record: %s", toCreate)
+	}
+
 	request := createReq{
 		Auth:   p.Auth,
 		Record: toCreate,
@@ -84,13 +88,21 @@ func (p Api) DeleteRecord(domain string, id string) error {
 	return nil
 }
 
+func isIgnored(record porkbun.Record) bool {
+	if record.Type == "NS" {
+		return true
+	}
+	if strings.HasPrefix(record.Name, "_acme-challenge") {
+		return true
+	}
+
+	return false
+}
+
 func ignoreRecords(input []porkbun.Record) []porkbun.Record {
 	records := make([]porkbun.Record, 0)
 	for _, record := range input {
-		if record.Type == "NS" {
-			continue
-		}
-		if strings.HasPrefix(record.Name, "_acme-challenge") {
+		if isIgnored(record) {
 			continue
 		}
 
