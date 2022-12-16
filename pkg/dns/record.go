@@ -11,8 +11,7 @@ type Record interface {
 }
 
 func RecordEquals(l Record, r Record) bool {
-	equal := true
-	equal = equal && l.GetName() == r.GetName()
+	equal := l.GetName() == r.GetName()
 	equal = equal && l.GetType() == r.GetType()
 	equal = equal && l.GetTtl() == r.GetTtl()
 	equal = equal && l.GetData() == r.GetData()
