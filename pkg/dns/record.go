@@ -8,8 +8,6 @@ type Record interface {
 	GetType() string
 	GetTtl() string
 	GetData() string
-	Equals(Record) bool
-	Hash() string
 }
 
 func RecordEquals(l Record, r Record) bool {
