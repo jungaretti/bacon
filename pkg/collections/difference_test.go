@@ -2,9 +2,14 @@ package collections
 
 import "testing"
 
+const (
+	hello = "hello"
+	world = "world"
+)
+
 func TestSetDifferenceEmpty(t *testing.T) {
-	from := []string{"hello", "world"}
-	to := []string{"hello", "world"}
+	from := []string{hello, world}
+	to := []string{hello, world}
 
 	diff := SetDifferenceByHash(from, to, func(thing string) string { return thing })
 
@@ -14,8 +19,8 @@ func TestSetDifferenceEmpty(t *testing.T) {
 }
 
 func TestSetDifferenceAdded(t *testing.T) {
-	from := []string{"hello"}
-	to := []string{"hello", "world"}
+	from := []string{hello}
+	to := []string{hello, world}
 
 	diff := SetDifferenceByHash(from, to, func(thing string) string { return thing })
 
@@ -25,22 +30,22 @@ func TestSetDifferenceAdded(t *testing.T) {
 }
 
 func TestSetDifferenceRemoved(t *testing.T) {
-	from := []string{"hello", "world"}
-	to := []string{"hello"}
+	from := []string{hello, world}
+	to := []string{hello}
 
 	diff := SetDifferenceByHash(from, to, func(thing string) string { return thing })
 
 	if len(diff) != 1 {
 		t.Error("expected", 1, "actual", len(diff))
 	}
-	if diff[0] != "world" {
-		t.Error("expected", "world", "actual", diff[0])
+	if diff[0] != world {
+		t.Error("expected", world, "actual", diff[0])
 	}
 }
 
 func TestDiffElementsEmpty(t *testing.T) {
-	from := []string{"hello", "world"}
-	to := []string{"hello", "world"}
+	from := []string{hello, world}
+	to := []string{hello, world}
 
 	added, removed := DiffElementsByHash(from, to, func(thing string) string { return thing })
 
@@ -53,8 +58,8 @@ func TestDiffElementsEmpty(t *testing.T) {
 }
 
 func TestDiffElementsAdded(t *testing.T) {
-	from := []string{"hello"}
-	to := []string{"hello", "world"}
+	from := []string{hello}
+	to := []string{hello, world}
 
 	added, removed := DiffElementsByHash(from, to, func(thing string) string { return thing })
 
@@ -67,8 +72,8 @@ func TestDiffElementsAdded(t *testing.T) {
 }
 
 func TestDiffElementsRemoved(t *testing.T) {
-	from := []string{"hello", "world"}
-	to := []string{"hello"}
+	from := []string{hello, world}
+	to := []string{hello}
 
 	added, removed := DiffElementsByHash(from, to, func(thing string) string { return thing })
 
