@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"bacon/pkg/collections"
 	"bacon/pkg/dns"
 	"fmt"
 	"io"
@@ -48,7 +49,7 @@ func deploy(app *App, configFile string, shouldCreate bool, shouldDelete bool) e
 		to[i] = record
 	}
 
-	added, removed := dns.DiffRecords(from, to)
+	added, removed := collections.DiffElementsByHash(from, to, dns.RecordHash)
 	if shouldDelete {
 		fmt.Println("Deleting", len(removed), "records...")
 		for _, record := range removed {
