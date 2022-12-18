@@ -10,9 +10,9 @@ const (
 func TestProvider(t *testing.T) {
 	provider := Provider{}
 
-	provider.Set(mockKey, mockKey)
+	provider.Set(mockKey, mockVal)
 
-	if provider.Read(mockKey) != mockKey {
+	if provider.Read(mockKey) != mockVal {
 		t.Error("value not found")
 	}
 }
