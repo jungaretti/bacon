@@ -9,6 +9,10 @@ type MockRecord struct {
 	Data string
 }
 
+func (r MockRecord) GetId() string {
+	return r.Name + r.Type
+}
+
 func (r MockRecord) GetName() string {
 	return r.Name
 }
@@ -26,3 +30,14 @@ func (r MockRecord) GetData() string {
 }
 
 var _ dns.Record = MockRecord{}
+
+func NewMockRecord(record dns.Record) MockRecord {
+	new := MockRecord{
+		Name: record.GetName(),
+		Type: record.GetType(),
+		Ttl:  record.GetTtl(),
+		Data: record.GetData(),
+	}
+
+	return new
+}
