@@ -12,13 +12,13 @@ func newPingCmd(app *App) *cobra.Command {
 		Short: "Check authentication status",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return ping(app)
+			return Ping(app)
 		},
 	}
 	return ping
 }
 
-func ping(app *App) error {
+func Ping(app *App) error {
 	err := app.Provider.CheckAuth()
 	if err != nil {
 		return err
