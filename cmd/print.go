@@ -14,13 +14,13 @@ func newPrintCmd(app *App) *cobra.Command {
 		Short: "Print existing records",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return print(app, args[0])
+			return Print(app, args[0])
 		},
 	}
 	return print
 }
 
-func print(app *App, domain string) error {
+func Print(app *App, domain string) error {
 	records, err := app.Provider.AllRecords(domain)
 	if err != nil {
 		return err
