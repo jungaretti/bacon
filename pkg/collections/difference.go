@@ -1,7 +1,7 @@
 package collections
 
-func SetDifferenceByHash[T any](from, to []T, hasher func(T) string) []T {
-	set := make(map[string]bool)
+func SetDifferenceByHash[T any, U comparable](from, to []T, hasher func(T) U) []T {
+	set := make(map[U]bool)
 
 	for _, element := range to {
 		set[hasher(element)] = true
@@ -16,7 +16,7 @@ func SetDifferenceByHash[T any](from, to []T, hasher func(T) string) []T {
 	return missing
 }
 
-func DiffElementsByHash[T any](from, to []T, hasher func(T) string) ([]T, []T) {
+func DiffElementsByHash[T any, U comparable](from, to []T, hasher func(T) U) ([]T, []T) {
 	added := SetDifferenceByHash(to, from, hasher)
 	removed := SetDifferenceByHash(from, to, hasher)
 	return added, removed

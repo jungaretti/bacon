@@ -1,5 +1,7 @@
 package dns
 
+import "strings"
+
 // DNS record according to the RFC 1035 spec.
 //
 // [RFC 1035]: https://www.rfc-editor.org/rfc/rfc1035
@@ -19,5 +21,10 @@ func RecordEquals(l Record, r Record) bool {
 }
 
 func RecordHash(r Record) string {
-	return r.GetName() + r.GetType() + r.GetTtl() + r.GetData()
+	return strings.Join([]string{
+		r.GetName(),
+		r.GetType(),
+		r.GetTtl(),
+		r.GetData(),
+	}, "-")
 }
