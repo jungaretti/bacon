@@ -22,7 +22,7 @@ func newDeployCmd(app *App) *cobra.Command {
 creating new records.`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return deploy(app, args[0], shouldCreate, shouldDelete)
+			return Deploy(app, args[0], shouldCreate, shouldDelete)
 		},
 	}
 
@@ -32,7 +32,7 @@ creating new records.`,
 	return deploy
 }
 
-func deploy(app *App, configFile string, shouldCreate bool, shouldDelete bool) error {
+func Deploy(app *App, configFile string, shouldCreate bool, shouldDelete bool) error {
 	config, err := readConfig(configFile)
 	if err != nil {
 		return fmt.Errorf("reading config: %v", err)
