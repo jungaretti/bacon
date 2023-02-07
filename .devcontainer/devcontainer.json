@@ -1,7 +1,7 @@
 {
   "image": "mcr.microsoft.com/devcontainers/base:debian",
   "remoteUser": "vscode",
-  "postCreateCommand": "./.devcontainer/scripts/postcreate.sh",
+  "postCreateCommand": ".devcontainer/postcreate.sh",
   "features": {
     "ghcr.io/devcontainers/features/go:1": {
       "version": "1.19"
