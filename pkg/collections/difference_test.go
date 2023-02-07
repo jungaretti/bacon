@@ -43,11 +43,11 @@ func TestSetDifferenceRemoved(t *testing.T) {
 	}
 }
 
-func TestDiffElementsEmpty(t *testing.T) {
+func TestAddedRemovedEmpty(t *testing.T) {
 	from := []string{hello, world}
 	to := []string{hello, world}
 
-	added, removed := DiffElementsByHash(from, to, func(thing string) string { return thing })
+	added, removed := AddedRemovedByHash(from, to, func(thing string) string { return thing })
 
 	if len(added) != 0 {
 		t.Error("expected", 0, "actual", len(added))
@@ -57,11 +57,11 @@ func TestDiffElementsEmpty(t *testing.T) {
 	}
 }
 
-func TestDiffElementsAdded(t *testing.T) {
+func TestAddedRemovedAdd(t *testing.T) {
 	from := []string{hello}
 	to := []string{hello, world}
 
-	added, removed := DiffElementsByHash(from, to, func(thing string) string { return thing })
+	added, removed := AddedRemovedByHash(from, to, func(thing string) string { return thing })
 
 	if len(added) != 1 {
 		t.Error("expected", 0, "actual", len(added))
@@ -71,11 +71,11 @@ func TestDiffElementsAdded(t *testing.T) {
 	}
 }
 
-func TestDiffElementsRemoved(t *testing.T) {
+func TestAddedRemovedRemove(t *testing.T) {
 	from := []string{hello, world}
 	to := []string{hello}
 
-	added, removed := DiffElementsByHash(from, to, func(thing string) string { return thing })
+	added, removed := AddedRemovedByHash(from, to, func(thing string) string { return thing })
 
 	if len(added) != 0 {
 		t.Error("expected", 0, "actual", len(added))

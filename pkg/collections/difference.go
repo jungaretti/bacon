@@ -16,7 +16,7 @@ func SetDifferenceByHash[T any, U comparable](from, to []T, hasher func(T) U) []
 	return missing
 }
 
-func DiffElementsByHash[T any, U comparable](from, to []T, hasher func(T) U) ([]T, []T) {
+func AddedRemovedByHash[T any, U comparable](from, to []T, hasher func(T) U) ([]T, []T) {
 	added := SetDifferenceByHash(to, from, hasher)
 	removed := SetDifferenceByHash(from, to, hasher)
 	return added, removed

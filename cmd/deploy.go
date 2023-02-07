@@ -49,7 +49,7 @@ func deploy(app *App, configFile string, shouldCreate bool, shouldDelete bool) e
 		to[i] = record
 	}
 
-	added, removed := collections.DiffElementsByHash(from, to, dns.RecordHash)
+	added, removed := collections.AddedRemovedByHash(from, to, dns.RecordHash)
 	if shouldDelete {
 		fmt.Println("Deleting", len(removed), "records...")
 		for _, record := range removed {
