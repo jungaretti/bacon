@@ -1,4 +1,4 @@
-# Bacon
+# Bacon 🥓
 
 Bacon deploys your DNS records from simple config files. You can use Bacon to deploy, backup, and restore your DNS records. Bored already? Let me try again...
 
