@@ -42,10 +42,11 @@ Sign into Porkbun's website and [generate a new API keyset](https://porkbun.com/
 
 ## Usage
 
-Bacon only offers two subcommands:
+Bacon offers a few commands to help you deploy and save your DNS records:
 
 - `ping` to double-check your API keys (stored in environment variables)
 - `deploy <config>` to deploy DNS records from a YAML config file
+- `print <domain>` to print your DNS records in YAML format
 
 ### Commands
 
@@ -53,47 +54,22 @@ Bacon only offers two subcommands:
 
 Verifies your API keys by pinging Porkbun.
 
-#### `deploy`
+#### `deploy <config>`
 
-Deploys records from a domain's config file by deleting unknown records and creating new records. Add `--delete` to delete outdated records and `--create` to create new records.
+Deploys records from a domain's config file by deleting unknown records and creating new records. Defaults to a dry-run mode that doesn't modify your DNS records.
 
-### Modes
+##### Parameters
 
-#### Dry Run
+- `--delete` disable dry-run deletions and delete outdated records
+- `--create` disable dry-run creations and create new records
 
-Bacon defaults to its dry-run mode. Execute `bacon deploy` without any flags to preview what it'll do:
+#### `print <domain>`
 
-```bash
-bacon deploy dns/example-com.yml
-```
+Prints records for a domain in YAML format.
 
-```
-Would delete 2 records:
-- {225823316 example.com A 123.456.789.112 600 0 }
-- {225823318 www.example.com A 123.456.789.112 600 0 }
-Would create 2 records:
-- { example.com A 789.112.123.456 600 0 }
-- { www.example.com A 789.112.123.456 600 0 }
-Mock deployment complete
-```
+##### Notes
 
-#### Modify
-
-Use the `--delete` flag to delete outdated records and the `--create` flag to create new records:
-
-```bash
-bacon deploy dns/example-com.yml --delete --create
-```
-
-```txt
-Deleting 2 records...
-- {225823316 example.com A 123.456.789.112 600 0 }
-- {225823318 www.example.com A 123.456.789.112 600 0 }
-Creating 2 records...
-- 225823565
-- 225823566
-Deployment complete!
-```
+Use `>` to redirect output to a Bacon config file. For example, `bacon print example.com > example.com.yml`
 
 ## Configuration
 
