@@ -1,0 +1,13 @@
+name: End-to-end integration test
+
+on:
+  workflow_dispatch:
+    
+jobs:
+  test:
+    name: Run end-to-end test
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo Hello world
+        shell: bash
