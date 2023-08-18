@@ -1,8 +1,6 @@
 # Bacon 🥓
 
-Bacon deploys your DNS records from simple config files. You can use Bacon to deploy, backup, and restore your DNS records. Bored already? Let me try again...
-
-Bacon is a peek into the future of DNS record management. It lets you codify your DNS records and deploy them with GitHub Actions. You can use issues, pull requests, and `git blame` to keep track of how and why your DNS records were created. In an emergency, you can use `git revert` to undo recent changes and fix your website.
+Bacon deploys your DNS records from simple config files. You can use Bacon to deploy, backup, and restore your DNS records.
 
 ![Demo of bacon deploy](https://user-images.githubusercontent.com/19893438/167231076-2f99e0ce-9ed7-40e4-9b1e-fc2fd578cd0f.gif)
 
