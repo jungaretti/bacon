@@ -8,6 +8,5 @@ jobs:
     name: Run end-to-end test
     runs-on: ubuntu-latest
     steps:
-      - run: |
-          echo Hello world
-        shell: bash
+      - uses: actions/checkout@v3
+      - run: ./scripts/integration-test.sh
