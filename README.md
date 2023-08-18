@@ -20,21 +20,25 @@ The easiest way to use Bacon is with the [Bacon Deploy Action](https://github.co
    - [Go](https://go.dev/dl/)
    - [GNU Make](https://ftp.gnu.org/gnu/make/)
 2. Clone this repo and use `make` to build `bin/bacon`
+3. Authenticate with your DNS provider (see below)
 
 ### Authentication
 
 Bacon only works with some DNS providers. Pull requests to add new providers are always welcome!
 
+`bacon` reads secrets from the following sources (in order of precedence):
+
+1. `.env` file in the current directory (see `.env.example` for an example)
+2. Environment variables
+
 #### Porkbun
 
 Sign into Porkbun's website and [generate a new API keyset](https://porkbun.com/account/api) for your account. Read the ["Generating API Keys" section of Porkbun's docs](https://kb.porkbun.com/article/190-getting-started-with-the-porkbun-dns-api) for more detailed instructions.
 
-Export two environment variables with your Porkbun API keys:
+##### Required Secrets
 
-```bash
-export PORKBUN_API_KEY="pk1_123abc789xyz"
-export PORKBUN_SECRET_KEY="sk1_xyz123abc789"
-```
+- `PORKBUN_API_KEY`
+- `PORKBUN_SECRET_KEY`
 
 ## Usage
 
