@@ -1,8 +1,6 @@
 # Bacon 🥓
 
-Bacon deploys your DNS records from simple config files. You can use Bacon to deploy, backup, and restore your DNS records. Bored already? Let me try again...
-
-Bacon is a peek into the future of DNS record management. It lets you codify your DNS records and deploy them with GitHub Actions. You can use issues, pull requests, and `git blame` to keep track of how and why your DNS records were created. In an emergency, you can use `git revert` to undo recent changes and fix your website.
+Bacon deploys your DNS records from simple config files. You can use Bacon to deploy, backup, and restore your DNS records.
 
 ![Demo of bacon deploy](https://user-images.githubusercontent.com/19893438/167231076-2f99e0ce-9ed7-40e4-9b1e-fc2fd578cd0f.gif)
 
@@ -22,28 +20,33 @@ The easiest way to use Bacon is with the [Bacon Deploy Action](https://github.co
    - [Go](https://go.dev/dl/)
    - [GNU Make](https://ftp.gnu.org/gnu/make/)
 2. Clone this repo and use `make` to build `bin/bacon`
+3. Authenticate with your DNS provider (see below)
 
 ### Authentication
 
 Bacon only works with some DNS providers. Pull requests to add new providers are always welcome!
 
+`bacon` reads secrets from the following sources (in order of precedence):
+
+1. `.env` file in the current directory (see `.env.example` for an example)
+2. Environment variables
+
 #### Porkbun
 
 Sign into Porkbun's website and [generate a new API keyset](https://porkbun.com/account/api) for your account. Read the ["Generating API Keys" section of Porkbun's docs](https://kb.porkbun.com/article/190-getting-started-with-the-porkbun-dns-api) for more detailed instructions.
 
-Export two environment variables with your Porkbun API keys:
+##### Required Secrets
 
-```bash
-export PORKBUN_API_KEY="pk1_123abc789xyz"
-export PORKBUN_SECRET_KEY="sk1_xyz123abc789"
-```
+- `PORKBUN_API_KEY`
+- `PORKBUN_SECRET_KEY`
 
 ## Usage
 
-Bacon only offers two subcommands:
+Bacon offers a few commands to help you deploy and save your DNS records:
 
 - `ping` to double-check your API keys (stored in environment variables)
 - `deploy <config>` to deploy DNS records from a YAML config file
+- `print <domain>` to print your DNS records in YAML format
 
 ### Commands
 
@@ -51,47 +54,22 @@ Bacon only offers two subcommands:
 
 Verifies your API keys by pinging Porkbun.
 
-#### `deploy`
+#### `deploy <config>`
 
-Deploys records from a domain's config file by deleting unknown records and creating new records. Add `--delete` to delete outdated records and `--create` to create new records.
+Deploys records from a domain's config file by deleting unknown records and creating new records. Defaults to a dry-run mode that doesn't modify your DNS records.
 
-### Modes
+##### Parameters
 
-#### Dry Run
+- `--delete` disable dry-run deletions and delete outdated records
+- `--create` disable dry-run creations and create new records
 
-Bacon defaults to its dry-run mode. Execute `bacon deploy` without any flags to preview what it'll do:
+#### `print <domain>`
 
-```bash
-bacon deploy dns/example-com.yml
-```
+Prints records for a domain in YAML format.
 
-```
-Would delete 2 records:
-- {225823316 example.com A 123.456.789.112 600 0 }
-- {225823318 www.example.com A 123.456.789.112 600 0 }
-Would create 2 records:
-- { example.com A 789.112.123.456 600 0 }
-- { www.example.com A 789.112.123.456 600 0 }
-Mock deployment complete
-```
+##### Notes
 
-#### Modify
-
-Use the `--delete` flag to delete outdated records and the `--create` flag to create new records:
-
-```bash
-bacon deploy dns/example-com.yml --delete --create
-```
-
-```txt
-Deleting 2 records...
-- {225823316 example.com A 123.456.789.112 600 0 }
-- {225823318 www.example.com A 123.456.789.112 600 0 }
-Creating 2 records...
-- 225823565
-- 225823566
-Deployment complete!
-```
+Use `>` to redirect output to a Bacon config file. For example, `bacon print example.com > example.com.yml`
 
 ## Configuration
 
