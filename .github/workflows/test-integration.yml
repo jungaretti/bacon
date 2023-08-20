@@ -1,8 +1,11 @@
-name: End-to-end integration test
+name: Integration test
 
 on:
+  pull_request:
+  schedule:
+    - cron: '00 2 * * *'
   workflow_dispatch:
-    
+
 jobs:
   test:
     name: Run end-to-end test
