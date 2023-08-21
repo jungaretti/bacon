@@ -25,3 +25,7 @@ setup() {
 
     ./bin/bacon deploy --delete --create config.example.yml
 }
+
+@test "print" {
+    ./bin/bacon print plantbasedbacon.xyz
+}
