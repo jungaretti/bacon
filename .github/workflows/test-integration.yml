@@ -13,3 +13,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - run: ./test/test.bash
+        env:
+          PORKBUN_API_KEY: ${{ secrets.PORKBUN_API_KEY }}
+          PORKBUN_SECRET_KEY: ${{ secrets.PORKBUN_SECRET_KEY }}
