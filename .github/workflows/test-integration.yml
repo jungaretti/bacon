@@ -1,13 +1,20 @@
-name: End-to-end integration test
+name: Integration test
 
 on:
+  pull_request:
+  schedule:
+    - cron: '00 2 * * *'
   workflow_dispatch:
-    
+
 jobs:
   test:
     name: Run end-to-end test
     runs-on: ubuntu-latest
     steps:
-      - run: |
-          echo Hello world
-        shell: bash
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+      - run: ./test/bats/bin/bats test/test.bats
+        env:
+          PORKBUN_API_KEY: ${{ secrets.PORKBUN_API_KEY }}
+          PORKBUN_SECRET_KEY: ${{ secrets.PORKBUN_SECRET_KEY }}
