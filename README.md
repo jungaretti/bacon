@@ -104,6 +104,23 @@ records:
 - `domain`
 - `records`
 
+## Contributing
+
+PRs that add new DNS providers or address [open issues](https://github.com/jungaretti/bacon/issues) are always welcome.
+
+### Development
+
+```bash
+# Build Bacon
+make build
+
+# Run unit tests
+make test-unit
+
+# Run system tests (auth required)
+make test-system
+```
+
 ## Built With
 
 - [Cobra](https://cobra.dev/)
