@@ -1,4 +1,4 @@
-name: Release Assets
+name: Build and release version
 
 on:
   release:
@@ -6,7 +6,7 @@ on:
 
 jobs:
   release:
-    name: Build and Release
+    name: Build and release
     runs-on: ubuntu-latest
     strategy:
       matrix:
