@@ -2,6 +2,8 @@
 
 Bacon deploys your DNS records from simple config files. You can use Bacon to deploy, backup, and restore your DNS records.
 
+You can use Bacon with [Porkbun](https://porkbun.com/account/api).
+
 ![Demo of bacon deploy](https://user-images.githubusercontent.com/19893438/167231076-2f99e0ce-9ed7-40e4-9b1e-fc2fd578cd0f.gif)
 
 ## Getting Started
