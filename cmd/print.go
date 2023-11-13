@@ -10,7 +10,7 @@ import (
 
 func newPrintCmd(app *App) *cobra.Command {
 	print := &cobra.Command{
-		Use:   "print",
+		Use:   "print <domain>",
 		Short: "Print existing records",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
