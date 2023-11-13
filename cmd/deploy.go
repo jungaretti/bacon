@@ -16,7 +16,7 @@ func newDeployCmd(app *App) *cobra.Command {
 	var shouldDelete bool
 
 	deploy := &cobra.Command{
-		Use:   "deploy <config>",
+		Use:   "deploy <config-file>",
 		Short: "Deploy records from a config file",
 		Long: `Deploys DNS records from a YAML config file by deleting existing records and
 creating new records.`,
