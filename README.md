@@ -6,7 +6,7 @@ Bacon deploys your DNS records from YAML config files to [Porkbun](https://porkb
 
 ## Getting Started
 
-The easiest way to use Bacon is with the [Bacon Deploy Action](https://github.com/jungaretti/bacon-deploy-action). All you need to do is create a new workflow, `uses` the action, and add some parameters. If you want to use Bacon on your own computer, keep reading!
+You can use Bacon locally or in a GitHub Actions workflow. For local use, download the latest release from GitHub or build it yourself. For GitHub Actions, use the [Bacon Deploy Action](https://github.com/jungaretti/bacon-deploy-action) in your workflow.
 
 ### Installation
 
