@@ -1,8 +1,6 @@
 # Bacon 🥓
 
-Bacon deploys your DNS records from simple config files. You can use Bacon to deploy, backup, and restore your DNS records.
-
-You can use Bacon with [Porkbun](https://porkbun.com/account/api).
+Bacon deploys your DNS records from YAML config files to [Porkbun](https://porkbun.com/api/json/v3/documentation). You can use Bacon to deploy, backup, and restore your DNS records.
 
 ![Demo of bacon deploy](https://user-images.githubusercontent.com/19893438/167231076-2f99e0ce-9ed7-40e4-9b1e-fc2fd578cd0f.gif)
 
@@ -26,21 +24,9 @@ The easiest way to use Bacon is with the [Bacon Deploy Action](https://github.co
 
 ### Authentication
 
-Bacon only works with some DNS providers. Pull requests to add new providers are always welcome!
+Sign into Porkbun and [generate a new API keyset](https://porkbun.com/account/api) for your account. Read the ["Generating API Keys" section of Porkbun's docs](https://kb.porkbun.com/article/190-getting-started-with-the-porkbun-dns-api) for more detailed instructions. Be sure to enable API access for the domain(s) that you would like to manage with Bacon.
 
-`bacon` reads secrets from the following sources (in order of precedence):
-
-1. `.env` file in the current directory (see `.env.example` for an example)
-2. Environment variables
-
-#### Porkbun
-
-Sign into Porkbun's website and [generate a new API keyset](https://porkbun.com/account/api) for your account. Read the ["Generating API Keys" section of Porkbun's docs](https://kb.porkbun.com/article/190-getting-started-with-the-porkbun-dns-api) for more detailed instructions.
-
-##### Required Secrets
-
-- `PORKBUN_API_KEY`
-- `PORKBUN_SECRET_KEY`
+Next, export your `PORKBUN_API_KEY` and `PORKBUN_SECRET_KEY` as environment variables. You can also use a `.env` file in the current directory (see [`.env.example`](https://github.com/jungaretti/bacon/blob/main/.env.example) for an example).
 
 ## Usage
 
@@ -106,11 +92,7 @@ records:
 - `domain`
 - `records`
 
-## Contributing
-
-PRs that add new DNS providers or address [open issues](https://github.com/jungaretti/bacon/issues) are always welcome.
-
-### Development
+## Development
 
 ```bash
 # Build Bacon
