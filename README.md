@@ -28,7 +28,7 @@ Sign into Porkbun and [generate a new API keyset](https://porkbun.com/account/ap
 
 Next, `export` the `PORKBUN_API_KEY` and `PORKBUN_SECRET_KEY` environment variables or add them to an `.env` file. Bacon uses these 2 environment variables to authenticate with Porkbun. If the current directory contains an `.env` file, then Bacon will load its contents into environment variables. See [`.env.example`](https://github.com/jungaretti/bacon/blob/main/.env.example) for an example.
 
-You can use `bacon ping` to check your authentication configuration.
+You can use [`bacon ping`](#ping) to check your authentication configuration.
 
 ## Usage
 
