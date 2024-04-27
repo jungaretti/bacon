@@ -1,8 +1,9 @@
 package cmd
 
 import (
-	"bacon/pkg/dns"
+	"bacon/pkg/config"
 	"fmt"
+	"strconv"
 
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
@@ -26,12 +27,20 @@ func print(app *App, domain string) error {
 		return err
 	}
 
-	configRecords := make([]dns.ConfigRecord, len(records))
+	configRecords := make([]config.Record, len(records))
 	for i, record := range records {
-		configRecords[i] = dns.ConfigFromRecord(record)
+		// Sets ttl to nil if Atoi fails
+		ttl, _ := strconv.Atoi(record.GetTtl())
+
+		configRecords[i] = config.Record{
+			Name: record.GetName(),
+			Type: record.GetType(),
+			Ttl:  &ttl,
+			Data: record.GetData(),
+		}
 	}
 
-	config := dns.Config{
+	config := config.Config{
 		Domain:  domain,
 		Records: configRecords,
 	}
