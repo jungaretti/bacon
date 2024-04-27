@@ -26,7 +26,9 @@ You can use Bacon locally or in a GitHub Actions workflow. For local use, downlo
 
 Sign into Porkbun and [generate a new API keyset](https://porkbun.com/account/api) for your account. Read the ["Generating API Keys" section of Porkbun's docs](https://kb.porkbun.com/article/190-getting-started-with-the-porkbun-dns-api) for more detailed instructions. Be sure to enable API access for the domain(s) that you would like to manage with Bacon.
 
-Bacon uses the `PORKBUN_API_KEY` and `PORKBUN_SECRET_KEY` environment variables to authenticate with Porkbun. You must `export` these environment variables in your shell config or store then in an `.env` file. If the current directory contains an `.env` file, then Bacon will load its contents into environment variables. See [`.env.example`](https://github.com/jungaretti/bacon/blob/main/.env.example) for an example.
+Next, `export` the `PORKBUN_API_KEY` and `PORKBUN_SECRET_KEY` environment variables or add them to an `.env` file. Bacon uses these 2 environment variables to authenticate with Porkbun. If the current directory contains an `.env` file, then Bacon will load its contents into environment variables. See [`.env.example`](https://github.com/jungaretti/bacon/blob/main/.env.example) for an example.
+
+You can use `bacon ping` to check your authentication configuration.
 
 ## Usage
 
