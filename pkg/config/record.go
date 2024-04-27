@@ -3,7 +3,6 @@ package config
 import (
 	"bacon/pkg/dns"
 	"fmt"
-	"strconv"
 )
 
 type Record struct {
@@ -34,14 +33,3 @@ func (r Record) GetData() string {
 }
 
 var _ dns.Record = Record{}
-
-func ConfigFromRecord(r dns.Record) Record {
-	ttl, _ := strconv.Atoi(r.GetTtl())
-
-	return Record{
-		Name: r.GetName(),
-		Type: r.GetType(),
-		Ttl:  &ttl,
-		Data: r.GetData(),
-	}
-}
