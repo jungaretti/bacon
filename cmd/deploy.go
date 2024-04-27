@@ -5,11 +5,8 @@ import (
 	"bacon/pkg/config"
 	"bacon/pkg/dns"
 	"fmt"
-	"io"
-	"os"
 
 	"github.com/spf13/cobra"
-	"gopkg.in/yaml.v3"
 )
 
 func newDeployCmd(app *App) *cobra.Command {
@@ -34,7 +31,7 @@ creating new records.`,
 }
 
 func deploy(app *App, configFile string, shouldCreate bool, shouldDelete bool) error {
-	config, err := readConfig(configFile)
+	config, err := config.ReadFile(configFile)
 	if err != nil {
 		return fmt.Errorf("reading config: %v", err)
 	}
@@ -90,29 +87,4 @@ func deploy(app *App, configFile string, shouldCreate bool, shouldDelete bool) e
 		fmt.Println("Mock deployment complete")
 	}
 	return nil
-}
-
-func readConfig(configFile string) (*config.Config, error) {
-	file, err := os.Open(configFile)
-	if err != nil {
-		return nil, err
-	}
-
-	raw, err := io.ReadAll(file)
-	if err != nil {
-		return nil, err
-	}
-
-	err = file.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	config := config.Config{}
-	err = yaml.Unmarshal(raw, &config)
-	if err != nil {
-		return nil, err
-	}
-
-	return &config, nil
 }
