@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"bacon/pkg/dns"
+	"bacon/pkg/config"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -26,12 +26,12 @@ func print(app *App, domain string) error {
 		return err
 	}
 
-	configRecords := make([]dns.ConfigRecord, len(records))
+	configRecords := make([]config.ConfigRecord, len(records))
 	for i, record := range records {
-		configRecords[i] = dns.ConfigFromRecord(record)
+		configRecords[i] = config.ConfigFromRecord(record)
 	}
 
-	config := dns.Config{
+	config := config.Config{
 		Domain:  domain,
 		Records: configRecords,
 	}

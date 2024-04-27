@@ -1,14 +1,10 @@
-package dns
+package config
 
 import (
+	"bacon/pkg/dns"
 	"fmt"
 	"strconv"
 )
-
-type Config struct {
-	Domain  string         `yaml:"domain"`
-	Records []ConfigRecord `yaml:"records"`
-}
 
 type ConfigRecord struct {
 	Name string `yaml:"host"`
@@ -37,9 +33,9 @@ func (r ConfigRecord) GetData() string {
 	return r.Data
 }
 
-var _ Record = ConfigRecord{}
+var _ dns.Record = ConfigRecord{}
 
-func ConfigFromRecord(r Record) ConfigRecord {
+func ConfigFromRecord(r dns.Record) ConfigRecord {
 	ttl, _ := strconv.Atoi(r.GetTtl())
 
 	return ConfigRecord{

@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"bacon/pkg/collections"
+	"bacon/pkg/config"
 	"bacon/pkg/dns"
 	"fmt"
 	"io"
@@ -91,7 +92,7 @@ func deploy(app *App, configFile string, shouldCreate bool, shouldDelete bool) e
 	return nil
 }
 
-func readConfig(configFile string) (*dns.Config, error) {
+func readConfig(configFile string) (*config.Config, error) {
 	file, err := os.Open(configFile)
 	if err != nil {
 		return nil, err
@@ -107,7 +108,7 @@ func readConfig(configFile string) (*dns.Config, error) {
 		return nil, err
 	}
 
-	config := dns.Config{}
+	config := config.Config{}
 	err = yaml.Unmarshal(raw, &config)
 	if err != nil {
 		return nil, err
