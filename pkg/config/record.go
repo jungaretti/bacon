@@ -6,22 +6,22 @@ import (
 	"strconv"
 )
 
-type ConfigRecord struct {
+type Record struct {
 	Name string `yaml:"host"`
 	Type string `yaml:"type"`
 	Ttl  *int   `yaml:"ttl"`
 	Data string `yaml:"content"`
 }
 
-func (r ConfigRecord) GetName() string {
+func (r Record) GetName() string {
 	return r.Name
 }
 
-func (r ConfigRecord) GetType() string {
+func (r Record) GetType() string {
 	return r.Type
 }
 
-func (r ConfigRecord) GetTtl() string {
+func (r Record) GetTtl() string {
 	if r.Ttl == nil {
 		return ""
 	}
@@ -29,16 +29,16 @@ func (r ConfigRecord) GetTtl() string {
 	return fmt.Sprint(*r.Ttl)
 }
 
-func (r ConfigRecord) GetData() string {
+func (r Record) GetData() string {
 	return r.Data
 }
 
-var _ dns.Record = ConfigRecord{}
+var _ dns.Record = Record{}
 
-func ConfigFromRecord(r dns.Record) ConfigRecord {
+func ConfigFromRecord(r dns.Record) Record {
 	ttl, _ := strconv.Atoi(r.GetTtl())
 
-	return ConfigRecord{
+	return Record{
 		Name: r.GetName(),
 		Type: r.GetType(),
 		Ttl:  &ttl,

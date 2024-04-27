@@ -26,7 +26,7 @@ func print(app *App, domain string) error {
 		return err
 	}
 
-	configRecords := make([]config.ConfigRecord, len(records))
+	configRecords := make([]config.Record, len(records))
 	for i, record := range records {
 		configRecords[i] = config.ConfigFromRecord(record)
 	}
