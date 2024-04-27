@@ -4,7 +4,6 @@ import (
 	"bacon/pkg/dns"
 	"bacon/pkg/providers/porkbun/api"
 	"bacon/pkg/providers/porkbun/record"
-	"bacon/pkg/secrets"
 	"fmt"
 )
 
@@ -62,12 +61,12 @@ func (p PorkProvider) DeleteRecord(domain string, toDelete dns.Record) error {
 	return p.Api.DeleteRecord(domain, target.Id)
 }
 
-func NewPorkbunProvider(secretsProvider secrets.Provider) dns.Provider {
+func NewPorkbunProvider(apiKey, secretApiKey string) dns.Provider {
 	return &PorkProvider{
 		Api: api.Api{
 			Auth: api.Auth{
-				ApiKey:       secretsProvider.Read(secrets.PorkbunApiKey),
-				SecretApiKey: secretsProvider.Read(secrets.PorkbunSecretKey),
+				ApiKey:       apiKey,
+				SecretApiKey: secretApiKey,
 			},
 		},
 	}
