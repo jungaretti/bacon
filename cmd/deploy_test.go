@@ -19,6 +19,9 @@ records:
       ttl: 600
       content: pixie.porkbun.com
 `)
+	if err != nil {
+		t.Fatal("could not seed config to temp file", err)
+	}
 
 	provider := console.NewConsoleProvider()
 	mockApp := &App{
