@@ -7,10 +7,10 @@ import (
 )
 
 const (
-	PING     string = "https://porkbun.com/api/json/v3/ping"
-	RETRIEVE string = "https://porkbun.com/api/json/v3/dns/retrieve"
-	CREATE   string = "https://porkbun.com/api/json/v3/dns/create"
-	DELETE   string = "https://porkbun.com/api/json/v3/dns/delete"
+	PING     string = "https://api.porkbun.com/api/json/v3/ping"
+	RETRIEVE string = "https://api.porkbun.com/api/json/v3/dns/retrieve"
+	CREATE   string = "https://api.porkbun.com/api/json/v3/dns/create"
+	DELETE   string = "https://api.porkbun.com/api/json/v3/dns/delete"
 )
 
 type Api struct {
