@@ -11,6 +11,17 @@ type PorkProvider struct {
 	Api api.Api
 }
 
+func NewPorkbunProvider(apiKey, secretApiKey string) dns.Provider {
+	return &PorkProvider{
+		Api: api.Api{
+			Auth: api.Auth{
+				ApiKey:       apiKey,
+				SecretApiKey: secretApiKey,
+			},
+		},
+	}
+}
+
 func (p PorkProvider) CheckAuth() error {
 	return p.Api.Ping()
 }
@@ -59,15 +70,4 @@ func (p PorkProvider) DeleteRecord(domain string, toDelete dns.Record) error {
 	}
 
 	return p.Api.DeleteRecord(domain, target.Id)
-}
-
-func NewPorkbunProvider(apiKey, secretApiKey string) dns.Provider {
-	return &PorkProvider{
-		Api: api.Api{
-			Auth: api.Auth{
-				ApiKey:       apiKey,
-				SecretApiKey: secretApiKey,
-			},
-		},
-	}
 }

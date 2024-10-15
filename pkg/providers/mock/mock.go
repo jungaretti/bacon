@@ -5,11 +5,17 @@ import (
 	"fmt"
 )
 
-type ConsoleProvider struct {
+type MockProvider struct {
 	records map[string]dns.Record
 }
 
-func (c ConsoleProvider) AllRecords(domain string) ([]dns.Record, error) {
+func NewMockProvider() dns.Provider {
+	return &MockProvider{
+		records: make(map[string]dns.Record),
+	}
+}
+
+func (c MockProvider) AllRecords(domain string) ([]dns.Record, error) {
 	var result []dns.Record
 	for _, record := range c.records {
 		result = append(result, record)
@@ -17,30 +23,22 @@ func (c ConsoleProvider) AllRecords(domain string) ([]dns.Record, error) {
 	return result, nil
 }
 
-func (c ConsoleProvider) CheckAuth() error {
+func (c MockProvider) CheckAuth() error {
 	return nil
 }
 
-func (c ConsoleProvider) CreateRecord(domain string, record dns.Record) error {
+func (c MockProvider) CreateRecord(domain string, record dns.Record) error {
 	c.records[recordId(record)] = record
 	return nil
 }
 
-func (c ConsoleProvider) DeleteRecord(domain string, record dns.Record) error {
+func (c MockProvider) DeleteRecord(domain string, record dns.Record) error {
 	if _, ok := c.records[recordId(record)]; !ok {
 		return fmt.Errorf("record not found")
 	}
 
 	delete(c.records, recordId(record))
 	return nil
-}
-
-var _ dns.Provider = ConsoleProvider{}
-
-func NewConsoleProvider() dns.Provider {
-	return &ConsoleProvider{
-		records: make(map[string]dns.Record),
-	}
 }
 
 func recordId(record dns.Record) string {
