@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"bacon/pkg/providers/console"
+	console "bacon/pkg/providers/mock"
 	"os"
 	"testing"
 )
@@ -23,7 +23,7 @@ records:
 		t.Fatal("could not seed config to temp file", err)
 	}
 
-	provider := console.NewConsoleProvider()
+	provider := console.NewMockProvider()
 	mockApp := &App{
 		Provider: provider,
 	}
