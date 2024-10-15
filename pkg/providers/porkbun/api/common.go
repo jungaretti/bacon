@@ -1,10 +1,11 @@
 package api
 
 import (
-	"bacon/pkg/network"
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
+	"net/http"
 )
 
 type checkable interface {
@@ -27,9 +28,17 @@ func (r baseRes) checkStatus() error {
 var _ checkable = baseRes{}
 
 func makeRequest(url string, req interface{}, out checkable) error {
-	res, err := network.PostJson(url, req)
+	jsonData, err := json.Marshal(req)
+	if err != nil {
+		return err
+	}
+
+	res, err := http.Post(url, "application/json", bytes.NewReader(jsonData))
 	if err != nil {
 		return fmt.Errorf("making POST request: %v", err)
+	}
+	if res.StatusCode < 200 || res.StatusCode >= 300 {
+		return fmt.Errorf("received non-success status code: %d", res.StatusCode)
 	}
 
 	body, err := io.ReadAll(res.Body)
