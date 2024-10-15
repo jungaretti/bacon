@@ -28,12 +28,15 @@ func (r baseRes) checkStatus() error {
 var _ checkable = baseRes{}
 
 func makeRequest(url string, req interface{}, out checkable) error {
-	res, err := postJson(url, req)
+	jsonData, err := json.Marshal(req)
+	if err != nil {
+		return err
+	}
+
+	res, err := http.Post(url, "application/json", bytes.NewReader(jsonData))
 	if err != nil {
 		return fmt.Errorf("making POST request: %v", err)
 	}
-	defer res.Body.Close()
-
 	if res.StatusCode < 200 || res.StatusCode >= 300 {
 		return fmt.Errorf("received non-success status code: %d", res.StatusCode)
 	}
@@ -57,13 +60,4 @@ func makeRequest(url string, req interface{}, out checkable) error {
 	}
 
 	return nil
-}
-
-func postJson(url string, body interface{}) (*http.Response, error) {
-	jsonData, err := json.Marshal(body)
-	if err != nil {
-		return nil, err
-	}
-
-	return http.Post(url, "application/json", bytes.NewReader(jsonData))
 }
