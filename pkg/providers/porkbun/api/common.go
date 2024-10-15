@@ -32,6 +32,7 @@ func makeRequest(url string, req interface{}, out checkable) error {
 	if err != nil {
 		return fmt.Errorf("making POST request: %v", err)
 	}
+	defer res.Body.Close()
 
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
