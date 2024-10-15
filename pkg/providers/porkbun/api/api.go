@@ -24,7 +24,7 @@ func (p Api) Ping() error {
 	}
 
 	response := pingRes{}
-	err := makeRequest(PING, p.Auth, &response)
+	err := makeRequestWithBackoff(PING, p.Auth, &response)
 	if err != nil {
 		return err
 	}
@@ -39,7 +39,7 @@ func (p Api) RetrieveRecords(domain string) ([]porkbun.Record, error) {
 	}
 
 	response := listRes{}
-	err := makeRequest(RETRIEVE+"/"+domain, p.Auth, &response)
+	err := makeRequestWithBackoff(RETRIEVE+"/"+domain, p.Auth, &response)
 	if err != nil {
 		return nil, err
 	}
@@ -70,7 +70,7 @@ func (p Api) CreateRecord(domain string, toCreate porkbun.Record) (string, error
 	request.Name = trimDomain(toCreate.Name, domain)
 
 	response := createRes{}
-	err := makeRequest(CREATE+"/"+domain, request, &response)
+	err := makeRequestWithBackoff(CREATE+"/"+domain, request, &response)
 	if err != nil {
 		return "", err
 	}
@@ -80,7 +80,7 @@ func (p Api) CreateRecord(domain string, toCreate porkbun.Record) (string, error
 
 func (p Api) DeleteRecord(domain string, id string) error {
 	response := baseRes{}
-	err := makeRequest(DELETE+"/"+domain+"/"+id, p.Auth, &response)
+	err := makeRequestWithBackoff(DELETE+"/"+domain+"/"+id, p.Auth, &response)
 	if err != nil {
 		return err
 	}

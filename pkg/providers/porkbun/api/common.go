@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"time"
 )
 
 type checkable interface {
@@ -25,6 +26,12 @@ func (r baseRes) checkStatus() error {
 }
 
 var _ checkable = baseRes{}
+
+func makeRequestWithBackoff(url string, req interface{}, out checkable) error {
+	baseDelay := time.Duration(2 * float64(time.Second))
+	maxDelay := time.Duration(4 * float64(time.Second))
+	return RetryWithBackoff(5, baseDelay, maxDelay, func() error { return makeRequest(url, req, out) })
+}
 
 func makeRequest(url string, req interface{}, out checkable) error {
 	res, err := network.PostJson(url, req)
