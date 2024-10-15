@@ -26,7 +26,6 @@ func RetryWithBackoff(attempts int, baseDelay time.Duration, maxDelay time.Durat
 		jitter := time.Duration(rand.Int63n(int64(baseDelay)))
 		backoff = backoff + jitter
 
-		fmt.Printf("Attempt %d failed. Retrying in %v...\n", i+1, backoff)
 		time.Sleep(backoff)
 	}
 	return fmt.Errorf("operation failed after %d attempts: %v", attempts, err)
