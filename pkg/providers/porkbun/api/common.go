@@ -35,8 +35,7 @@ func makeRequest(url string, req interface{}, out checkable) error {
 	defer res.Body.Close()
 
 	if res.StatusCode < 200 || res.StatusCode >= 300 {
-		body, _ := io.ReadAll(res.Body)
-		return fmt.Errorf("received non-success status code: %d. Body: %s", res.StatusCode, string(body))
+		return fmt.Errorf("received non-success status code: %d", res.StatusCode)
 	}
 
 	body, err := io.ReadAll(res.Body)
