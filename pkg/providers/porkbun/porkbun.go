@@ -18,6 +18,7 @@ func NewPorkbunProvider(apiKey, secretApiKey string) dns.Provider {
 				ApiKey:       apiKey,
 				SecretApiKey: secretApiKey,
 			},
+			Throttler: *api.NewThrottler(1),
 		},
 	}
 }
