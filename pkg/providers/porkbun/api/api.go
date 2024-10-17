@@ -13,7 +13,8 @@ const (
 )
 
 type Api struct {
-	Auth Auth
+	Auth      Auth
+	Throttler Throttler
 }
 
 func (p Api) Ping() error {
@@ -23,6 +24,7 @@ func (p Api) Ping() error {
 	}
 
 	response := pingRes{}
+	p.Throttler.WaitForPermit()
 	err := makeRequest(PING, p.Auth, &response)
 	if err != nil {
 		return err
@@ -38,6 +40,7 @@ func (p Api) RetrieveRecords(domain string) ([]Record, error) {
 	}
 
 	response := listRes{}
+	p.Throttler.WaitForPermit()
 	err := makeRequest(RETRIEVE+"/"+domain, p.Auth, &response)
 	if err != nil {
 		return nil, err
@@ -69,6 +72,7 @@ func (p Api) CreateRecord(domain string, toCreate Record) (string, error) {
 	request.Name = trimDomain(toCreate.Name, domain)
 
 	response := createRes{}
+	p.Throttler.WaitForPermit()
 	err := makeRequest(CREATE+"/"+domain, request, &response)
 	if err != nil {
 		return "", err
@@ -79,6 +83,7 @@ func (p Api) CreateRecord(domain string, toCreate Record) (string, error) {
 
 func (p Api) DeleteRecord(domain string, id string) error {
 	response := baseRes{}
+	p.Throttler.WaitForPermit()
 	err := makeRequest(DELETE+"/"+domain+"/"+id, p.Auth, &response)
 	if err != nil {
 		return err
