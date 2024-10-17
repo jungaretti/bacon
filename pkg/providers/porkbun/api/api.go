@@ -1,6 +1,7 @@
 package api
 
 import (
+	porkbun "bacon/pkg/providers/porkbun/record"
 	"fmt"
 	"strings"
 )
@@ -33,10 +34,10 @@ func (p Api) Ping() error {
 	return nil
 }
 
-func (p Api) RetrieveRecords(domain string) ([]Record, error) {
+func (p Api) RetrieveRecords(domain string) ([]porkbun.Record, error) {
 	type listRes struct {
 		baseRes
-		Records []Record `json:"records"`
+		Records []porkbun.Record `json:"records"`
 	}
 
 	response := listRes{}
@@ -50,10 +51,10 @@ func (p Api) RetrieveRecords(domain string) ([]Record, error) {
 	return records, nil
 }
 
-func (p Api) CreateRecord(domain string, toCreate Record) (string, error) {
+func (p Api) CreateRecord(domain string, toCreate porkbun.Record) (string, error) {
 	type createReq struct {
 		Auth
-		Record
+		porkbun.Record
 	}
 
 	type createRes struct {
@@ -92,7 +93,7 @@ func (p Api) DeleteRecord(domain string, id string) error {
 	return nil
 }
 
-func isIgnored(record Record) bool {
+func isIgnored(record porkbun.Record) bool {
 	if record.Type == "NS" {
 		return true
 	}
@@ -103,8 +104,8 @@ func isIgnored(record Record) bool {
 	return false
 }
 
-func ignoreRecords(input []Record) []Record {
-	records := make([]Record, 0)
+func ignoreRecords(input []porkbun.Record) []porkbun.Record {
+	records := make([]porkbun.Record, 0)
 	for _, record := range input {
 		if isIgnored(record) {
 			continue

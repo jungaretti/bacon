@@ -1,4 +1,4 @@
-package api
+package record
 
 import "bacon/pkg/dns"
 
