@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"bacon/pkg/providers/porkbun"
-	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -14,8 +13,8 @@ func Execute() {
 
 	root := newRootCmd(app)
 
-	if err := root.Execute(); err != nil {
-		fmt.Println(err)
+	err := root.Execute()
+	if err != nil {
 		os.Exit(1)
 	}
 }
