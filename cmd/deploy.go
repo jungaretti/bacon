@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func newDeployCmd(app *App) *cobra.Command {
+func newDeployCmd(provider dns.Provider) *cobra.Command {
 	var shouldCreate bool
 	var shouldDelete bool
 
@@ -20,7 +20,7 @@ func newDeployCmd(app *App) *cobra.Command {
 creating new records.`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return deploy(app, args[0], shouldCreate, shouldDelete)
+			return deploy(provider, args[0], shouldCreate, shouldDelete)
 		},
 	}
 
@@ -30,13 +30,13 @@ creating new records.`,
 	return deploy
 }
 
-func deploy(app *App, configFile string, shouldCreate bool, shouldDelete bool) error {
+func deploy(provider dns.Provider, configFile string, shouldCreate bool, shouldDelete bool) error {
 	config, err := config.ReadFile(configFile)
 	if err != nil {
 		return fmt.Errorf("reading config: %v", err)
 	}
 
-	from, err := app.Provider.AllRecords(config.Domain)
+	from, err := provider.AllRecords(config.Domain)
 	if err != nil {
 		return fmt.Errorf("fetching existing records: %v", err)
 	}
@@ -51,7 +51,7 @@ func deploy(app *App, configFile string, shouldCreate bool, shouldDelete bool) e
 	if shouldDelete {
 		fmt.Println("Deleting", len(removed), "records...")
 		for _, record := range removed {
-			err := app.Provider.DeleteRecord(config.Domain, record)
+			err := provider.DeleteRecord(config.Domain, record)
 			if err != nil {
 				return fmt.Errorf("couldn't delete record: %v", err)
 			}
@@ -66,7 +66,7 @@ func deploy(app *App, configFile string, shouldCreate bool, shouldDelete bool) e
 	if shouldCreate {
 		fmt.Println("Creating", len(added), "records...")
 		for _, record := range added {
-			err := app.Provider.CreateRecord(config.Domain, record)
+			err := provider.CreateRecord(config.Domain, record)
 			if err != nil {
 				return fmt.Errorf("couldn't create record: %v", err)
 			}
