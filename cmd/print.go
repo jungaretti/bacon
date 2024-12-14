@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"bacon/pkg/config"
+	"bacon/pkg/dns"
 	"fmt"
 	"strconv"
 
@@ -9,20 +10,20 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func newPrintCmd(app *App) *cobra.Command {
+func newPrintCmd(provider dns.Provider) *cobra.Command {
 	print := &cobra.Command{
 		Use:   "print <domain>",
 		Short: "Print existing records",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return print(app, args[0])
+			return print(provider, args[0])
 		},
 	}
 	return print
 }
 
-func print(app *App, domain string) error {
-	records, err := app.Provider.AllRecords(domain)
+func print(provider dns.Provider, domain string) error {
+	records, err := provider.AllRecords(domain)
 	if err != nil {
 		return err
 	}

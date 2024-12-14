@@ -23,17 +23,14 @@ records:
 		t.Fatal("could not seed config to temp file", err)
 	}
 
-	provider := console.NewMockProvider()
-	mockApp := &App{
-		Provider: provider,
-	}
+	mockProvider := console.NewMockProvider()
 
-	err = deploy(mockApp, configFile, true, true)
+	err = deploy(mockProvider, configFile, true, true)
 	if err != nil {
 		t.Fatal("did not deploy records", err)
 	}
 
-	records, err := provider.AllRecords("plantbasedbacon.xyz")
+	records, err := mockProvider.AllRecords("plantbasedbacon.xyz")
 	if err != nil {
 		t.Fatal("could not fetch records after deployment", err)
 	}
