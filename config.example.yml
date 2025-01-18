@@ -1,10 +1,10 @@
-domain: plantbasedbacon.xyz
+domain: bacontest42.com
 records:
-    - host: plantbasedbacon.xyz
+    - host: bacontest42.com
       type: ALIAS
       ttl: 600
       content: pixie.porkbun.com
-    - host: '*.plantbasedbacon.xyz'
+    - host: '*.bacontest42.com'
       type: CNAME
       ttl: 600
       content: pixie.porkbun.com

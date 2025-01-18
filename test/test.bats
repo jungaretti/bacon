@@ -27,5 +27,5 @@ setup() {
 }
 
 @test "print" {
-    ./bin/bacon print plantbasedbacon.xyz
+    ./bin/bacon print bacontest42.com
 }
