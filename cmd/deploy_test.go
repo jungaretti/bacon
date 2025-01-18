@@ -8,13 +8,13 @@ import (
 
 func TestDeploy(t *testing.T) {
 	configFile, err := seedConfigToTempFile(`
-domain: plantbasedbacon.xyz
+domain: bacontest42.com
 records:
-    - host: plantbasedbacon.xyz
+    - host: bacontest42.com
       type: ALIAS
       ttl: 600
       content: pixie.porkbun.com
-    - host: '*.plantbasedbacon.xyz'
+    - host: '*.bacontest42.com'
       type: CNAME
       ttl: 600
       content: pixie.porkbun.com
@@ -30,7 +30,7 @@ records:
 		t.Fatal("did not deploy records", err)
 	}
 
-	records, err := mockProvider.AllRecords("plantbasedbacon.xyz")
+	records, err := mockProvider.AllRecords("bacontest42.com")
 	if err != nil {
 		t.Fatal("could not fetch records after deployment", err)
 	}
