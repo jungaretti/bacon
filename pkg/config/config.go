@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"io"
 	"os"
 
@@ -10,6 +11,21 @@ import (
 type Config struct {
 	Domain  string   `yaml:"domain"`
 	Records []Record `yaml:"records"`
+}
+
+func (c Config) Validate() error {
+	if c.Domain == "" {
+		return fmt.Errorf("domain is required")
+	}
+
+	for _, record := range c.Records {
+		err := record.Validate()
+		if err != nil {
+			return fmt.Errorf("record is invalid %v: %v", record, err)
+		}
+	}
+
+	return nil
 }
 
 func ReadFile(configFile string) (*Config, error) {
@@ -30,6 +46,11 @@ func ReadFile(configFile string) (*Config, error) {
 
 	config := Config{}
 	err = yaml.Unmarshal(raw, &config)
+	if err != nil {
+		return nil, err
+	}
+
+	err = config.Validate()
 	if err != nil {
 		return nil, err
 	}
