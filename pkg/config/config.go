@@ -57,3 +57,19 @@ func ReadFile(configFile string) (*Config, error) {
 
 	return &config, nil
 }
+
+func SeedConfigToTempFile(mockConfig string) (string, error) {
+	tempFile, err := os.CreateTemp("", "tmpfile-*")
+	if err != nil {
+		return "", err
+	}
+
+	defer tempFile.Close()
+
+	_, err = tempFile.WriteString(mockConfig)
+	if err != nil {
+		return "", err
+	}
+
+	return tempFile.Name(), nil
+}

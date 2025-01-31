@@ -1,13 +1,13 @@
 package cmd
 
 import (
-	"os"
+	"bacon/pkg/config"
 	"bacon/pkg/providers/mock"
 	"testing"
 )
 
 func TestDeploy(t *testing.T) {
-	configFile, err := seedConfigToTempFile(`
+	configFile, err := config.SeedConfigToTempFile(`
 domain: bacontest42.com
 records:
     - host: bacontest42.com
@@ -41,7 +41,7 @@ records:
 }
 
 func TestDeployMissingHost(t *testing.T) {
-	configFile, err := seedConfigToTempFile(`
+	configFile, err := config.SeedConfigToTempFile(`
 domain: bacontest42.com
 records:
     - type: ALIAS
@@ -61,7 +61,7 @@ records:
 }
 
 func TestDeployMissingType(t *testing.T) {
-	configFile, err := seedConfigToTempFile(`
+	configFile, err := config.SeedConfigToTempFile(`
 domain: bacontest42.com
 records:
     - host: bacontest42.com
@@ -81,7 +81,7 @@ records:
 }
 
 func TestDeployInvalidType(t *testing.T) {
-	configFile, err := seedConfigToTempFile(`
+	configFile, err := config.SeedConfigToTempFile(`
 domain: bacontest42.com
 records:
     - host: bacontest42.com
@@ -102,7 +102,7 @@ records:
 }
 
 func TestDeployMissingTtl(t *testing.T) {
-	configFile, err := seedConfigToTempFile(`
+	configFile, err := config.SeedConfigToTempFile(`
 domain: bacontest42.com
 records:
     - host: bacontest42.com
@@ -122,7 +122,7 @@ records:
 }
 
 func TestDeployInvalidTtl(t *testing.T) {
-	configFile, err := seedConfigToTempFile(`
+	configFile, err := config.SeedConfigToTempFile(`
 domain: bacontest42.com
 records:
     - host: bacontest42.com
@@ -143,7 +143,7 @@ records:
 }
 
 func TestDeployMissingContent(t *testing.T) {
-	configFile, err := seedConfigToTempFile(`
+	configFile, err := config.SeedConfigToTempFile(`
 domain: bacontest42.com
 records:
     - host: bacontest42.com
@@ -154,26 +154,10 @@ records:
 		t.Fatal("could not seed config to temp file", err)
 	}
 
-	mockProvider := console.NewMockProvider()
+	mockProvider := mock.NewMockProvider()
 
 	err = deploy(mockProvider, configFile, true, true)
 	if err == nil {
 		t.Fatal("expected error when a record is missing content field", err)
 	}
-}
-
-func seedConfigToTempFile(mockConfig string) (string, error) {
-	tempFile, err := os.CreateTemp("", "tmpfile-*")
-	if err != nil {
-		return "", err
-	}
-
-	defer tempFile.Close()
-
-	_, err = tempFile.WriteString(mockConfig)
-	if err != nil {
-		return "", err
-	}
-
-	return tempFile.Name(), nil
 }
