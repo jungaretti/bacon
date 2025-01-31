@@ -33,7 +33,7 @@ creating new records.`,
 func deploy(provider dns.Provider, configFile string, shouldCreate bool, shouldDelete bool) error {
 	config, err := config.ReadFile(configFile)
 	if err != nil {
-		return fmt.Errorf("reading config: %v", err)
+		return fmt.Errorf("reading %v: %v", configFile, err)
 	}
 
 	from, err := provider.AllRecords(config.Domain)
