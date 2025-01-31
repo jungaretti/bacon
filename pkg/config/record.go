@@ -8,7 +8,7 @@ import (
 type Record struct {
 	Name string `yaml:"host"`
 	Type string `yaml:"type"`
-	Ttl  *int   `yaml:"ttl"`
+	Ttl  int    `yaml:"ttl"`
 	Data string `yaml:"content"`
 }
 
@@ -21,11 +21,7 @@ func (r Record) GetType() string {
 }
 
 func (r Record) GetTtl() string {
-	if r.Ttl == nil {
-		return ""
-	}
-
-	return fmt.Sprint(*r.Ttl)
+	return fmt.Sprint(r.Ttl)
 }
 
 func (r Record) GetData() string {
