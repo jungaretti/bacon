@@ -1,8 +1,8 @@
 package cmd
 
 import (
-	console "bacon/pkg/providers/mock"
 	"os"
+	"bacon/pkg/providers/mock"
 	"testing"
 )
 
@@ -23,7 +23,7 @@ records:
 		t.Fatal("could not seed config to temp file", err)
 	}
 
-	mockProvider := console.NewMockProvider()
+	mockProvider := mock.NewMockProvider()
 
 	err = deploy(mockProvider, configFile, true, true)
 	if err != nil {
@@ -52,7 +52,7 @@ records:
 		t.Fatal("could not seed config to temp file", err)
 	}
 
-	mockProvider := console.NewMockProvider()
+	mockProvider := mock.NewMockProvider()
 
 	err = deploy(mockProvider, configFile, true, true)
 	if err == nil {
@@ -72,7 +72,7 @@ records:
 		t.Fatal("could not seed config to temp file", err)
 	}
 
-	mockProvider := console.NewMockProvider()
+	mockProvider := mock.NewMockProvider()
 
 	err = deploy(mockProvider, configFile, true, true)
 	if err == nil {
@@ -93,7 +93,7 @@ records:
 		t.Fatal("could not seed config to temp file", err)
 	}
 
-	mockProvider := console.NewMockProvider()
+	mockProvider := mock.NewMockProvider()
 
 	err = deploy(mockProvider, configFile, true, true)
 	if err == nil {
@@ -113,7 +113,7 @@ records:
 		t.Fatal("could not seed config to temp file", err)
 	}
 
-	mockProvider := console.NewMockProvider()
+	mockProvider := mock.NewMockProvider()
 
 	err = deploy(mockProvider, configFile, true, true)
 	if err == nil {
@@ -134,7 +134,7 @@ records:
 		t.Fatal("could not seed config to temp file", err)
 	}
 
-	mockProvider := console.NewMockProvider()
+	mockProvider := mock.NewMockProvider()
 
 	err = deploy(mockProvider, configFile, true, true)
 	if err == nil {
