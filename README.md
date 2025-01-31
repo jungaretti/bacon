@@ -76,22 +76,22 @@ records:
     host: www.example.com
     content: 123.456.789.112
     ttl: 600
-    priority: 20
 ```
 
 ### Schema
 
 #### Record
 
-- `type`
-- `host`
-- `content`
-- `ttl`
-- `priority`
+- `type` - Required. Allowed values: `A`, `MX`, `CNAME`, `ALIAS`, `TXT`, `NS`, `AAAA`, `SRV`, `TLSA`, `CAA`, `HTTPS`, `SVCB`.
+- `host` - Required.
+- `content` - Required.
+- `ttl` - Required. Minimum value: `600`.
+
+Bacon does not support `priority`. In order to specify a certain `priority`, you must create the record with Bacon and update the `priority` manually.
 
 #### Config
 
-- `domain`
+- `domain` - Required.
 - `records`
 
 ## Development
