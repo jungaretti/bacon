@@ -1,13 +1,13 @@
 package cmd
 
 import (
-	console "bacon/pkg/providers/mock"
-	"os"
+	"bacon/pkg/config"
+	"bacon/pkg/providers/mock"
 	"testing"
 )
 
 func TestDeploy(t *testing.T) {
-	configFile, err := seedConfigToTempFile(`
+	configFile, err := config.SeedConfigToTempFile(`
 domain: bacontest42.com
 records:
     - host: bacontest42.com
@@ -23,7 +23,7 @@ records:
 		t.Fatal("could not seed config to temp file", err)
 	}
 
-	mockProvider := console.NewMockProvider()
+	mockProvider := mock.NewMockProvider()
 
 	err = deploy(mockProvider, configFile, true, true)
 	if err != nil {
@@ -38,20 +38,4 @@ records:
 	if len(records) != 2 {
 		t.Fatal("expected 2 records after deployment, got", len(records))
 	}
-}
-
-func seedConfigToTempFile(mockConfig string) (string, error) {
-	tempFile, err := os.CreateTemp("", "tmpfile-*")
-	if err != nil {
-		return "", err
-	}
-
-	defer tempFile.Close()
-
-	_, err = tempFile.WriteString(mockConfig)
-	if err != nil {
-		return "", err
-	}
-
-	return tempFile.Name(), nil
 }

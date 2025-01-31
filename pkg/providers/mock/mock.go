@@ -1,4 +1,4 @@
-package console
+package mock
 
 import (
 	"bacon/pkg/dns"

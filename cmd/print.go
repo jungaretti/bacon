@@ -30,13 +30,15 @@ func print(provider dns.Provider, domain string) error {
 
 	configRecords := make([]config.Record, len(records))
 	for i, record := range records {
-		// Sets ttl to nil if Atoi fails
-		ttl, _ := strconv.Atoi(record.GetTtl())
+		ttl, err := strconv.Atoi(record.GetTtl())
+		if err != nil {
+			return fmt.Errorf("record %v has invalid TTL: %v", record, err)
+		}
 
 		configRecords[i] = config.Record{
 			Name: record.GetName(),
 			Type: record.GetType(),
-			Ttl:  &ttl,
+			Ttl:  ttl,
 			Data: record.GetData(),
 		}
 	}
