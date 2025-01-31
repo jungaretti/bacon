@@ -3,6 +3,7 @@ package config
 import (
 	"bacon/pkg/dns"
 	"fmt"
+	"strings"
 )
 
 type Record struct {
@@ -11,6 +12,10 @@ type Record struct {
 	Ttl  int    `yaml:"ttl"`
 	Data string `yaml:"content"`
 }
+
+const (
+	TYPE_ALLOWLIST = "A, MX, CNAME, ALIAS, TXT, NS, AAAA, SRV, TLSA, CAA, HTTPS, SVCB"
+)
 
 func (r Record) GetName() string {
 	return r.Name
@@ -36,23 +41,8 @@ func (r Record) Validate() error {
 	if r.Type == "" {
 		return fmt.Errorf("type is required")
 	}
-
-	allowedTypes := map[string]bool{
-		"A":     true,
-		"MX":    true,
-		"CNAME": true,
-		"ALIAS": true,
-		"TXT":   true,
-		"NS":    true,
-		"AAAA":  true,
-		"SRV":   true,
-		"TLSA":  true,
-		"CAA":   true,
-		"HTTPS": true,
-		"SVCB":  true,
-	}
-	if !allowedTypes[r.Type] {
-		return fmt.Errorf("type must be one of A, MX, CNAME, ALIAS, TXT, NS, AAAA, SRV, TLSA, CAA, HTTPS, SVCB")
+	if !isTypeAllowed(r) {
+		return fmt.Errorf("type must be one of %v", TYPE_ALLOWLIST)
 	}
 
 	if r.Ttl < 600 {
@@ -64,6 +54,19 @@ func (r Record) Validate() error {
 	}
 
 	return nil
+}
+
+func isTypeAllowed(r Record) bool {
+	allowedTypes := make(map[string]bool)
+	for _, t := range strings.Split(TYPE_ALLOWLIST, ", ") {
+		allowedTypes[t] = true
+	}
+
+	if _, ok := allowedTypes[r.Type]; !ok {
+		return false
+	}
+
+	return true
 }
 
 var _ dns.Record = Record{}

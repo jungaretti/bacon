@@ -4,7 +4,34 @@ import (
 	"testing"
 )
 
-func TestDeployMissingHost(t *testing.T) {
+func TestValidConfig(t *testing.T) {
+	configFile, err := SeedConfigToTempFile(`
+domain: bacontest42.com
+records:
+    - host: bacontest42.com
+      type: ALIAS
+      ttl: 600
+      content: pixie.porkbun.com
+    - host: '*.bacontest42.com'
+      type: CNAME
+      ttl: 600
+      content: pixie.porkbun.com
+`)
+	if err != nil {
+		t.Fatal("could not seed config to temp file", err)
+	}
+
+	config, err := ReadFile(configFile)
+	if err != nil {
+		t.Fatal("could not read config file", err)
+	}
+
+	if len(config.Records) != 2 {
+		t.Fatal("expected 2 records after deployment, got", len(config.Records))
+	}
+}
+
+func TestInvalidConfigMissingHost(t *testing.T) {
 	configFile, err := SeedConfigToTempFile(`
 domain: bacontest42.com
 records:
@@ -22,7 +49,7 @@ records:
 	}
 }
 
-func TestDeployMissingType(t *testing.T) {
+func TestInvalidConfigMissingType(t *testing.T) {
 	configFile, err := SeedConfigToTempFile(`
 domain: bacontest42.com
 records:
@@ -40,7 +67,7 @@ records:
 	}
 }
 
-func TestDeployInvalidType(t *testing.T) {
+func TestInvalidConfigInvalidType(t *testing.T) {
 	configFile, err := SeedConfigToTempFile(`
 domain: bacontest42.com
 records:
@@ -59,7 +86,7 @@ records:
 	}
 }
 
-func TestDeployMissingTtl(t *testing.T) {
+func TestInvalidConfigMissingTtl(t *testing.T) {
 	configFile, err := SeedConfigToTempFile(`
 domain: bacontest42.com
 records:
@@ -77,7 +104,7 @@ records:
 	}
 }
 
-func TestDeployInvalidTtl(t *testing.T) {
+func TestInvalidConfigInvalidTtl(t *testing.T) {
 	configFile, err := SeedConfigToTempFile(`
 domain: bacontest42.com
 records:
@@ -96,7 +123,7 @@ records:
 	}
 }
 
-func TestDeployMissingContent(t *testing.T) {
+func TestInvalidConfigMissingContent(t *testing.T) {
 	configFile, err := SeedConfigToTempFile(`
 domain: bacontest42.com
 records:
