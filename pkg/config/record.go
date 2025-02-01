@@ -9,7 +9,7 @@ import (
 const (
 	// Record types that are allowed. Found in Porkbun's API documentation.
 	TYPE_ALLOWLIST = "A, MX, CNAME, ALIAS, TXT, NS, AAAA, SRV, TLSA, CAA, HTTPS, SVCB"
-	// Record types that are allowed to have a priority. Found in Porkbun's API documentation.
+	// Record types that are allowed to have a priority. Found in Porkbun's web app.
 	PRIORITY_ALLOWLIST = "MX, SRV"
 )
 
