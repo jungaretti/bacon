@@ -165,3 +165,27 @@ records:
 		t.Fatal("priority is not allowed on ALIAS records", err)
 	}
 }
+
+func TestInvalidConfigCnameSameHost(t *testing.T) {
+	configFile, err := SeedConfigToTempFile(`
+domain: bacontest42.com
+records:
+    - host: '*.bacontest42.com'
+      type: CNAME
+      ttl: 600
+      content: pixie.porkbun.com
+    - type: MX
+      host: "*.bacontest42.com"
+      content: in1-smtp.messagingengine.com
+      ttl: 600
+      priority: 10
+`)
+	if err != nil {
+		t.Fatal("could not seed config to temp file", err)
+	}
+
+	_, err = ReadFile(configFile)
+	if err == nil {
+		t.Fatal("cannot have a CNAME and another record for the same host", err)
+	}
+}

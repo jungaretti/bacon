@@ -86,6 +86,7 @@ records:
 - `host` - Required.
 - `content` - Required.
 - `ttl` - Required. Minimum value: `600`.
+- `priority` - Optional. Allowed for `MX` and `SRV` records.
 
 Bacon does not support `priority`. In order to specify a certain `priority`, you must create the record with Bacon and update the `priority` manually.
 
