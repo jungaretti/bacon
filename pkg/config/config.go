@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"io"
 	"os"
 
@@ -11,36 +10,6 @@ import (
 type Config struct {
 	Domain  string   `yaml:"domain"`
 	Records []Record `yaml:"records"`
-}
-
-func (c Config) Validate() error {
-	if c.Domain == "" {
-		return fmt.Errorf("domain is required")
-	}
-
-	for _, record := range c.Records {
-		err := record.Validate()
-		if err != nil {
-			return fmt.Errorf("record is invalid %v: %v", record, err)
-		}
-	}
-
-	cnameHosts := make(map[string]bool)
-	for _, record := range c.Records {
-		if record.GetType() == "CNAME" {
-			if _, ok := cnameHosts[record.GetName()]; ok {
-				return fmt.Errorf("multiple CNAME records for host %s", record.GetName())
-			}
-			cnameHosts[record.GetName()] = true
-		}
-	}
-	for _, record := range c.Records {
-		if record.GetType() != "CNAME" && cnameHosts[record.GetName()] {
-			return fmt.Errorf("non-CNAME record %v shares host with a CNAME record", record)
-		}
-	}
-
-	return nil
 }
 
 func ReadFile(configFile string) (*Config, error) {
@@ -65,7 +34,7 @@ func ReadFile(configFile string) (*Config, error) {
 		return nil, err
 	}
 
-	err = config.Validate()
+	err = ValidateConfiguration(config)
 	if err != nil {
 		return nil, err
 	}
