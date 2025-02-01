@@ -1,7 +1,6 @@
 package api
 
 import (
-	porkbun "bacon/pkg/providers/porkbun/record"
 	"fmt"
 	"strings"
 )
@@ -34,10 +33,10 @@ func (p Api) Ping() error {
 	return nil
 }
 
-func (p Api) RetrieveRecords(domain string) ([]porkbun.Record, error) {
+func (p Api) RetrieveRecords(domain string) ([]Record, error) {
 	type listRes struct {
 		baseRes
-		Records []porkbun.Record `json:"records"`
+		Records []Record `json:"records"`
 	}
 
 	response := listRes{}
@@ -47,14 +46,21 @@ func (p Api) RetrieveRecords(domain string) ([]porkbun.Record, error) {
 		return nil, err
 	}
 
-	records := ignoreRecords(response.Records)
+	records := make([]Record, 0)
+	for _, record := range response.Records {
+		if record.isIgnored() {
+			continue
+		}
+		records = append(records, record)
+	}
+
 	return records, nil
 }
 
-func (p Api) CreateRecord(domain string, toCreate porkbun.Record) (string, error) {
+func (p Api) CreateRecord(domain string, toCreate Record) (string, error) {
 	type createReq struct {
 		Auth
-		porkbun.Record
+		Record
 	}
 
 	type createRes struct {
@@ -62,7 +68,7 @@ func (p Api) CreateRecord(domain string, toCreate porkbun.Record) (string, error
 		Id int `json:"id"`
 	}
 
-	if isIgnored(toCreate) {
+	if toCreate.isIgnored() {
 		return "", fmt.Errorf("cannot create an ignored record: %s", toCreate)
 	}
 
@@ -91,30 +97,6 @@ func (p Api) DeleteRecord(domain string, id string) error {
 	}
 
 	return nil
-}
-
-func isIgnored(record porkbun.Record) bool {
-	if record.Type == "NS" {
-		return true
-	}
-	if strings.HasPrefix(record.Name, "_acme-challenge") {
-		return true
-	}
-
-	return false
-}
-
-func ignoreRecords(input []porkbun.Record) []porkbun.Record {
-	records := make([]porkbun.Record, 0)
-	for _, record := range input {
-		if isIgnored(record) {
-			continue
-		}
-
-		records = append(records, record)
-	}
-
-	return records
 }
 
 // Trims a root domain from a longer subdomain. For example, trims

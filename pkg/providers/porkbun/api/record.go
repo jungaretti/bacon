@@ -1,6 +1,9 @@
-package record
+package api
 
-import "bacon/pkg/dns"
+import (
+	"bacon/pkg/dns"
+	"strings"
+)
 
 type Record struct {
 	Id       string `json:"id"`
@@ -37,3 +40,14 @@ func (r Record) GetPriority() string {
 }
 
 var _ dns.Record = Record{}
+
+func (r Record) isIgnored() bool {
+	if r.Type == "NS" {
+		return true
+	}
+	if strings.HasPrefix(r.Name, "_acme-challenge") {
+		return true
+	}
+
+	return false
+}
