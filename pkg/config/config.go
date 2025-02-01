@@ -25,6 +25,21 @@ func (c Config) Validate() error {
 		}
 	}
 
+	cnameHosts := make(map[string]bool)
+	for _, record := range c.Records {
+		if record.GetType() == "CNAME" {
+			if _, ok := cnameHosts[record.GetName()]; ok {
+				return fmt.Errorf("multiple CNAME records for host %s", record.GetName())
+			}
+			cnameHosts[record.GetName()] = true
+		}
+	}
+	for _, record := range c.Records {
+		if record.GetType() != "CNAME" && cnameHosts[record.GetName()] {
+			return fmt.Errorf("non-CNAME record %v shares host with a CNAME record", record)
+		}
+	}
+
 	return nil
 }
 
