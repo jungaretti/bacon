@@ -16,6 +16,19 @@
             ]
         },
         {
+            "name": "deploy config.example.com --create --delete",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}",
+            "args": [
+                "deploy",
+                "config.example.yml",
+                "--create",
+                "--delete",
+            ]
+        },
+        {
             "name": "print bacontest42.com",
             "type": "go",
             "request": "launch",
