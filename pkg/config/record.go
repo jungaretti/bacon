@@ -6,6 +6,13 @@ import (
 	"strings"
 )
 
+const (
+	// Record types that are allowed. Found in Porkbun's API documentation.
+	TYPE_ALLOWLIST = "A, MX, CNAME, ALIAS, TXT, NS, AAAA, SRV, TLSA, CAA, HTTPS, SVCB"
+	// Record types that are allowed to have a priority. Found in Porkbun's API documentation.
+	PRIORITY_ALLOWLIST = "MX, SRV"
+)
+
 type Record struct {
 	Name     string `yaml:"host"`
 	Type     string `yaml:"type"`
@@ -13,11 +20,6 @@ type Record struct {
 	Data     string `yaml:"content"`
 	Priority int    `yaml:"priority"`
 }
-
-const (
-	TYPE_ALLOWLIST     = "A, MX, CNAME, ALIAS, TXT, NS, AAAA, SRV, TLSA, CAA, HTTPS, SVCB"
-	PRIORITY_ALLOWLIST = "MX, SRV"
-)
 
 func (r Record) GetName() string {
 	return r.Name
