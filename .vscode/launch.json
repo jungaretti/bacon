@@ -12,7 +12,7 @@
             "program": "${workspaceFolder}",
             "args": [
                 "deploy",
-                "config.example.com"
+                "config.example.yml",
             ]
         },
         {
