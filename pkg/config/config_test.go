@@ -16,6 +16,11 @@ records:
       type: CNAME
       ttl: 600
       content: pixie.porkbun.com
+    - type: MX
+      host: bacontest42.com
+      content: in1-smtp.messagingengine.com
+      ttl: 600
+      priority: 10
 `)
 	if err != nil {
 		t.Fatal("could not seed config to temp file", err)
@@ -26,8 +31,8 @@ records:
 		t.Fatal("could not read config file", err)
 	}
 
-	if len(config.Records) != 2 {
-		t.Fatal("expected 2 records after deployment, got", len(config.Records))
+	if len(config.Records) != 3 {
+		t.Fatal("expected 3 records after deployment, got", len(config.Records))
 	}
 }
 
@@ -138,5 +143,25 @@ records:
 	_, err = ReadFile(configFile)
 	if err == nil {
 		t.Fatal("expected error when a record is missing content field", err)
+	}
+}
+
+func TestInvalidConfigInvalidPriority(t *testing.T) {
+	configFile, err := SeedConfigToTempFile(`
+domain: bacontest42.com
+records:
+    - host: bacontest42.com
+      type: ALIAS
+      ttl: 600
+      content: pixie.porkbun.com
+	  priority: 20
+`)
+	if err != nil {
+		t.Fatal("could not seed config to temp file", err)
+	}
+
+	_, err = ReadFile(configFile)
+	if err == nil {
+		t.Fatal("priority is not allowed on ALIAS records", err)
 	}
 }

@@ -7,14 +7,16 @@ import (
 )
 
 type Record struct {
-	Name string `yaml:"host"`
-	Type string `yaml:"type"`
-	Ttl  int    `yaml:"ttl"`
-	Data string `yaml:"content"`
+	Name     string `yaml:"host"`
+	Type     string `yaml:"type"`
+	Ttl      int    `yaml:"ttl"`
+	Data     string `yaml:"content"`
+	Priority int    `yaml:"priority"`
 }
 
 const (
-	TYPE_ALLOWLIST = "A, MX, CNAME, ALIAS, TXT, NS, AAAA, SRV, TLSA, CAA, HTTPS, SVCB"
+	TYPE_ALLOWLIST     = "A, MX, CNAME, ALIAS, TXT, NS, AAAA, SRV, TLSA, CAA, HTTPS, SVCB"
+	PRIORITY_ALLOWLIST = "MX, SRV"
 )
 
 func (r Record) GetName() string {
@@ -31,6 +33,10 @@ func (r Record) GetTtl() string {
 
 func (r Record) GetData() string {
 	return r.Data
+}
+
+func (r Record) GetPriority() string {
+	return fmt.Sprint(r.Priority)
 }
 
 func (r Record) Validate() error {
@@ -53,6 +59,10 @@ func (r Record) Validate() error {
 		return fmt.Errorf("content is required")
 	}
 
+	if r.Priority != 0 && !isPriorityAllowed(r) {
+		return fmt.Errorf("priority must be one of %v", PRIORITY_ALLOWLIST)
+	}
+
 	return nil
 }
 
@@ -63,6 +73,19 @@ func isTypeAllowed(r Record) bool {
 	}
 
 	if _, ok := allowedTypes[r.Type]; !ok {
+		return false
+	}
+
+	return true
+}
+
+func isPriorityAllowed(r Record) bool {
+	allowedPriorities := make(map[string]bool)
+	for _, t := range strings.Split(PRIORITY_ALLOWLIST, ", ") {
+		allowedPriorities[t] = true
+	}
+
+	if _, ok := allowedPriorities[r.Type]; !ok {
 		return false
 	}
 

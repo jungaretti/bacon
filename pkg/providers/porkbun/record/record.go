@@ -28,4 +28,8 @@ func (r Record) GetData() string {
 	return r.Content
 }
 
+func (r Record) GetPriority() string {
+	return r.Priority
+}
+
 var _ dns.Record = Record{}

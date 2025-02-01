@@ -8,3 +8,13 @@ records:
       type: CNAME
       ttl: 600
       content: pixie.porkbun.com
+    - type: MX
+      host: bacontest42.com
+      content: in1-smtp.messagingengine.com
+      ttl: 600
+      priority: 10
+    - type: MX
+      host: bacontest42.com
+      content: in2-smtp.messagingengine.com
+      ttl: 600
+      priority: 20

@@ -10,6 +10,7 @@ type Record interface {
 	GetType() string
 	GetTtl() string
 	GetData() string
+	GetPriority() string
 }
 
 func RecordEquals(l Record, r Record) bool {
@@ -17,6 +18,7 @@ func RecordEquals(l Record, r Record) bool {
 	equal = equal && l.GetType() == r.GetType()
 	equal = equal && l.GetTtl() == r.GetTtl()
 	equal = equal && l.GetData() == r.GetData()
+	equal = equal && l.GetPriority() == r.GetPriority()
 	return equal
 }
 
@@ -26,5 +28,6 @@ func RecordHash(r Record) string {
 		r.GetType(),
 		r.GetTtl(),
 		r.GetData(),
+		r.GetPriority(),
 	}, "-")
 }
