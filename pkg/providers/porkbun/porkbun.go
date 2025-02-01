@@ -3,7 +3,6 @@ package porkbun
 import (
 	"bacon/pkg/dns"
 	"bacon/pkg/providers/porkbun/api"
-	"bacon/pkg/providers/porkbun/record"
 	"fmt"
 )
 
@@ -42,7 +41,7 @@ func (p PorkProvider) AllRecords(domain string) ([]dns.Record, error) {
 }
 
 func (p PorkProvider) CreateRecord(domain string, newRecord dns.Record) error {
-	porkRecord := record.Record{
+	porkRecord := api.Record{
 		Name:    newRecord.GetName(),
 		Type:    newRecord.GetType(),
 		TTL:     newRecord.GetTtl(),
@@ -63,7 +62,7 @@ func (p PorkProvider) DeleteRecord(domain string, toDelete dns.Record) error {
 		return err
 	}
 
-	var target *record.Record = nil
+	var target *api.Record = nil
 	for _, record := range allRecords {
 		if dns.RecordEquals(toDelete, record) {
 			target = &record
