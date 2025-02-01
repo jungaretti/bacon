@@ -29,6 +29,10 @@ func (r Record) GetData() string {
 }
 
 func (r Record) GetPriority() string {
+	if r.Priority == "0" {
+		return ""
+	}
+
 	return r.Priority
 }
 
