@@ -49,6 +49,10 @@ func (p PorkProvider) CreateRecord(domain string, newRecord dns.Record) error {
 		Content: newRecord.GetData(),
 	}
 
+	if newRecord.GetPriority() != "0" {
+		porkRecord.Priority = newRecord.GetPriority()
+	}
+
 	_, err := p.Api.CreateRecord(domain, porkRecord)
 	return err
 }
