@@ -4,7 +4,6 @@ import (
 	"bacon/pkg/config"
 	"bacon/pkg/porkbun"
 	"fmt"
-	"strconv"
 
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
@@ -30,17 +29,11 @@ func print(client *porkbun.Client, domain string) error {
 
 	configRecords := make([]config.Record, len(records))
 	for i, record := range records {
-		ttl, err := strconv.Atoi(record.TTL)
+		configRecord, err := config.RecordFromPorkbun(record)
 		if err != nil {
-			return fmt.Errorf("record %v has invalid TTL: %v", record, err)
+			return err
 		}
-
-		configRecords[i] = config.Record{
-			Name: record.Name,
-			Type: record.Type,
-			Ttl:  ttl,
-			Data: record.Content,
-		}
+		configRecords[i] = configRecord
 	}
 
 	config := config.Config{

@@ -1,6 +1,7 @@
 package config
 
 import (
+	"bacon/pkg/porkbun"
 	"testing"
 )
 
@@ -187,5 +188,41 @@ records:
 	_, err = ReadFile(configFile)
 	if err == nil {
 		t.Fatal("cannot have a CNAME and another record for the same host", err)
+	}
+}
+
+func TestRecordFromPorkbunWithPriority(t *testing.T) {
+	record := porkbun.Record{
+		Name:     "bacontest42.com",
+		Type:     "MX",
+		TTL:      "600",
+		Content:  "in1-smtp.messagingengine.com",
+		Priority: "10",
+	}
+
+	configRecord, err := RecordFromPorkbun(record)
+	if err != nil {
+		t.Fatal("did not convert record", err)
+	}
+	if configRecord.Priority != 10 {
+		t.Error("expected priority 10, got", configRecord.Priority)
+	}
+}
+
+func TestRecordFromPorkbunWithoutPriority(t *testing.T) {
+	record := porkbun.Record{
+		Name:     "*.bacontest42.com",
+		Type:     "CNAME",
+		TTL:      "600",
+		Content:  "pixie.porkbun.com",
+		Priority: "0",
+	}
+
+	configRecord, err := RecordFromPorkbun(record)
+	if err != nil {
+		t.Fatal("did not convert record", err)
+	}
+	if configRecord.Priority != 0 {
+		t.Error("expected priority 0, got", configRecord.Priority)
 	}
 }
