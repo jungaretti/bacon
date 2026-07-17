@@ -1,4 +1,4 @@
-package api
+package porkbun
 
 import (
 	"fmt"
@@ -12,36 +12,38 @@ const (
 	DELETE   string = "https://api.porkbun.com/api/json/v3/dns/delete"
 )
 
-type Api struct {
+type Client struct {
 	Auth      Auth
 	Throttler Throttler
 }
 
-func (p Api) Ping() error {
+func NewClient(apiKey, secretApiKey string) *Client {
+	return &Client{
+		Auth:      Auth{ApiKey: apiKey, SecretApiKey: secretApiKey},
+		Throttler: *NewThrottler(1),
+	}
+}
+
+func (c Client) Ping() error {
 	type pingRes struct {
 		baseRes
 		YourIp string `json:"yourIp"`
 	}
 
 	response := pingRes{}
-	p.Throttler.WaitForPermit()
-	err := makeRequest(PING, p.Auth, &response)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	c.Throttler.WaitForPermit()
+	return makeRequest(PING, c.Auth, &response)
 }
 
-func (p Api) RetrieveRecords(domain string) ([]Record, error) {
+func (c Client) AllRecords(domain string) ([]Record, error) {
 	type listRes struct {
 		baseRes
 		Records []Record `json:"records"`
 	}
 
 	response := listRes{}
-	p.Throttler.WaitForPermit()
-	err := makeRequest(RETRIEVE+"/"+domain, p.Auth, &response)
+	c.Throttler.WaitForPermit()
+	err := makeRequest(RETRIEVE+"/"+domain, c.Auth, &response)
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +59,7 @@ func (p Api) RetrieveRecords(domain string) ([]Record, error) {
 	return records, nil
 }
 
-func (p Api) CreateRecord(domain string, toCreate Record) (string, error) {
+func (c Client) CreateRecord(domain string, record Record) error {
 	type createReq struct {
 		Auth
 		Record
@@ -68,35 +70,22 @@ func (p Api) CreateRecord(domain string, toCreate Record) (string, error) {
 		Id int `json:"id"`
 	}
 
-	if toCreate.isIgnored() {
-		return "", fmt.Errorf("cannot create an ignored record: %s", toCreate)
+	if record.isIgnored() {
+		return fmt.Errorf("cannot create an ignored record: %s", record)
 	}
 
-	request := createReq{
-		Auth:   p.Auth,
-		Record: toCreate,
-	}
-	request.Name = trimDomain(toCreate.Name, domain)
+	request := createReq{Auth: c.Auth, Record: record}
+	request.Name = trimDomain(record.Name, domain)
 
 	response := createRes{}
-	p.Throttler.WaitForPermit()
-	err := makeRequest(CREATE+"/"+domain, request, &response)
-	if err != nil {
-		return "", err
-	}
-
-	return fmt.Sprint(response.Id), nil
+	c.Throttler.WaitForPermit()
+	return makeRequest(CREATE+"/"+domain, request, &response)
 }
 
-func (p Api) DeleteRecord(domain string, id string) error {
+func (c Client) DeleteRecord(domain string, record Record) error {
+	c.Throttler.WaitForPermit()
 	response := baseRes{}
-	p.Throttler.WaitForPermit()
-	err := makeRequest(DELETE+"/"+domain+"/"+id, p.Auth, &response)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return makeRequest(DELETE+"/"+domain+"/"+record.Id, c.Auth, &response)
 }
 
 // Trims a root domain from a longer subdomain. For example, trims

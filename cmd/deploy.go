@@ -3,13 +3,13 @@ package cmd
 import (
 	"bacon/pkg/collections"
 	"bacon/pkg/config"
-	"bacon/pkg/dns"
+	"bacon/pkg/porkbun"
 	"fmt"
 
 	"github.com/spf13/cobra"
 )
 
-func newDeployCmd(provider dns.Provider) *cobra.Command {
+func newDeployCmd(client *porkbun.Client) *cobra.Command {
 	var shouldCreate bool
 	var shouldDelete bool
 
@@ -20,7 +20,7 @@ func newDeployCmd(provider dns.Provider) *cobra.Command {
 creating new records.`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return deploy(provider, args[0], shouldCreate, shouldDelete)
+			return deploy(client, args[0], shouldCreate, shouldDelete)
 		},
 	}
 
@@ -30,28 +30,38 @@ creating new records.`,
 	return deploy
 }
 
-func deploy(provider dns.Provider, configFile string, shouldCreate bool, shouldDelete bool) error {
+func deploy(client *porkbun.Client, configFile string, shouldCreate bool, shouldDelete bool) error {
 	config, err := config.ReadFile(configFile)
 	if err != nil {
 		return fmt.Errorf("reading %v: %v", configFile, err)
 	}
 
-	from, err := provider.AllRecords(config.Domain)
+	from, err := client.AllRecords(config.Domain)
 	if err != nil {
 		return fmt.Errorf("fetching existing records: %v", err)
 	}
 
-	configRecords := config.Records
-	to := make([]dns.Record, len(configRecords))
-	for i, record := range configRecords {
-		to[i] = record
+	to := make([]porkbun.Record, len(config.Records))
+	for i, record := range config.Records {
+		priority := ""
+		if record.Priority != 0 {
+			priority = fmt.Sprint(record.Priority)
+		}
+
+		to[i] = porkbun.Record{
+			Name:     record.Name,
+			Type:     record.Type,
+			TTL:      fmt.Sprint(record.Ttl),
+			Content:  record.Data,
+			Priority: priority,
+		}
 	}
 
-	added, removed := collections.AddedRemovedByHash(from, to, dns.RecordHash)
+	added, removed := collections.AddedRemovedByHash(from, to, porkbun.RecordHash)
 	if shouldDelete {
 		fmt.Println("Deleting", len(removed), "records...")
 		for _, record := range removed {
-			err := provider.DeleteRecord(config.Domain, record)
+			err := client.DeleteRecord(config.Domain, record)
 			if err != nil {
 				return fmt.Errorf("couldn't delete record: %v", err)
 			}
@@ -66,7 +76,7 @@ func deploy(provider dns.Provider, configFile string, shouldCreate bool, shouldD
 	if shouldCreate {
 		fmt.Println("Creating", len(added), "records...")
 		for _, record := range added {
-			err := provider.CreateRecord(config.Domain, record)
+			err := client.CreateRecord(config.Domain, record)
 			if err != nil {
 				return fmt.Errorf("couldn't create record: %v", err)
 			}

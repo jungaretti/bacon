@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"bacon/pkg/config"
-	"bacon/pkg/dns"
+	"bacon/pkg/porkbun"
 	"fmt"
 	"strconv"
 
@@ -10,36 +10,36 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func newPrintCmd(provider dns.Provider) *cobra.Command {
+func newPrintCmd(client *porkbun.Client) *cobra.Command {
 	print := &cobra.Command{
 		Use:   "print <domain>",
 		Short: "Print existing records",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return print(provider, args[0])
+			return print(client, args[0])
 		},
 	}
 	return print
 }
 
-func print(provider dns.Provider, domain string) error {
-	records, err := provider.AllRecords(domain)
+func print(client *porkbun.Client, domain string) error {
+	records, err := client.AllRecords(domain)
 	if err != nil {
 		return err
 	}
 
 	configRecords := make([]config.Record, len(records))
 	for i, record := range records {
-		ttl, err := strconv.Atoi(record.GetTtl())
+		ttl, err := strconv.Atoi(record.TTL)
 		if err != nil {
 			return fmt.Errorf("record %v has invalid TTL: %v", record, err)
 		}
 
 		configRecords[i] = config.Record{
-			Name: record.GetName(),
-			Type: record.GetType(),
+			Name: record.Name,
+			Type: record.Type,
 			Ttl:  ttl,
-			Data: record.GetData(),
+			Data: record.Content,
 		}
 	}
 

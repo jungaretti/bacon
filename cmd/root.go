@@ -1,8 +1,7 @@
 package cmd
 
 import (
-	"bacon/pkg/dns"
-	"bacon/pkg/providers/porkbun"
+	"bacon/pkg/porkbun"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -15,24 +14,24 @@ func Execute() {
 
 	var porkbunApiKey = os.Getenv("PORKBUN_API_KEY")
 	var porkbunSecretApiKey = os.Getenv("PORKBUN_SECRET_KEY")
-	var porkbunProvider = porkbun.NewPorkbunProvider(porkbunApiKey, porkbunSecretApiKey)
+	var client = porkbun.NewClient(porkbunApiKey, porkbunSecretApiKey)
 
-	root := newRootCmd(porkbunProvider)
+	root := newRootCmd(client)
 	err := root.Execute()
 	if err != nil {
 		os.Exit(1)
 	}
 }
 
-func newRootCmd(provider dns.Provider) *cobra.Command {
+func newRootCmd(client *porkbun.Client) *cobra.Command {
 	root := &cobra.Command{
 		Use:   "bacon",
 		Short: "Bacon is a tasty DNS manager for Porkbun",
 	}
 
-	root.AddCommand(newPingCmd(provider))
-	root.AddCommand(newDeployCmd(provider))
-	root.AddCommand(newPrintCmd(provider))
+	root.AddCommand(newPingCmd(client))
+	root.AddCommand(newDeployCmd(client))
+	root.AddCommand(newPrintCmd(client))
 
 	return root
 }

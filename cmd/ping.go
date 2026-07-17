@@ -1,26 +1,26 @@
 package cmd
 
 import (
-	"bacon/pkg/dns"
+	"bacon/pkg/porkbun"
 	"fmt"
 
 	"github.com/spf13/cobra"
 )
 
-func newPingCmd(provider dns.Provider) *cobra.Command {
+func newPingCmd(client *porkbun.Client) *cobra.Command {
 	ping := &cobra.Command{
 		Use:   "ping",
 		Short: "Check authentication status",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return ping(provider)
+			return ping(client)
 		},
 	}
 	return ping
 }
 
-func ping(provider dns.Provider) error {
-	err := provider.CheckAuth()
+func ping(client *porkbun.Client) error {
+	err := client.Ping()
 	if err != nil {
 		return err
 	}

@@ -1,4 +1,4 @@
-package api
+package porkbun
 
 type Auth struct {
 	ApiKey       string `json:"apikey"`
