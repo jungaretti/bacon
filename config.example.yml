@@ -1,27 +1,27 @@
-domain: bacontest42.com
+domain: bacondemo.com
 records:
-  - host: bacontest42.com
+  - host: bacondemo.com
     type: ALIAS
     ttl: 600
-    content: pixie.porkbun.com
-  - host: '*.bacontest42.com'
+    content: uixie.porkbun.com
+  - host: '*.bacondemo.com'
     type: CNAME
     ttl: 600
-    content: pixie.porkbun.com
+    content: uixie.porkbun.com
   - type: MX
-    host: bacontest42.com
+    host: bacondemo.com
     content: in1-smtp.messagingengine.com
     ttl: 600
     priority: 10
     notes: Email server
   - type: MX
-    host: bacontest42.com
+    host: bacondemo.com
     content: in2-smtp.messagingengine.com
     ttl: 600
     priority: 20
     notes: Email server
   - type: A
-    host: api.bacontest42.com
+    host: api.bacondemo.com
     content: 42.42.42.42
     ttl: 600
     notes: API endpoint

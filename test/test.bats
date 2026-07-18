@@ -27,5 +27,5 @@ setup() {
 }
 
 @test "print" {
-    ./bin/bacon print bacontest42.com
+    ./bin/bacon print bacondemo.com
 }

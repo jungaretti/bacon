@@ -6,14 +6,14 @@ import (
 
 func TestRecordHashDiffsName(t *testing.T) {
 	recordA := Record{
-		Name:    "www.bacontest42.com",
+		Name:    "www.bacondemo.com",
 		Type:    "A",
 		TTL:     "600",
 		Content: "1.2.3.4",
 	}
 
 	recordB := Record{
-		Name:    "mail.bacontest42.com",
+		Name:    "mail.bacondemo.com",
 		Type:    recordA.Type,
 		TTL:     recordA.TTL,
 		Content: recordA.Content,
@@ -26,7 +26,7 @@ func TestRecordHashDiffsName(t *testing.T) {
 
 func TestRecordHashDiffsType(t *testing.T) {
 	recordA := Record{
-		Name:    "www.bacontest42.com",
+		Name:    "www.bacondemo.com",
 		Type:    "A",
 		TTL:     "600",
 		Content: "1.2.3.4",
@@ -46,7 +46,7 @@ func TestRecordHashDiffsType(t *testing.T) {
 
 func TestRecordHashDiffsContent(t *testing.T) {
 	recordA := Record{
-		Name:    "www.bacontest42.com",
+		Name:    "www.bacondemo.com",
 		Type:    "A",
 		TTL:     "600",
 		Content: "1.2.3.4",
@@ -66,7 +66,7 @@ func TestRecordHashDiffsContent(t *testing.T) {
 
 func TestRecordHashDiffsTTL(t *testing.T) {
 	recordA := Record{
-		Name:    "www.bacontest42.com",
+		Name:    "www.bacondemo.com",
 		Type:    "A",
 		TTL:     "600",
 		Content: "1.2.3.4",
@@ -86,10 +86,10 @@ func TestRecordHashDiffsTTL(t *testing.T) {
 
 func TestRecordHashDiffsPriority(t *testing.T) {
 	recordA := Record{
-		Name:     "mail.bacontest42.com",
+		Name:     "mail.bacondemo.com",
 		Type:     "MX",
 		TTL:      "600",
-		Content:  "mx.example.com",
+		Content:  "mx.bacondemo.com",
 		Priority: "10",
 	}
 
@@ -108,10 +108,10 @@ func TestRecordHashDiffsPriority(t *testing.T) {
 
 func TestRecordHashDiffsNotes(t *testing.T) {
 	recordA := Record{
-		Name:     "mail.bacontest42.com",
+		Name:     "mail.bacondemo.com",
 		Type:     "MX",
 		TTL:      "600",
-		Content:  "mx.example.com",
+		Content:  "mx.bacondemo.com",
 		Priority: "10",
 		Notes:    "Fastmail",
 	}
@@ -132,7 +132,7 @@ func TestRecordHashDiffsNotes(t *testing.T) {
 
 func TestIgnoredName(t *testing.T) {
 	ignoredRecord := Record{
-		Name:    "_acme-challenge.bacontest42.com",
+		Name:    "_acme-challenge.bacondemo.com",
 		Type:    "TXT",
 		TTL:     "600",
 		Content: "c_V4WaKPWlisAvnvTZ62BOuLiQDpkC2cOtahW8TDthw",
@@ -145,7 +145,7 @@ func TestIgnoredName(t *testing.T) {
 
 func TestIgnoredType(t *testing.T) {
 	ignoredRecord := Record{
-		Name:    "www.bacontest42.com",
+		Name:    "www.bacondemo.com",
 		Type:    "NS",
 		TTL:     "600",
 		Content: "c_V4WaKPWlisAvnvTZ62BOuLiQDpkC2cOtahW8TDsfs",

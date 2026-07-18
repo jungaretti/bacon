@@ -29,14 +29,14 @@
             ]
         },
         {
-            "name": "print bacontest42.com",
+            "name": "print bacondemo.com",
             "type": "go",
             "request": "launch",
             "mode": "auto",
             "program": "${workspaceFolder}",
             "args": [
                 "print",
-                "bacontest42.com"
+                "bacondemo.com"
             ]
         }
     ]

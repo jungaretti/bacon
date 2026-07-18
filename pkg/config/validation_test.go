@@ -6,22 +6,22 @@ import (
 
 func TestValidateConfigValid(t *testing.T) {
 	config := Config{
-		Domain: "bacontest42.com",
+		Domain: "bacondemo.com",
 		Records: []Record{
 			{
-				Name: "bacontest42.com",
+				Name: "bacondemo.com",
 				Type: "ALIAS",
 				Ttl:  600,
 				Data: "pixie.porkbun.com",
 			},
 			{
-				Name: "*.bacontest42.com",
+				Name: "*.bacondemo.com",
 				Type: "CNAME",
 				Ttl:  600,
 				Data: "pixie.porkbun.com",
 			},
 			{
-				Name:     "bacontest42.com",
+				Name:     "bacondemo.com",
 				Type:     "MX",
 				Ttl:      600,
 				Data:     "in1-smtp.messagingengine.com",
@@ -37,7 +37,7 @@ func TestValidateConfigValid(t *testing.T) {
 
 func TestValidateConfigMissingHost(t *testing.T) {
 	config := Config{
-		Domain: "bacontest42.com",
+		Domain: "bacondemo.com",
 		Records: []Record{
 			{
 				Type: "ALIAS",
@@ -54,10 +54,10 @@ func TestValidateConfigMissingHost(t *testing.T) {
 
 func TestValidateConfigAcmeChallengeHost(t *testing.T) {
 	config := Config{
-		Domain: "bacontest42.com",
+		Domain: "bacondemo.com",
 		Records: []Record{
 			{
-				Name: "_acme-challenge.bacontest42.com",
+				Name: "_acme-challenge.bacondemo.com",
 				Type: "TXT",
 				Ttl:  600,
 				Data: "c_V4WaKPWlisAvnvTZ62BOuLiQDpkC2cOtahW8TDthw",
@@ -72,10 +72,10 @@ func TestValidateConfigAcmeChallengeHost(t *testing.T) {
 
 func TestValidateConfigMissingType(t *testing.T) {
 	config := Config{
-		Domain: "bacontest42.com",
+		Domain: "bacondemo.com",
 		Records: []Record{
 			{
-				Name: "bacontest42.com",
+				Name: "bacondemo.com",
 				Ttl:  600,
 				Data: "pixie.porkbun.com",
 			},
@@ -89,10 +89,10 @@ func TestValidateConfigMissingType(t *testing.T) {
 
 func TestValidateConfigInvalidType(t *testing.T) {
 	config := Config{
-		Domain: "bacontest42.com",
+		Domain: "bacondemo.com",
 		Records: []Record{
 			{
-				Name: "bacontest42.com",
+				Name: "bacondemo.com",
 				Type: "FAKE",
 				Ttl:  600,
 				Data: "pixie.porkbun.com",
@@ -107,10 +107,10 @@ func TestValidateConfigInvalidType(t *testing.T) {
 
 func TestValidateConfigMissingTtl(t *testing.T) {
 	config := Config{
-		Domain: "bacontest42.com",
+		Domain: "bacondemo.com",
 		Records: []Record{
 			{
-				Name: "bacontest42.com",
+				Name: "bacondemo.com",
 				Type: "ALIAS",
 				Data: "pixie.porkbun.com",
 			},
@@ -124,10 +124,10 @@ func TestValidateConfigMissingTtl(t *testing.T) {
 
 func TestValidateConfigInvalidTtl(t *testing.T) {
 	config := Config{
-		Domain: "bacontest42.com",
+		Domain: "bacondemo.com",
 		Records: []Record{
 			{
-				Name: "bacontest42.com",
+				Name: "bacondemo.com",
 				Type: "ALIAS",
 				Ttl:  300,
 				Data: "pixie.porkbun.com",
@@ -142,10 +142,10 @@ func TestValidateConfigInvalidTtl(t *testing.T) {
 
 func TestValidateConfigMissingContent(t *testing.T) {
 	config := Config{
-		Domain: "bacontest42.com",
+		Domain: "bacondemo.com",
 		Records: []Record{
 			{
-				Name: "bacontest42.com",
+				Name: "bacondemo.com",
 				Type: "ALIAS",
 				Ttl:  600,
 			},
@@ -159,10 +159,10 @@ func TestValidateConfigMissingContent(t *testing.T) {
 
 func TestValidateConfigInvalidPriority(t *testing.T) {
 	config := Config{
-		Domain: "bacontest42.com",
+		Domain: "bacondemo.com",
 		Records: []Record{
 			{
-				Name:     "bacontest42.com",
+				Name:     "bacondemo.com",
 				Type:     "ALIAS",
 				Ttl:      600,
 				Data:     "pixie.porkbun.com",
@@ -178,16 +178,16 @@ func TestValidateConfigInvalidPriority(t *testing.T) {
 
 func TestValidateConfigCnameSameHost(t *testing.T) {
 	config := Config{
-		Domain: "bacontest42.com",
+		Domain: "bacondemo.com",
 		Records: []Record{
 			{
-				Name: "*.bacontest42.com",
+				Name: "*.bacondemo.com",
 				Type: "CNAME",
 				Ttl:  600,
 				Data: "pixie.porkbun.com",
 			},
 			{
-				Name:     "*.bacontest42.com",
+				Name:     "*.bacondemo.com",
 				Type:     "MX",
 				Ttl:      600,
 				Data:     "in1-smtp.messagingengine.com",

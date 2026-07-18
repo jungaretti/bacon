@@ -7,7 +7,7 @@ import (
 
 func TestRecordToPorkbun(t *testing.T) {
 	record := Record{
-		Name: "bacontest42.com",
+		Name: "bacondemo.com",
 		Type: "A",
 		Ttl:  600,
 		Data: "1.2.3.4",
@@ -30,10 +30,10 @@ func TestRecordToPorkbun(t *testing.T) {
 
 func TestRecordToPorkbunWithPriority(t *testing.T) {
 	record := Record{
-		Name:     "bacontest42.com",
+		Name:     "bacondemo.com",
 		Type:     "MX",
 		Ttl:      600,
-		Data:     "mail.bacontest42.com",
+		Data:     "mail.bacondemo.com",
 		Priority: 10,
 	}
 
@@ -45,7 +45,7 @@ func TestRecordToPorkbunWithPriority(t *testing.T) {
 
 func TestRecordToPorkbunWithNotes(t *testing.T) {
 	record := Record{
-		Name:  "capybara.bacontest42.com",
+		Name:  "capybara.bacondemo.com",
 		Type:  "A",
 		Ttl:   600,
 		Data:  "1.2.3.4",
@@ -60,7 +60,7 @@ func TestRecordToPorkbunWithNotes(t *testing.T) {
 
 func TestRecordFromPorkbun(t *testing.T) {
 	record := porkbun.Record{
-		Name:    "bacontest42.com",
+		Name:    "bacondemo.com",
 		Type:    "A",
 		TTL:     "600",
 		Content: "1.2.3.4",
@@ -87,7 +87,7 @@ func TestRecordFromPorkbun(t *testing.T) {
 
 func TestRoundTripConversion(t *testing.T) {
 	original := Record{
-		Name: "bacontest42.com",
+		Name: "bacondemo.com",
 		Type: "A",
 		Ttl:  600,
 		Data: "1.2.3.4",
