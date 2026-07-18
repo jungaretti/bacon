@@ -12,6 +12,7 @@ type Record struct {
 	Ttl      int    `yaml:"ttl"`
 	Data     string `yaml:"content"`
 	Priority int    `yaml:"priority,omitempty"`
+	Notes    string `yaml:"notes,omitempty"`
 }
 
 func (r Record) ToPorkbun() porkbun.Record {
@@ -26,6 +27,7 @@ func (r Record) ToPorkbun() porkbun.Record {
 		TTL:      strconv.Itoa(r.Ttl),
 		Content:  r.Data,
 		Priority: priority,
+		Notes:    r.Notes,
 	}
 }
 
@@ -49,5 +51,6 @@ func RecordFromPorkbun(record porkbun.Record) (Record, error) {
 		Ttl:      ttl,
 		Data:     record.Content,
 		Priority: priority,
+		Notes:    record.Notes,
 	}, nil
 }

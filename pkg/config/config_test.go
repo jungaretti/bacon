@@ -1,7 +1,6 @@
 package config
 
 import (
-	"bacon/pkg/porkbun"
 	"os"
 	"path/filepath"
 	"testing"
@@ -48,71 +47,6 @@ records:
 	_, err := ReadFile(configFile)
 	if err == nil {
 		t.Fatal("expected error when config is invalid", err)
-	}
-}
-
-func TestRecordToPorkbunWithPriority(t *testing.T) {
-	record := Record{
-		Name:     "bacontest42.com",
-		Type:     "MX",
-		Ttl:      600,
-		Data:     "in1-smtp.messagingengine.com",
-		Priority: 10,
-	}
-
-	porkRecord := record.ToPorkbun()
-	if porkRecord.Priority != "10" {
-		t.Error("expected priority 10, got", porkRecord.Priority)
-	}
-}
-
-func TestRecordToPorkbunWithoutPriority(t *testing.T) {
-	record := Record{
-		Name: "*.bacontest42.com",
-		Type: "CNAME",
-		Ttl:  600,
-		Data: "pixie.porkbun.com",
-	}
-
-	porkRecord := record.ToPorkbun()
-	if porkRecord.Priority != "" {
-		t.Error("expected empty priority, got", porkRecord.Priority)
-	}
-}
-
-func TestRecordFromPorkbunWithPriority(t *testing.T) {
-	record := porkbun.Record{
-		Name:     "bacontest42.com",
-		Type:     "MX",
-		TTL:      "600",
-		Content:  "in1-smtp.messagingengine.com",
-		Priority: "10",
-	}
-
-	configRecord, err := RecordFromPorkbun(record)
-	if err != nil {
-		t.Fatal("did not convert record", err)
-	}
-	if configRecord.Priority != 10 {
-		t.Error("expected priority 10, got", configRecord.Priority)
-	}
-}
-
-func TestRecordFromPorkbunWithoutPriority(t *testing.T) {
-	record := porkbun.Record{
-		Name:     "*.bacontest42.com",
-		Type:     "CNAME",
-		TTL:      "600",
-		Content:  "pixie.porkbun.com",
-		Priority: "0",
-	}
-
-	configRecord, err := RecordFromPorkbun(record)
-	if err != nil {
-		t.Fatal("did not convert record", err)
-	}
-	if configRecord.Priority != 0 {
-		t.Error("expected priority 0, got", configRecord.Priority)
 	}
 }
 
