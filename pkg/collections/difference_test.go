@@ -84,3 +84,37 @@ func TestAddedRemovedRemove(t *testing.T) {
 		t.Error("expected", 0, "actual", len(added))
 	}
 }
+
+func TestAddedRemovedUnchangedEmpty(t *testing.T) {
+	from := []string{hello, world}
+	to := []string{hello, world}
+
+	added, removed, unchanged := AddedRemovedUnchangedByHash(from, to, func(thing string) string { return thing })
+
+	if len(added) != 0 {
+		t.Error("expected", 0, "actual", len(added))
+	}
+	if len(removed) != 0 {
+		t.Error("expected", 0, "actual", len(removed))
+	}
+	if len(unchanged) != 2 {
+		t.Error("expected", 2, "actual", len(unchanged))
+	}
+}
+
+func TestAddedRemovedUnchangedMixed(t *testing.T) {
+	from := []string{hello, world}
+	to := []string{world, "bacon"}
+
+	added, removed, unchanged := AddedRemovedUnchangedByHash(from, to, func(thing string) string { return thing })
+
+	if len(added) != 1 || added[0] != "bacon" {
+		t.Error("expected", []string{"bacon"}, "actual", added)
+	}
+	if len(removed) != 1 || removed[0] != hello {
+		t.Error("expected", []string{hello}, "actual", removed)
+	}
+	if len(unchanged) != 1 || unchanged[0] != world {
+		t.Error("expected", []string{world}, "actual", unchanged)
+	}
+}
