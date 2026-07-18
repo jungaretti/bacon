@@ -54,6 +54,7 @@ Deploys records from a domain's config file by deleting unknown records and crea
 
 - `--delete` disable dry-run deletions and delete outdated records
 - `--create` disable dry-run creations and create new records
+- `--output` set the output format. Allowed values: `table` (default), `json`
 
 #### `print <domain>`
 
