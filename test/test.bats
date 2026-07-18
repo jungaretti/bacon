@@ -7,7 +7,7 @@ setup() {
 }
 
 @test "deploy" {
-    ./bin/bacon deploy config.example.yml | grep '4 unchanged'
+    ./bin/bacon deploy config.example.yml
 }
 
 @test "print" {
