@@ -14,6 +14,21 @@ type Record struct {
 	Priority int    `yaml:"priority,omitempty"`
 }
 
+func (r Record) ToPorkbun() porkbun.Record {
+	priority := ""
+	if r.Priority != 0 {
+		priority = strconv.Itoa(r.Priority)
+	}
+
+	return porkbun.Record{
+		Name:     r.Name,
+		Type:     r.Type,
+		TTL:      strconv.Itoa(r.Ttl),
+		Content:  r.Data,
+		Priority: priority,
+	}
+}
+
 func RecordFromPorkbun(record porkbun.Record) (Record, error) {
 	ttl, err := strconv.Atoi(record.TTL)
 	if err != nil {

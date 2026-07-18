@@ -56,6 +56,35 @@ records:
 	}
 }
 
+func TestRecordToPorkbunWithPriority(t *testing.T) {
+	record := Record{
+		Name:     "bacontest42.com",
+		Type:     "MX",
+		Ttl:      600,
+		Data:     "in1-smtp.messagingengine.com",
+		Priority: 10,
+	}
+
+	porkRecord := record.ToPorkbun()
+	if porkRecord.Priority != "10" {
+		t.Error("expected priority 10, got", porkRecord.Priority)
+	}
+}
+
+func TestRecordToPorkbunWithoutPriority(t *testing.T) {
+	record := Record{
+		Name: "*.bacontest42.com",
+		Type: "CNAME",
+		Ttl:  600,
+		Data: "pixie.porkbun.com",
+	}
+
+	porkRecord := record.ToPorkbun()
+	if porkRecord.Priority != "" {
+		t.Error("expected empty priority, got", porkRecord.Priority)
+	}
+}
+
 func TestRecordFromPorkbunWithPriority(t *testing.T) {
 	record := porkbun.Record{
 		Name:     "bacontest42.com",

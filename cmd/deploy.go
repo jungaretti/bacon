@@ -43,18 +43,7 @@ func deploy(client *porkbun.Client, configFile string, shouldCreate bool, should
 
 	to := make([]porkbun.Record, len(config.Records))
 	for i, record := range config.Records {
-		priority := ""
-		if record.Priority != 0 {
-			priority = fmt.Sprint(record.Priority)
-		}
-
-		to[i] = porkbun.Record{
-			Name:     record.Name,
-			Type:     record.Type,
-			TTL:      fmt.Sprint(record.Ttl),
-			Content:  record.Data,
-			Priority: priority,
-		}
+		to[i] = record.ToPorkbun()
 	}
 
 	added, removed := collections.AddedRemovedByHash(from, to, porkbun.RecordHash)
