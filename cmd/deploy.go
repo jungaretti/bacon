@@ -8,6 +8,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	createSymbol = "+"
+	editSymbol   = "~"
+	deleteSymbol = "-"
+	keepSymbol   = "="
+)
+
 func newDeployCmd(client *porkbun.Client) *cobra.Command {
 	var shouldCreate bool
 	var shouldDelete bool
@@ -56,12 +63,12 @@ func deploy(client *porkbun.Client, configFile string, shouldCreate bool, should
 			if err != nil {
 				return fmt.Errorf("couldn't delete record: %v", err)
 			}
-			fmt.Println("-", record)
+			fmt.Println(deleteSymbol, record)
 		}
 	} else {
 		fmt.Println("Would delete", len(removed), "records:")
 		for _, record := range removed {
-			fmt.Println("-", record)
+			fmt.Println(deleteSymbol, record)
 		}
 	}
 
@@ -72,12 +79,12 @@ func deploy(client *porkbun.Client, configFile string, shouldCreate bool, should
 			if err != nil {
 				return fmt.Errorf("couldn't edit record: %v", err)
 			}
-			fmt.Println("~", record)
+			fmt.Println(editSymbol, record)
 		}
 	} else {
 		fmt.Println("Would edit", len(edited), "records:")
 		for _, record := range edited {
-			fmt.Println("~", record)
+			fmt.Println(editSymbol, record)
 		}
 	}
 
@@ -90,18 +97,18 @@ func deploy(client *porkbun.Client, configFile string, shouldCreate bool, should
 			}
 
 			record.Id = id
-			fmt.Println("+", record)
+			fmt.Println(createSymbol, record)
 		}
 	} else {
 		fmt.Println("Would create", len(added), "records:")
 		for _, record := range added {
-			fmt.Println("+", record)
+			fmt.Println(createSymbol, record)
 		}
 	}
 
 	fmt.Println("Keeping", len(unchanged), "records:")
 	for _, record := range unchanged {
-		fmt.Println("=", record)
+		fmt.Println(keepSymbol, record)
 	}
 
 	fullDeployment := shouldCreate && shouldDelete && shouldEdit
