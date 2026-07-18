@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 )
 
 type checkable interface {
@@ -27,11 +28,14 @@ func (r baseRes) checkStatus() error {
 
 var _ checkable = baseRes{}
 
-func makeRequest(url string, req interface{}, out checkable) error {
+func makeRequest(ticker *time.Ticker, url string, req interface{}, out checkable) error {
 	jsonData, err := json.Marshal(req)
 	if err != nil {
 		return err
 	}
+
+	// Porkbun returns 5XX errors if we send requests too quickly
+	<-ticker.C
 
 	res, err := http.Post(url, "application/json", bytes.NewReader(jsonData))
 	if err != nil {

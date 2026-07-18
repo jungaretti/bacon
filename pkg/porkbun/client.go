@@ -3,24 +3,33 @@ package porkbun
 import (
 	"fmt"
 	"strings"
+	"time"
 )
 
 const (
-	PING     string = "https://api.porkbun.com/api/json/v3/ping"
-	RETRIEVE string = "https://api.porkbun.com/api/json/v3/dns/retrieve"
-	CREATE   string = "https://api.porkbun.com/api/json/v3/dns/create"
-	DELETE   string = "https://api.porkbun.com/api/json/v3/dns/delete"
+	pingUrl     string = "https://api.porkbun.com/api/json/v3/ping"
+	retrieveUrl string = "https://api.porkbun.com/api/json/v3/dns/retrieve"
+	createUrl   string = "https://api.porkbun.com/api/json/v3/dns/create"
+	deleteUrl   string = "https://api.porkbun.com/api/json/v3/dns/delete"
 )
 
+// Porkbun returns 5XX errors if we send requests too quickly
+const rateLimit = time.Second
+
+type Auth struct {
+	ApiKey       string `json:"apikey"`
+	SecretApiKey string `json:"secretapikey"`
+}
+
 type Client struct {
-	Auth      Auth
-	Throttler Throttler
+	Auth   Auth
+	ticker *time.Ticker
 }
 
 func NewClient(apiKey, secretApiKey string) *Client {
 	return &Client{
-		Auth:      Auth{ApiKey: apiKey, SecretApiKey: secretApiKey},
-		Throttler: *NewThrottler(1),
+		Auth:   Auth{ApiKey: apiKey, SecretApiKey: secretApiKey},
+		ticker: time.NewTicker(rateLimit),
 	}
 }
 
@@ -31,8 +40,7 @@ func (c Client) Ping() error {
 	}
 
 	response := pingRes{}
-	c.Throttler.WaitForPermit()
-	return makeRequest(PING, c.Auth, &response)
+	return makeRequest(c.ticker, pingUrl, c.Auth, &response)
 }
 
 func (c Client) AllRecords(domain string) ([]Record, error) {
@@ -42,8 +50,7 @@ func (c Client) AllRecords(domain string) ([]Record, error) {
 	}
 
 	response := listRes{}
-	c.Throttler.WaitForPermit()
-	err := makeRequest(RETRIEVE+"/"+domain, c.Auth, &response)
+	err := makeRequest(c.ticker, retrieveUrl+"/"+domain, c.Auth, &response)
 	if err != nil {
 		return nil, err
 	}
@@ -78,14 +85,12 @@ func (c Client) CreateRecord(domain string, record Record) error {
 	request.Name = trimDomain(record.Name, domain)
 
 	response := createRes{}
-	c.Throttler.WaitForPermit()
-	return makeRequest(CREATE+"/"+domain, request, &response)
+	return makeRequest(c.ticker, createUrl+"/"+domain, request, &response)
 }
 
 func (c Client) DeleteRecord(domain string, record Record) error {
-	c.Throttler.WaitForPermit()
 	response := baseRes{}
-	return makeRequest(DELETE+"/"+domain+"/"+record.Id, c.Auth, &response)
+	return makeRequest(c.ticker, deleteUrl+"/"+domain+"/"+record.Id, c.Auth, &response)
 }
 
 // Trims a root domain from a longer subdomain. For example, trims
