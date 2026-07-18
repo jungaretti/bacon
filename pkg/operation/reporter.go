@@ -16,7 +16,7 @@ type Summary struct {
 	Failed         int `json:"failed"`
 }
 
-func (s Summary) String() string {
+func (summary Summary) String() string {
 	var parts []string
 	appendCount := func(count int, singular, plural string) {
 		if count == 1 {
@@ -26,12 +26,12 @@ func (s Summary) String() string {
 		}
 	}
 
-	appendCount(s.Created, "created", "created")
-	appendCount(s.Deleted, "deleted", "deleted")
-	appendCount(s.PlannedCreates, "create planned", "creates planned")
-	appendCount(s.PlannedDeletes, "delete planned", "deletes planned")
-	appendCount(s.Unchanged, "unchanged", "unchanged")
-	appendCount(s.Failed, "failed", "failed")
+	appendCount(summary.Created, "created", "created")
+	appendCount(summary.Deleted, "deleted", "deleted")
+	appendCount(summary.PlannedCreates, "create planned", "creates planned")
+	appendCount(summary.PlannedDeletes, "delete planned", "deletes planned")
+	appendCount(summary.Unchanged, "unchanged", "unchanged")
+	appendCount(summary.Failed, "failed", "failed")
 
 	if len(parts) == 0 {
 		return "no records"
@@ -41,54 +41,66 @@ func (s Summary) String() string {
 
 type Reporter interface {
 	Report(result RecordOperationResult)
-	Finish(s Summary) error
+	Finish(summary Summary) error
 }
 
-// Collects results and serializes them to a single JSON object after all operations have completed.
 type jsonReporter struct {
-	w       io.Writer
+	writer  io.Writer
 	results []RecordOperationResult
 }
 
-// NewJSONReporter returns a Reporter that collects results and serializes them to a single JSON object after all operations have completed.
-func NewJSONReporter(w io.Writer) Reporter {
-	return &jsonReporter{w: w, results: []RecordOperationResult{}}
+// NewJSONReporter returns a Reporter that collects results and serializes
+// them to a single JSON object after all operations have completed.
+func NewJSONReporter(writer io.Writer) Reporter {
+	return &jsonReporter{writer: writer, results: []RecordOperationResult{}}
 }
 
-func (j *jsonReporter) Report(result RecordOperationResult) {
-	j.results = append(j.results, result)
+func (reporter *jsonReporter) Report(result RecordOperationResult) {
+	reporter.results = append(reporter.results, result)
 }
 
-func (j *jsonReporter) Finish(summary Summary) error {
+func (reporter *jsonReporter) Finish(summary Summary) error {
 	document := struct {
 		Summary Summary                 `json:"summary"`
 		Results []RecordOperationResult `json:"results"`
 	}{
-		Results: j.results,
 		Summary: summary,
+		Results: reporter.results,
 	}
 
-	encoder := json.NewEncoder(j.w)
+	encoder := json.NewEncoder(reporter.writer)
 	encoder.SetIndent("", "  ")
 	return encoder.Encode(document)
 }
 
-// Streams results in a tabular format as they complete.
+var tableColumns = []struct {
+	header string
+	width  int
+}{
+	{"ACTION", 6},
+	{"STATUS", 9},
+	{"HOST", 24},
+	{"TYPE", 6},
+	{"CONTENT", 30},
+	{"TTL", 5},
+	{"PRIO", 4},
+}
+
 type tableReporter struct {
-	w           io.Writer
+	writer      io.Writer
 	wroteHeader bool
 }
 
-// NewTableReporter returns a Reporter that streams results in a tabular format as they complete.
-func NewTableReporter(w io.Writer) Reporter {
-	return &tableReporter{w: w}
+// NewTableReporter returns a Reporter that streams results in a tabular
+// format as they complete.
+func NewTableReporter(writer io.Writer) Reporter {
+	return &tableReporter{writer: writer}
 }
 
-func (t *tableReporter) Report(result RecordOperationResult) {
-	if !t.wroteHeader {
-		t.printRow("ACTION", "STATUS", "HOST", "TYPE", "CONTENT", "TTL", "PRIO")
-		t.printSeparator()
-		t.wroteHeader = true
+func (reporter *tableReporter) Report(result RecordOperationResult) {
+	if !reporter.wroteHeader {
+		reporter.printHeader()
+		reporter.wroteHeader = true
 	}
 
 	record := result.Operation.Record
@@ -97,41 +109,46 @@ func (t *tableReporter) Report(result RecordOperationResult) {
 		priority = ""
 	}
 
-	t.printRow(string(result.Operation.Action), string(result.Status()), record.Name, record.Type, record.Content, record.TTL, priority)
+	reporter.printRow(actionLabel(result.Operation.Action), string(result.Status()), record.Name, record.Type, record.Content, record.TTL, priority)
 	if result.Err != nil {
-		fmt.Fprintln(t.w, "  error:", result.Err)
+		fmt.Fprintln(reporter.writer, "  error:", result.Err)
 	}
 }
 
-func (t *tableReporter) Finish(summary Summary) error {
-	_, err := fmt.Fprintln(t.w, "\n"+summary.String())
+func (reporter *tableReporter) Finish(summary Summary) error {
+	_, err := fmt.Fprintln(reporter.writer, "\n"+summary.String())
 	return err
 }
 
-const (
-	actionWidth  = 6
-	statusWidth  = 9
-	hostWidth    = 24
-	typeWidth    = 6
-	contentWidth = 30
-	ttlWidth     = 5
-)
+func (reporter *tableReporter) printHeader() {
+	headers := make([]string, len(tableColumns))
+	separators := make([]string, len(tableColumns))
+	for i, column := range tableColumns {
+		headers[i] = column.header
+		separators[i] = strings.Repeat("-", column.width)
+	}
 
-func (t *tableReporter) printRow(action, status, host, recordType, content, ttl, priority string) {
-	row := fmt.Sprintf("%-*s  %-*s  %-*s  %-*s  %-*s  %-*s  %s",
-		actionWidth, truncate(action, actionWidth),
-		statusWidth, truncate(status, statusWidth),
-		hostWidth, truncate(host, hostWidth),
-		typeWidth, truncate(recordType, typeWidth),
-		contentWidth, truncate(content, contentWidth),
-		ttlWidth, truncate(ttl, ttlWidth),
-		priority)
-	fmt.Fprintln(t.w, strings.TrimRight(row, " "))
+	reporter.printRow(headers...)
+	reporter.printRow(separators...)
 }
 
-func (t *tableReporter) printSeparator() {
-	dashes := func(width int) string { return strings.Repeat("-", width) }
-	t.printRow(dashes(actionWidth), dashes(statusWidth), dashes(hostWidth), dashes(typeWidth), dashes(contentWidth), dashes(ttlWidth), dashes(len("PRIO")))
+func (reporter *tableReporter) printRow(values ...string) {
+	cells := make([]string, len(values))
+	for i, value := range values {
+		width := tableColumns[i].width
+		cells[i] = fmt.Sprintf("%-*s", width, truncate(value, width))
+	}
+
+	row := strings.Join(cells, "  ")
+	fmt.Fprintln(reporter.writer, strings.TrimRight(row, " "))
+}
+
+// Label for the table's ACTION column. Skip becomes blank because it doesn't do anything.
+func actionLabel(action Action) string {
+	if action == Skip {
+		return ""
+	}
+	return string(action)
 }
 
 // Shortens a value to fit within width, marking cut values with "..."

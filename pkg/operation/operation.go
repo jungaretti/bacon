@@ -35,35 +35,35 @@ type RecordOperationResult struct {
 	Err       error
 }
 
-func (r RecordOperationResult) Status() Status {
-	if r.Operation.Action == Skip {
+func (result RecordOperationResult) Status() Status {
+	if result.Operation.Action == Skip {
 		return Unchanged
 	}
-	if r.Operation.DryRun {
+	if result.Operation.DryRun {
 		return Planned
 	}
-	if r.Err != nil {
+	if result.Err != nil {
 		return Failed
 	}
 	return Succeeded
 }
 
-func (r RecordOperationResult) MarshalJSON() ([]byte, error) {
-	result := struct {
+func (result RecordOperationResult) MarshalJSON() ([]byte, error) {
+	payload := struct {
 		Action Action         `json:"action"`
-		Status Status         `json:"status,omitempty"`
+		Status Status         `json:"status"`
 		Record porkbun.Record `json:"record"`
 		Error  string         `json:"error,omitempty"`
 	}{
-		Action: r.Operation.Action,
-		Record: r.Operation.Record,
-		Status: r.Status(),
+		Action: result.Operation.Action,
+		Status: result.Status(),
+		Record: result.Operation.Record,
 	}
-	if r.Err != nil {
-		result.Error = r.Err.Error()
+	if result.Err != nil {
+		payload.Error = result.Err.Error()
 	}
 
-	return json.Marshal(result)
+	return json.Marshal(payload)
 }
 
 // Manager runs operations and collects their results.
@@ -75,25 +75,28 @@ func NewManager() *Manager {
 	return &Manager{}
 }
 
-// Run executes an operation, unless it is a skip or a dry run, and records
-// the result.
-func (m *Manager) Run(op RecordOperation) RecordOperationResult {
-	result := RecordOperationResult{Operation: op}
-	if op.Action != Skip && !op.DryRun && op.Execute != nil {
-		result.Err = op.Execute()
+// Executes an operation and records the result
+func (manager *Manager) Run(operation RecordOperation) RecordOperationResult {
+	result := RecordOperationResult{Operation: operation}
+
+	isSkip := operation.Action == Skip
+	isDryRun := operation.DryRun
+	hasExecute := operation.Execute != nil
+	if !isSkip && !isDryRun && hasExecute {
+		result.Err = operation.Execute()
 	}
 
-	m.results = append(m.results, result)
+	manager.results = append(manager.results, result)
 	return result
 }
 
-func (m *Manager) Results() []RecordOperationResult {
-	return m.results
+func (manager *Manager) Results() []RecordOperationResult {
+	return manager.results
 }
 
-func (m *Manager) Summary() Summary {
+func (manager *Manager) Summary() Summary {
 	summary := Summary{}
-	for _, result := range m.results {
+	for _, result := range manager.results {
 		switch result.Status() {
 		case Succeeded:
 			if result.Operation.Action == Create {

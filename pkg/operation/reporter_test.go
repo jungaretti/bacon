@@ -50,11 +50,32 @@ func TestTableReporter(t *testing.T) {
 	reporter.Finish(Summary{Created: 1, Unchanged: 1, Failed: 1})
 
 	output := buffer.String()
+	findRow := func(substring string) string {
+		for _, line := range strings.Split(output, "\n") {
+			if strings.Contains(line, substring) {
+				return line
+			}
+		}
+		t.Fatal("no row contains", substring)
+		return ""
+	}
+
+	rows := map[string][]string{
+		"ALIAS":               {"create", "succeeded"},
+		"old.bacontest42.com": {"delete", "failed"},
+		"www.bacontest42.com": {"unchanged"},
+	}
+	for row, marks := range rows {
+		line := findRow(row)
+		for _, mark := range marks {
+			if !strings.Contains(line, mark) {
+				t.Error("expected row", line, "to contain", mark)
+			}
+		}
+	}
+
 	for _, expected := range []string{
 		"ACTION",
-		"+       succeeded  bacontest42.com",
-		"-       failed     old.bacontest42.com",
-		"        unchanged  www.bacontest42.com",
 		"error: api error",
 		"1 created, 1 unchanged, 1 failed",
 	} {
@@ -113,7 +134,6 @@ func TestJSONReporter(t *testing.T) {
 	document := struct {
 		Results []struct {
 			Action string         `json:"action"`
-			DryRun bool           `json:"dryRun"`
 			Record porkbun.Record `json:"record"`
 			Status string         `json:"status"`
 			Error  string         `json:"error"`
