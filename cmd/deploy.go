@@ -46,7 +46,7 @@ func deploy(client *porkbun.Client, configFile string, shouldCreate bool, should
 		to[i] = record.ToPorkbun()
 	}
 
-	added, removed := collections.AddedRemovedByHash(from, to, porkbun.RecordHash)
+	added, removed, _ := collections.AddedRemovedUnchangedByHash(from, to, porkbun.RecordHash)
 	if shouldDelete {
 		fmt.Println("Deleting", len(removed), "records...")
 		for _, record := range removed {
