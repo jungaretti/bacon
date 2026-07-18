@@ -65,10 +65,12 @@ func deploy(client *porkbun.Client, configFile string, shouldCreate bool, should
 	if shouldCreate {
 		fmt.Println("Creating", len(added), "records...")
 		for _, record := range added {
-			err := client.CreateRecord(config.Domain, record)
+			id, err := client.CreateRecord(config.Domain, record)
 			if err != nil {
 				return fmt.Errorf("couldn't create record: %v", err)
 			}
+
+			record.Id = id
 			fmt.Println("-", record)
 		}
 	} else {

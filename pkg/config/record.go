@@ -36,7 +36,7 @@ func RecordFromPorkbun(record porkbun.Record) (Record, error) {
 	}
 
 	priority := 0
-	if record.Priority != "" && record.Priority != "0" {
+	if record.Priority != "" {
 		priority, err = strconv.Atoi(record.Priority)
 		if err != nil {
 			return Record{}, fmt.Errorf("record %v has invalid priority: %v", record, err)

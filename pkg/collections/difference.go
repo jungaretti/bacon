@@ -9,7 +9,7 @@ func SetDifferenceByHash[T any, U comparable](from, to []T, hasher func(T) U) []
 
 	var missing []T
 	for _, element := range from {
-		if _, ok := set[hasher(element)]; !ok {
+		if !set[hasher(element)] {
 			missing = append(missing, element)
 		}
 	}

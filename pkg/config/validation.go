@@ -2,14 +2,15 @@ package config
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 )
 
 var (
 	// Record types that are allowed. Found in Porkbun's API documentation.
-	TYPE_ALLOWLIST = []string{"A", "MX", "CNAME", "ALIAS", "TXT", "AAAA", "SRV", "TLSA", "CAA", "HTTPS", "SVCB"}
+	allowedTypes = []string{"A", "MX", "CNAME", "ALIAS", "TXT", "AAAA", "SRV", "TLSA", "CAA", "HTTPS", "SVCB"}
 	// Record types that are allowed to have a priority. Found in Porkbun's web app.
-	PRIORITY_ALLOWLIST = []string{"MX", "SRV"}
+	allowedPriorityTypes = []string{"MX", "SRV"}
 )
 
 func ValidateConfiguration(config Config) error {
@@ -79,13 +80,11 @@ func recordHasValidName(record Record) error {
 }
 
 func recordHasValidType(record Record) error {
-	for _, allowedType := range TYPE_ALLOWLIST {
-		if record.Type == allowedType {
-			return nil
-		}
+	if !slices.Contains(allowedTypes, record.Type) {
+		return fmt.Errorf("type must be one of %v", allowedTypes)
 	}
 
-	return fmt.Errorf("type must be one of %v", TYPE_ALLOWLIST)
+	return nil
 }
 
 func recordHasValidTtl(record Record) error {
@@ -101,13 +100,11 @@ func recordHasValidPriority(record Record) error {
 		return nil
 	}
 
-	for _, allowedType := range PRIORITY_ALLOWLIST {
-		if record.Type == allowedType {
-			return nil
-		}
+	if !slices.Contains(allowedPriorityTypes, record.Type) {
+		return fmt.Errorf("type must be one of %v to have priority", allowedPriorityTypes)
 	}
 
-	return fmt.Errorf("type must be one of %v to have priority", PRIORITY_ALLOWLIST)
+	return nil
 }
 
 func configHasUniqueCnameHosts(records []Record) error {
