@@ -2,9 +2,7 @@ package porkbun
 
 import "bacon/pkg/collections"
 
-// Diffs existing records (from) against desired records (to). Changed
-// records that keep their identity become edits that carry the existing
-// record's ID with the desired record's fields.
+// Diff existing records (from) against desired records (to).
 func DiffRecords(from, to []Record) (added, removed, edited, unchanged []Record) {
 	added, removed, unchanged = collections.AddedRemovedUnchangedByHash(from, to, RecordHash)
 	groups, removed, added := collections.GroupByHash(removed, added, RecordIdentityHash)
