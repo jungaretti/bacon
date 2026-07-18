@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"strings"
 )
 
 var (
@@ -34,6 +35,10 @@ func ValidateRecord(record Record) error {
 		return err
 	}
 
+	if err := recordHasValidName(record); err != nil {
+		return err
+	}
+
 	if err := recordHasValidType(record); err != nil {
 		return err
 	}
@@ -60,6 +65,14 @@ func recordHasRequiredFields(record Record) error {
 
 	if record.Data == "" {
 		return fmt.Errorf("content is required")
+	}
+
+	return nil
+}
+
+func recordHasValidName(record Record) error {
+	if strings.HasPrefix(record.Name, "_acme-challenge") {
+		return fmt.Errorf("host must not begin with _acme-challenge")
 	}
 
 	return nil

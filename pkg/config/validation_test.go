@@ -52,6 +52,24 @@ func TestValidateConfigMissingHost(t *testing.T) {
 	}
 }
 
+func TestValidateConfigAcmeChallengeHost(t *testing.T) {
+	config := Config{
+		Domain: "bacontest42.com",
+		Records: []Record{
+			{
+				Name: "_acme-challenge.bacontest42.com",
+				Type: "TXT",
+				Ttl:  600,
+				Data: "c_V4WaKPWlisAvnvTZ62BOuLiQDpkC2cOtahW8TDthw",
+			},
+		},
+	}
+
+	if err := ValidateConfiguration(config); err == nil {
+		t.Fatal("expected error when a record host begins with _acme-challenge")
+	}
+}
+
 func TestValidateConfigMissingType(t *testing.T) {
 	config := Config{
 		Domain: "bacontest42.com",
