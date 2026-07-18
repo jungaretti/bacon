@@ -1,9 +1,6 @@
-package api
+package porkbun
 
-import (
-	"bacon/pkg/dns"
-	"strings"
-)
+import "strings"
 
 type Record struct {
 	Id       string `json:"id"`
@@ -15,31 +12,14 @@ type Record struct {
 	Notes    string `json:"notes"`
 }
 
-func (r Record) GetName() string {
-	return r.Name
-}
-
-func (r Record) GetType() string {
-	return r.Type
-}
-
-func (r Record) GetTtl() string {
-	return r.TTL
-}
-
-func (r Record) GetData() string {
-	return r.Content
-}
-
-func (r Record) GetPriority() string {
-	if r.Priority == "0" {
-		return ""
+func RecordHash(r Record) string {
+	priority := r.Priority
+	if priority == "0" {
+		priority = ""
 	}
 
-	return r.Priority
+	return strings.Join([]string{r.Name, r.Type, r.TTL, r.Content, priority}, "-")
 }
-
-var _ dns.Record = Record{}
 
 func (r Record) isIgnored() bool {
 	if r.Type == "NS" {

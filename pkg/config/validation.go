@@ -2,13 +2,15 @@ package config
 
 import (
 	"fmt"
+	"slices"
+	"strings"
 )
 
 var (
 	// Record types that are allowed. Found in Porkbun's API documentation.
-	TYPE_ALLOWLIST = []string{"A", "MX", "CNAME", "ALIAS", "TXT", "NS", "AAAA", "SRV", "TLSA", "CAA", "HTTPS", "SVCB"}
+	allowedTypes = []string{"A", "MX", "CNAME", "ALIAS", "TXT", "AAAA", "SRV", "TLSA", "CAA", "HTTPS", "SVCB"}
 	// Record types that are allowed to have a priority. Found in Porkbun's web app.
-	PRIORITY_ALLOWLIST = []string{"MX", "SRV"}
+	allowedPriorityTypes = []string{"MX", "SRV"}
 )
 
 func ValidateConfiguration(config Config) error {
@@ -31,6 +33,10 @@ func ValidateConfiguration(config Config) error {
 
 func ValidateRecord(record Record) error {
 	if err := recordHasRequiredFields(record); err != nil {
+		return err
+	}
+
+	if err := recordHasValidName(record); err != nil {
 		return err
 	}
 
@@ -65,14 +71,20 @@ func recordHasRequiredFields(record Record) error {
 	return nil
 }
 
-func recordHasValidType(record Record) error {
-	for _, allowedType := range TYPE_ALLOWLIST {
-		if record.Type == allowedType {
-			return nil
-		}
+func recordHasValidName(record Record) error {
+	if strings.HasPrefix(record.Name, "_acme-challenge") {
+		return fmt.Errorf("host must not begin with _acme-challenge")
 	}
 
-	return fmt.Errorf("type must be one of %v", TYPE_ALLOWLIST)
+	return nil
+}
+
+func recordHasValidType(record Record) error {
+	if !slices.Contains(allowedTypes, record.Type) {
+		return fmt.Errorf("type must be one of %v", allowedTypes)
+	}
+
+	return nil
 }
 
 func recordHasValidTtl(record Record) error {
@@ -88,13 +100,8 @@ func recordHasValidPriority(record Record) error {
 		return nil
 	}
 
-	allowedPriorityTypes := make(map[string]bool)
-	for _, t := range PRIORITY_ALLOWLIST {
-		allowedPriorityTypes[t] = true
-	}
-
-	if _, ok := allowedPriorityTypes[record.Type]; !ok {
-		return fmt.Errorf("type must be one of %v to have priority", PRIORITY_ALLOWLIST)
+	if !slices.Contains(allowedPriorityTypes, record.Type) {
+		return fmt.Errorf("type must be one of %v to have priority", allowedPriorityTypes)
 	}
 
 	return nil

@@ -1,8 +1,9 @@
 package config
 
 import (
-	"bacon/pkg/dns"
+	"bacon/pkg/porkbun"
 	"fmt"
+	"strconv"
 )
 
 type Record struct {
@@ -10,31 +11,43 @@ type Record struct {
 	Type     string `yaml:"type"`
 	Ttl      int    `yaml:"ttl"`
 	Data     string `yaml:"content"`
-	Priority int    `yaml:"priority"`
+	Priority int    `yaml:"priority,omitempty"`
 }
 
-func (r Record) GetName() string {
-	return r.Name
-}
-
-func (r Record) GetType() string {
-	return r.Type
-}
-
-func (r Record) GetTtl() string {
-	return fmt.Sprint(r.Ttl)
-}
-
-func (r Record) GetData() string {
-	return r.Data
-}
-
-func (r Record) GetPriority() string {
-	if r.Priority == 0 {
-		return ""
+func (r Record) ToPorkbun() porkbun.Record {
+	priority := ""
+	if r.Priority != 0 {
+		priority = strconv.Itoa(r.Priority)
 	}
 
-	return fmt.Sprint(r.Priority)
+	return porkbun.Record{
+		Name:     r.Name,
+		Type:     r.Type,
+		TTL:      strconv.Itoa(r.Ttl),
+		Content:  r.Data,
+		Priority: priority,
+	}
 }
 
-var _ dns.Record = Record{}
+func RecordFromPorkbun(record porkbun.Record) (Record, error) {
+	ttl, err := strconv.Atoi(record.TTL)
+	if err != nil {
+		return Record{}, fmt.Errorf("record %v has invalid TTL: %v", record, err)
+	}
+
+	priority := 0
+	if record.Priority != "" {
+		priority, err = strconv.Atoi(record.Priority)
+		if err != nil {
+			return Record{}, fmt.Errorf("record %v has invalid priority: %v", record, err)
+		}
+	}
+
+	return Record{
+		Name:     record.Name,
+		Type:     record.Type,
+		Ttl:      ttl,
+		Data:     record.Content,
+		Priority: priority,
+	}, nil
+}

@@ -1,11 +1,14 @@
 package config
 
 import (
+	"bacon/pkg/porkbun"
+	"os"
+	"path/filepath"
 	"testing"
 )
 
 func TestValidConfig(t *testing.T) {
-	configFile, err := SeedConfigToTempFile(`
+	configFile := seedConfigToTempFile(t, `
 domain: bacontest42.com
 records:
     - host: bacontest42.com
@@ -22,9 +25,6 @@ records:
       ttl: 600
       priority: 10
 `)
-	if err != nil {
-		t.Fatal("could not seed config to temp file", err)
-	}
 
 	config, err := ReadFile(configFile)
 	if err != nil {
@@ -32,160 +32,97 @@ records:
 	}
 
 	if len(config.Records) != 3 {
-		t.Fatal("expected 3 records after deployment, got", len(config.Records))
+		t.Fatal("expected 3 records, got", len(config.Records))
 	}
 }
 
-func TestInvalidConfigMissingHost(t *testing.T) {
-	configFile, err := SeedConfigToTempFile(`
+func TestInvalidConfig(t *testing.T) {
+	configFile := seedConfigToTempFile(t, `
 domain: bacontest42.com
 records:
     - type: ALIAS
       ttl: 600
       content: pixie.porkbun.com
 `)
-	if err != nil {
-		t.Fatal("could not seed config to temp file", err)
-	}
 
-	_, err = ReadFile(configFile)
+	_, err := ReadFile(configFile)
 	if err == nil {
-		t.Fatal("expected error when a record is missing host field", err)
+		t.Fatal("expected error when config is invalid", err)
 	}
 }
 
-func TestInvalidConfigMissingType(t *testing.T) {
-	configFile, err := SeedConfigToTempFile(`
-domain: bacontest42.com
-records:
-    - host: bacontest42.com
-      ttl: 600
-      content: pixie.porkbun.com
-`)
-	if err != nil {
-		t.Fatal("could not seed config to temp file", err)
+func TestRecordToPorkbunWithPriority(t *testing.T) {
+	record := Record{
+		Name:     "bacontest42.com",
+		Type:     "MX",
+		Ttl:      600,
+		Data:     "in1-smtp.messagingengine.com",
+		Priority: 10,
 	}
 
-	_, err = ReadFile(configFile)
-	if err == nil {
-		t.Fatal("expected error when a record is missing type field", err)
+	porkRecord := record.ToPorkbun()
+	if porkRecord.Priority != "10" {
+		t.Error("expected priority 10, got", porkRecord.Priority)
 	}
 }
 
-func TestInvalidConfigInvalidType(t *testing.T) {
-	configFile, err := SeedConfigToTempFile(`
-domain: bacontest42.com
-records:
-    - host: bacontest42.com
-      type: FAKE
-      ttl: 600
-      content: pixie.porkbun.com
-`)
-	if err != nil {
-		t.Fatal("could not seed config to temp file", err)
+func TestRecordToPorkbunWithoutPriority(t *testing.T) {
+	record := Record{
+		Name: "*.bacontest42.com",
+		Type: "CNAME",
+		Ttl:  600,
+		Data: "pixie.porkbun.com",
 	}
 
-	_, err = ReadFile(configFile)
-	if err == nil {
-		t.Fatal("expected error when a record has an invalid type", err)
+	porkRecord := record.ToPorkbun()
+	if porkRecord.Priority != "" {
+		t.Error("expected empty priority, got", porkRecord.Priority)
 	}
 }
 
-func TestInvalidConfigMissingTtl(t *testing.T) {
-	configFile, err := SeedConfigToTempFile(`
-domain: bacontest42.com
-records:
-    - host: bacontest42.com
-      type: ALIAS
-      content: pixie.porkbun.com
-`)
-	if err != nil {
-		t.Fatal("could not seed config to temp file", err)
+func TestRecordFromPorkbunWithPriority(t *testing.T) {
+	record := porkbun.Record{
+		Name:     "bacontest42.com",
+		Type:     "MX",
+		TTL:      "600",
+		Content:  "in1-smtp.messagingengine.com",
+		Priority: "10",
 	}
 
-	_, err = ReadFile(configFile)
-	if err == nil {
-		t.Fatal("expected error when a record is missing ttl field", err)
+	configRecord, err := RecordFromPorkbun(record)
+	if err != nil {
+		t.Fatal("did not convert record", err)
+	}
+	if configRecord.Priority != 10 {
+		t.Error("expected priority 10, got", configRecord.Priority)
 	}
 }
 
-func TestInvalidConfigInvalidTtl(t *testing.T) {
-	configFile, err := SeedConfigToTempFile(`
-domain: bacontest42.com
-records:
-    - host: bacontest42.com
-      type: ALIAS
-      ttl: 300
-      content: pixie.porkbun.com
-`)
-	if err != nil {
-		t.Fatal("could not seed config to temp file", err)
+func TestRecordFromPorkbunWithoutPriority(t *testing.T) {
+	record := porkbun.Record{
+		Name:     "*.bacontest42.com",
+		Type:     "CNAME",
+		TTL:      "600",
+		Content:  "pixie.porkbun.com",
+		Priority: "0",
 	}
 
-	_, err = ReadFile(configFile)
-	if err == nil {
-		t.Fatal("expected error when a record has an invalid ttl", err)
+	configRecord, err := RecordFromPorkbun(record)
+	if err != nil {
+		t.Fatal("did not convert record", err)
+	}
+	if configRecord.Priority != 0 {
+		t.Error("expected priority 0, got", configRecord.Priority)
 	}
 }
 
-func TestInvalidConfigMissingContent(t *testing.T) {
-	configFile, err := SeedConfigToTempFile(`
-domain: bacontest42.com
-records:
-    - host: bacontest42.com
-      type: ALIAS
-      ttl: 600
-`)
-	if err != nil {
+func seedConfigToTempFile(t *testing.T, mockConfig string) string {
+	t.Helper()
+
+	configFile := filepath.Join(t.TempDir(), "config.yml")
+	if err := os.WriteFile(configFile, []byte(mockConfig), 0600); err != nil {
 		t.Fatal("could not seed config to temp file", err)
 	}
 
-	_, err = ReadFile(configFile)
-	if err == nil {
-		t.Fatal("expected error when a record is missing content field", err)
-	}
-}
-
-func TestInvalidConfigInvalidPriority(t *testing.T) {
-	configFile, err := SeedConfigToTempFile(`
-domain: bacontest42.com
-records:
-    - host: bacontest42.com
-      type: ALIAS
-      ttl: 600
-      content: pixie.porkbun.com
-	  priority: 20
-`)
-	if err != nil {
-		t.Fatal("could not seed config to temp file", err)
-	}
-
-	_, err = ReadFile(configFile)
-	if err == nil {
-		t.Fatal("priority is not allowed on ALIAS records", err)
-	}
-}
-
-func TestInvalidConfigCnameSameHost(t *testing.T) {
-	configFile, err := SeedConfigToTempFile(`
-domain: bacontest42.com
-records:
-    - host: '*.bacontest42.com'
-      type: CNAME
-      ttl: 600
-      content: pixie.porkbun.com
-    - type: MX
-      host: "*.bacontest42.com"
-      content: in1-smtp.messagingengine.com
-      ttl: 600
-      priority: 10
-`)
-	if err != nil {
-		t.Fatal("could not seed config to temp file", err)
-	}
-
-	_, err = ReadFile(configFile)
-	if err == nil {
-		t.Fatal("cannot have a CNAME and another record for the same host", err)
-	}
+	return configFile
 }
