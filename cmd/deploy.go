@@ -4,7 +4,12 @@ import (
 	"bacon/pkg/config"
 	"bacon/pkg/porkbun"
 	"fmt"
+	"regexp"
+	"strings"
+	"unicode/utf8"
 
+	"github.com/fatih/color"
+	"github.com/rodaine/table"
 	"github.com/spf13/cobra"
 )
 
@@ -56,69 +61,103 @@ func deploy(client *porkbun.Client, configFile string, shouldCreate bool, should
 
 	added, removed, updated, unchanged := porkbun.DiffRecords(from, to)
 
+	printRecords(removed, updated, added, unchanged)
+	fmt.Println()
+
 	if shouldDelete {
-		fmt.Println("Deleting", len(removed), "records...")
 		for _, record := range removed {
 			err := client.DeleteRecord(config.Domain, record)
 			if err != nil {
 				return fmt.Errorf("couldn't delete record: %v", err)
 			}
-			fmt.Println(deleteSymbol, record)
-		}
-	} else {
-		fmt.Println("Would delete", len(removed), "records:")
-		for _, record := range removed {
-			fmt.Println(deleteSymbol, record)
 		}
 	}
 
 	if shouldUpdate {
-		fmt.Println("Updating", len(updated), "records...")
 		for _, record := range updated {
 			err := client.EditRecord(config.Domain, record)
 			if err != nil {
 				return fmt.Errorf("couldn't update record: %v", err)
 			}
-			fmt.Println(updateSymbol, record)
-		}
-	} else {
-		fmt.Println("Would update", len(updated), "records:")
-		for _, record := range updated {
-			fmt.Println(updateSymbol, record)
 		}
 	}
 
 	if shouldCreate {
-		fmt.Println("Creating", len(added), "records...")
 		for _, record := range added {
-			id, err := client.CreateRecord(config.Domain, record)
+			_, err := client.CreateRecord(config.Domain, record)
 			if err != nil {
 				return fmt.Errorf("couldn't create record: %v", err)
 			}
-
-			record.Id = id
-			fmt.Println(createSymbol, record)
-		}
-	} else {
-		fmt.Println("Would create", len(added), "records:")
-		for _, record := range added {
-			fmt.Println(createSymbol, record)
 		}
 	}
 
-	fmt.Println("Keeping", len(unchanged), "records:")
-	for _, record := range unchanged {
-		fmt.Println(keepSymbol, record)
+	clauses := []string{}
+	if len(removed) > 0 {
+		clauses = append(clauses, summarizeAction(shouldDelete, "deleted", "would delete", len(removed)))
+	}
+	if len(updated) > 0 {
+		clauses = append(clauses, summarizeAction(shouldUpdate, "updated", "would update", len(updated)))
+	}
+	if len(added) > 0 {
+		clauses = append(clauses, summarizeAction(shouldCreate, "created", "would create", len(added)))
+	}
+	if len(unchanged) > 0 {
+		clauses = append(clauses, "kept "+countRecords(len(unchanged)))
 	}
 
-	fullDeployment := shouldCreate && shouldDelete && shouldUpdate
-	partialDeployment := shouldCreate || shouldDelete || shouldUpdate
-	if fullDeployment {
-		fmt.Println("Deployment complete!")
-	} else if partialDeployment {
-		fmt.Println("Partial deployment complete!")
-	} else {
-		fmt.Println("Mock deployment complete")
+	if len(clauses) == 0 {
+		fmt.Println("Summary: no records")
+		return nil
 	}
+
+	summary := strings.Join(clauses, ", ")
+	fmt.Println("Summary:", strings.ToUpper(summary[:1])+summary[1:])
 	return nil
+}
+
+func printRecords(removed, updated, added, unchanged []porkbun.Record) {
+	output := table.New("", "NAME", "TYPE", "CONTENT", "TTL", "PRI", "NOTES").
+		WithHeaderFormatter(color.New(color.Underline).SprintfFunc()).
+		WithWidthFunc(visibleWidth)
+
+	for _, record := range removed {
+		output.AddRow(recordRow(color.RedString(deleteSymbol), record)...)
+	}
+	for _, record := range updated {
+		output.AddRow(recordRow(color.YellowString(updateSymbol), record)...)
+	}
+	for _, record := range added {
+		output.AddRow(recordRow(color.GreenString(createSymbol), record)...)
+	}
+	for _, record := range unchanged {
+		output.AddRow(recordRow(keepSymbol, record)...)
+	}
+
+	output.Print()
+}
+
+func recordRow(symbol string, record porkbun.Record) []any {
+	return []any{symbol, record.Name, record.Type, record.Content, record.TTL, record.Priority, record.Notes}
+}
+
+var ansiEscapes = regexp.MustCompile(`\x1b\[[0-9;]*m`)
+
+// Colored cells must not count their ANSI escapes toward column width.
+func visibleWidth(text string) int {
+	return utf8.RuneCountInString(ansiEscapes.ReplaceAllString(text, ""))
+}
+
+func summarizeAction(applied bool, appliedVerb string, plannedVerb string, count int) string {
+	verb := plannedVerb
+	if applied {
+		verb = appliedVerb
+	}
+	return verb + " " + countRecords(count)
+}
+
+func countRecords(count int) string {
+	if count == 1 {
+		return "1 record"
+	}
+	return fmt.Sprintf("%d records", count)
 }
