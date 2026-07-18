@@ -11,14 +11,27 @@ func TestDiffRecordsChangedName(t *testing.T) {
 			TTL:     "600",
 			Content: "1.2.3.4",
 		},
+		{
+			Id:      "456",
+			Name:    "api.bacondemo.com",
+			Type:    "A",
+			TTL:     "600",
+			Content: "5.6.7.8",
+		},
 	}
 
 	to := []Record{
 		{
-			Name:    "api.bacondemo.com",
+			Name:    "www.bacondemo.com",
 			Type:    "A",
 			TTL:     "600",
 			Content: "1.2.3.4",
+		},
+		{
+			Name:    "api-v2.bacondemo.com",
+			Type:    "A",
+			TTL:     "600",
+			Content: "5.6.7.8",
 		},
 	}
 
@@ -36,8 +49,8 @@ func TestDiffRecordsChangedName(t *testing.T) {
 		t.Error("expected no edited, got", len(edited))
 	}
 
-	if len(unchanged) != 0 {
-		t.Error("expected no unchanged, got", len(unchanged))
+	if len(unchanged) != 1 {
+		t.Error("expected 1 unchanged, got", len(unchanged))
 	}
 }
 
@@ -50,6 +63,13 @@ func TestDiffRecordsChangedType(t *testing.T) {
 			TTL:     "600",
 			Content: "1.2.3.4",
 		},
+		{
+			Id:      "456",
+			Name:    "api.bacondemo.com",
+			Type:    "A",
+			TTL:     "600",
+			Content: "5.6.7.8",
+		},
 	}
 
 	to := []Record{
@@ -58,6 +78,13 @@ func TestDiffRecordsChangedType(t *testing.T) {
 			Type:    "CNAME",
 			TTL:     "600",
 			Content: "somewhere.else.com",
+		},
+		{
+			Id:      "456",
+			Name:    "api.bacondemo.com",
+			Type:    "A",
+			TTL:     "600",
+			Content: "5.6.7.8",
 		},
 	}
 
@@ -75,8 +102,8 @@ func TestDiffRecordsChangedType(t *testing.T) {
 		t.Error("expected no edited, got", len(edited))
 	}
 
-	if len(unchanged) != 0 {
-		t.Error("expected no unchanged, got", len(unchanged))
+	if len(unchanged) != 1 {
+		t.Error("expected 1 unchanged, got", len(unchanged))
 	}
 }
 
