@@ -13,17 +13,20 @@ type Record struct {
 }
 
 func RecordHash(r Record) string {
-	// Treat "0" as empty for hashing purposes
-	priority := r.Priority
-	if priority == "0" {
-		priority = ""
-	}
-
-	return strings.Join([]string{r.Name, r.Type, r.TTL, r.Content, priority, r.Notes}, "-")
+	return strings.Join([]string{r.Name, r.Type, r.TTL, r.Content, r.Priority, r.Notes}, "-")
 }
 
 func RecordIdentityHash(r Record) string {
 	return strings.Join([]string{r.Name, r.Type}, "-")
+}
+
+func (record Record) NormalizePriority() Record {
+	// Porkbun returns priority "0" for records that don't have priority
+	if record.Priority == "0" {
+		record.Priority = ""
+	}
+
+	return record
 }
 
 func (r Record) isIgnored() bool {

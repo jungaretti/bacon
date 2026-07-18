@@ -62,7 +62,12 @@ func (client *Client) AllRecords(domain string) ([]Record, error) {
 		return nil, err
 	}
 
-	return slices.DeleteFunc(response.Records, Record.isIgnored), nil
+	records := slices.DeleteFunc(response.Records, Record.isIgnored)
+	for i, record := range records {
+		records[i] = record.NormalizePriority()
+	}
+
+	return records, nil
 }
 
 func (client *Client) CreateRecord(domain string, record Record) (string, error) {

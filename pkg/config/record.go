@@ -9,26 +9,21 @@ import (
 type Record struct {
 	Name     string `yaml:"host"`
 	Type     string `yaml:"type"`
-	Ttl      int    `yaml:"ttl"`
 	Data     string `yaml:"content"`
+	Ttl      int    `yaml:"ttl"`
 	Priority int    `yaml:"priority,omitempty"`
 	Notes    string `yaml:"notes,omitempty"`
 }
 
 func (r Record) ToPorkbun() porkbun.Record {
-	priority := ""
-	if r.Priority != 0 {
-		priority = strconv.Itoa(r.Priority)
-	}
-
 	return porkbun.Record{
 		Name:     r.Name,
 		Type:     r.Type,
 		TTL:      strconv.Itoa(r.Ttl),
 		Content:  r.Data,
-		Priority: priority,
+		Priority: strconv.Itoa(r.Priority),
 		Notes:    r.Notes,
-	}
+	}.NormalizePriority()
 }
 
 func RecordFromPorkbun(record porkbun.Record) (Record, error) {
