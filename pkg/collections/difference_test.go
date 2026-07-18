@@ -1,6 +1,9 @@
 package collections
 
-import "testing"
+import (
+	"slices"
+	"testing"
+)
 
 func TestSetDifferenceEmpty(t *testing.T) {
 	from := []string{"hello", "world"}
@@ -47,6 +50,12 @@ func TestSetIntersectionEmpty(t *testing.T) {
 	if len(intersection) != 2 {
 		t.Error("expected", 2, "actual", len(intersection))
 	}
+	if slices.Contains(intersection, "hello") == false {
+		t.Error("expected", true, "actual", false)
+	}
+	if slices.Contains(intersection, "world") == false {
+		t.Error("expected", true, "actual", false)
+	}
 }
 
 func TestSetIntersectionAdded(t *testing.T) {
@@ -86,11 +95,19 @@ func TestAddedRemovedUnchangedByHashEmpty(t *testing.T) {
 	if len(added) != 0 {
 		t.Error("expected", 0, "actual", len(added))
 	}
+
 	if len(removed) != 0 {
 		t.Error("expected", 0, "actual", len(removed))
 	}
+
 	if len(unchanged) != 2 {
 		t.Error("expected", 2, "actual", len(unchanged))
+	}
+	if slices.Contains(unchanged, "hello") == false {
+		t.Error("expected", true, "actual", false)
+	}
+	if slices.Contains(unchanged, "world") == false {
+		t.Error("expected", true, "actual", false)
 	}
 }
 
@@ -103,9 +120,14 @@ func TestAddedRemovedUnchangedByHashAdd(t *testing.T) {
 	if len(added) != 1 {
 		t.Error("expected", 1, "actual", len(added))
 	}
+	if slices.Contains(added, "world") == false {
+		t.Error("expected", true, "actual", false)
+	}
+
 	if len(removed) != 0 {
 		t.Error("expected", 0, "actual", len(removed))
 	}
+
 	if len(unchanged) != 1 {
 		t.Error("expected", 1, "actual", len(unchanged))
 	}
@@ -120,10 +142,18 @@ func TestAddedRemovedUnchangedByHashRemove(t *testing.T) {
 	if len(added) != 0 {
 		t.Error("expected", 0, "actual", len(added))
 	}
+
 	if len(removed) != 1 {
 		t.Error("expected", 1, "actual", len(removed))
 	}
+	if slices.Contains(removed, "world") == false {
+		t.Error("expected", true, "actual", false)
+	}
+
 	if len(unchanged) != 1 {
 		t.Error("expected", 1, "actual", len(unchanged))
+	}
+	if slices.Contains(unchanged, "hello") == false {
+		t.Error("expected", true, "actual", false)
 	}
 }
