@@ -32,3 +32,19 @@ func (r Record) isIgnored() bool {
 
 	return false
 }
+
+type RecordIdentity struct {
+	Name string
+	Type string
+}
+
+func (r Record) Identity() RecordIdentity {
+	return RecordIdentity{
+		Name: r.Name,
+		Type: r.Type,
+	}
+}
+
+func RecordIdentityHash(identity RecordIdentity) string {
+	return strings.Join([]string{identity.Name, identity.Type}, "-")
+}
