@@ -1,7 +1,6 @@
 package config
 
 import (
-	"io"
 	"os"
 
 	"gopkg.in/yaml.v3"
@@ -13,17 +12,7 @@ type Config struct {
 }
 
 func ReadFile(configFile string) (*Config, error) {
-	file, err := os.Open(configFile)
-	if err != nil {
-		return nil, err
-	}
-
-	raw, err := io.ReadAll(file)
-	if err != nil {
-		return nil, err
-	}
-
-	err = file.Close()
+	raw, err := os.ReadFile(configFile)
 	if err != nil {
 		return nil, err
 	}
