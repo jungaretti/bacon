@@ -22,6 +22,10 @@ func RecordHash(r Record) string {
 	return strings.Join([]string{r.Name, r.Type, r.TTL, r.Content, priority, r.Notes}, "-")
 }
 
+func RecordIdentityHash(r Record) string {
+	return strings.Join([]string{r.Name, r.Type}, "-")
+}
+
 func (r Record) isIgnored() bool {
 	if r.Type == "NS" {
 		return true
@@ -31,20 +35,4 @@ func (r Record) isIgnored() bool {
 	}
 
 	return false
-}
-
-type RecordIdentity struct {
-	Name string
-	Type string
-}
-
-func (r Record) Identity() RecordIdentity {
-	return RecordIdentity{
-		Name: r.Name,
-		Type: r.Type,
-	}
-}
-
-func RecordIdentityHash(identity RecordIdentity) string {
-	return strings.Join([]string{identity.Name, identity.Type}, "-")
 }
