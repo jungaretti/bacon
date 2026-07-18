@@ -83,7 +83,7 @@ var tableColumns = []struct {
 	{"TYPE", 6},
 	{"CONTENT", 30},
 	{"TTL", 5},
-	{"PRIO", 4},
+	{"PRI", 4},
 }
 
 type tableReporter struct {
