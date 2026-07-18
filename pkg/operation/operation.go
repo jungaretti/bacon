@@ -3,6 +3,7 @@ package operation
 import (
 	"bacon/pkg/porkbun"
 	"encoding/json"
+	"errors"
 )
 
 type Action string
@@ -81,9 +82,12 @@ func (manager *Manager) Run(operation RecordOperation) RecordOperationResult {
 
 	isSkip := operation.Action == Skip
 	isDryRun := operation.DryRun
-	hasExecute := operation.Execute != nil
-	if !isSkip && !isDryRun && hasExecute {
-		result.Err = operation.Execute()
+	if !isSkip && !isDryRun {
+		if operation.Execute == nil {
+			result.Err = errors.New("operation is missing an execute function")
+		} else {
+			result.Err = operation.Execute()
+		}
 	}
 
 	manager.results = append(manager.results, result)

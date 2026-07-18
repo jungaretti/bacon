@@ -52,6 +52,18 @@ func TestRunDoesNotExecuteSkip(t *testing.T) {
 	}
 }
 
+func TestRunFailsWithoutExecute(t *testing.T) {
+	manager := NewManager()
+
+	result := manager.Run(RecordOperation{
+		Action: Create,
+	})
+
+	if result.Status() != Failed {
+		t.Error("expected", Failed, "actual", result.Status())
+	}
+}
+
 func TestRunCapturesFailure(t *testing.T) {
 	manager := NewManager()
 
