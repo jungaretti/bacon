@@ -13,12 +13,13 @@ type Record struct {
 }
 
 func RecordHash(r Record) string {
+	// Treat "0" as empty for hashing purposes
 	priority := r.Priority
 	if priority == "0" {
 		priority = ""
 	}
 
-	return strings.Join([]string{r.Name, r.Type, r.TTL, r.Content, priority}, "-")
+	return strings.Join([]string{r.Name, r.Type, r.TTL, r.Content, priority, r.Notes}, "-")
 }
 
 func (r Record) isIgnored() bool {

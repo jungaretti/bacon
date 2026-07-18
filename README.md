@@ -70,14 +70,31 @@ See [`config.example.yml`](https://github.com/jungaretti/bacon/blob/main/config.
 ```yaml
 domain: example.com
 records:
-  - type: A
-    host: blog.example.com
-    content: 123.456.789.112
+  - host: example.com
+    type: ALIAS
     ttl: 600
-  - type: A
-    host: www.example.com
-    content: 123.456.789.112
+    content: pixie.porkbun.com
+  - host: '*.example.com'
+    type: CNAME
     ttl: 600
+    content: pixie.porkbun.com
+  - type: MX
+    host: example.com
+    content: in1-smtp.messagingengine.com
+    ttl: 600
+    priority: 10
+    notes: Email server
+  - type: MX
+    host: example.com
+    content: in2-smtp.messagingengine.com
+    ttl: 600
+    priority: 20
+    notes: Email server
+  - type: A
+    host: api.example.com
+    content: 42.42.42.42
+    ttl: 600
+    notes: API endpoint
 ```
 
 ### Schema
@@ -89,6 +106,7 @@ records:
 - `content` - Required.
 - `ttl` - Required. Minimum value: `600`.
 - `priority` - Optional. Allowed for `MX` and `SRV` records.
+- `notes` - Optional. Private notes in Porkbun that are not exposed via DNS
 
 > Bacon ignores `NS` records and records whose host begins with `_acme-challenge`.
 
