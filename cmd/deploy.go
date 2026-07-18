@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"bacon/pkg/collections"
 	"bacon/pkg/config"
 	"bacon/pkg/porkbun"
 	"fmt"
@@ -9,28 +8,37 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	createSymbol = "+"
+	updateSymbol = "~"
+	deleteSymbol = "-"
+	keepSymbol   = "="
+)
+
 func newDeployCmd(client *porkbun.Client) *cobra.Command {
 	var shouldCreate bool
 	var shouldDelete bool
+	var shouldUpdate bool
 
 	deploy := &cobra.Command{
 		Use:   "deploy <config-file>",
 		Short: "Deploy records from a config file",
-		Long: `Deploys DNS records from a YAML config file by deleting existing records and
-creating new records.`,
+		Long: `Deploys DNS records from a YAML config file by updating records in place when
+possible, then deleting old records and creating new records.`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return deploy(client, args[0], shouldCreate, shouldDelete)
+			return deploy(client, args[0], shouldCreate, shouldDelete, shouldUpdate)
 		},
 	}
 
 	deploy.Flags().BoolVarP(&shouldCreate, "create", "c", false, "create new records")
 	deploy.Flags().BoolVarP(&shouldDelete, "delete", "d", false, "delete old records")
+	deploy.Flags().BoolVarP(&shouldUpdate, "update", "u", false, "update changed records")
 
 	return deploy
 }
 
-func deploy(client *porkbun.Client, configFile string, shouldCreate bool, shouldDelete bool) error {
+func deploy(client *porkbun.Client, configFile string, shouldCreate bool, shouldDelete bool, shouldUpdate bool) error {
 	config, err := config.ReadFile(configFile)
 	if err != nil {
 		return fmt.Errorf("reading %v: %v", configFile, err)
@@ -46,7 +54,7 @@ func deploy(client *porkbun.Client, configFile string, shouldCreate bool, should
 		to[i] = record.ToPorkbun()
 	}
 
-	added, removed, unchanged := collections.AddedRemovedUnchangedByHash(from, to, porkbun.RecordHash)
+	added, removed, updated, unchanged := porkbun.DiffRecords(from, to)
 
 	if shouldDelete {
 		fmt.Println("Deleting", len(removed), "records...")
@@ -55,12 +63,28 @@ func deploy(client *porkbun.Client, configFile string, shouldCreate bool, should
 			if err != nil {
 				return fmt.Errorf("couldn't delete record: %v", err)
 			}
-			fmt.Println("-", record)
+			fmt.Println(deleteSymbol, record)
 		}
 	} else {
 		fmt.Println("Would delete", len(removed), "records:")
 		for _, record := range removed {
-			fmt.Println("-", record)
+			fmt.Println(deleteSymbol, record)
+		}
+	}
+
+	if shouldUpdate {
+		fmt.Println("Updating", len(updated), "records...")
+		for _, record := range updated {
+			err := client.EditRecord(config.Domain, record)
+			if err != nil {
+				return fmt.Errorf("couldn't update record: %v", err)
+			}
+			fmt.Println(updateSymbol, record)
+		}
+	} else {
+		fmt.Println("Would update", len(updated), "records:")
+		for _, record := range updated {
+			fmt.Println(updateSymbol, record)
 		}
 	}
 
@@ -73,23 +97,25 @@ func deploy(client *porkbun.Client, configFile string, shouldCreate bool, should
 			}
 
 			record.Id = id
-			fmt.Println("-", record)
+			fmt.Println(createSymbol, record)
 		}
 	} else {
 		fmt.Println("Would create", len(added), "records:")
 		for _, record := range added {
-			fmt.Println("-", record)
+			fmt.Println(createSymbol, record)
 		}
 	}
 
 	fmt.Println("Keeping", len(unchanged), "records:")
 	for _, record := range unchanged {
-		fmt.Println("-", record)
+		fmt.Println(keepSymbol, record)
 	}
 
-	if shouldCreate && shouldDelete {
+	fullDeployment := shouldCreate && shouldDelete && shouldUpdate
+	partialDeployment := shouldCreate || shouldDelete || shouldUpdate
+	if fullDeployment {
 		fmt.Println("Deployment complete!")
-	} else if shouldCreate || shouldDelete {
+	} else if partialDeployment {
 		fmt.Println("Partial deployment complete!")
 	} else {
 		fmt.Println("Mock deployment complete")

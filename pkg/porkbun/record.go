@@ -22,6 +22,10 @@ func RecordHash(r Record) string {
 	return strings.Join([]string{r.Name, r.Type, r.TTL, r.Content, priority, r.Notes}, "-")
 }
 
+func RecordIdentityHash(r Record) string {
+	return strings.Join([]string{r.Name, r.Type}, "-")
+}
+
 func (r Record) isIgnored() bool {
 	if r.Type == "NS" {
 		return true

@@ -4,6 +4,26 @@ import (
 	"testing"
 )
 
+func TestRecordHashNoDiffs(t *testing.T) {
+	recordA := Record{
+		Name:    "www.bacondemo.com",
+		Type:    "A",
+		TTL:     "600",
+		Content: "1.2.3.4",
+	}
+
+	recordB := Record{
+		Name:    recordA.Name,
+		Type:    recordA.Type,
+		TTL:     recordA.TTL,
+		Content: recordA.Content,
+	}
+
+	if RecordHash(recordA) != RecordHash(recordB) {
+		t.Error("records that are the same have different hashes")
+	}
+}
+
 func TestRecordHashDiffsName(t *testing.T) {
 	recordA := Record{
 		Name:    "www.bacondemo.com",
@@ -127,6 +147,54 @@ func TestRecordHashDiffsNotes(t *testing.T) {
 
 	if RecordHash(recordA) == RecordHash(recordB) {
 		t.Error("records that differ only by notes have the same hash")
+	}
+}
+
+func TestRecordIdentityHashNoDiffs(t *testing.T) {
+	recordA := Record{
+		Name: "www.bacondemo.com",
+		Type: "A",
+	}
+
+	recordB := Record{
+		Name: recordA.Name,
+		Type: recordA.Type,
+	}
+
+	if RecordIdentityHash(recordA) != RecordIdentityHash(recordB) {
+		t.Error("records that are the same have different identity hashes")
+	}
+}
+
+func TestRecordIdentityHashDiffsName(t *testing.T) {
+	recordA := Record{
+		Name: "www.bacondemo.com",
+		Type: "A",
+	}
+
+	recordB := Record{
+		Name: "mail.bacondemo.com",
+		Type: recordA.Type,
+	}
+
+	if RecordIdentityHash(recordA) == RecordIdentityHash(recordB) {
+		t.Error("records that differ by name have the same identity hash")
+	}
+}
+
+func TestRecordIdentityHashDiffsType(t *testing.T) {
+	recordA := Record{
+		Name: "www.bacondemo.com",
+		Type: "A",
+	}
+
+	recordB := Record{
+		Name: recordA.Name,
+		Type: "CNAME",
+	}
+
+	if RecordIdentityHash(recordA) == RecordIdentityHash(recordB) {
+		t.Error("records that differ by type have the same identity hash")
 	}
 }
 

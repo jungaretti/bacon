@@ -17,6 +17,7 @@ const (
 	pingUrl     string = baseUrl + "/ping"
 	retrieveUrl string = baseUrl + "/dns/retrieve"
 	createUrl   string = baseUrl + "/dns/create"
+	editUrl     string = baseUrl + "/dns/edit"
 	deleteUrl   string = baseUrl + "/dns/delete"
 )
 
@@ -89,6 +90,23 @@ func (client *Client) CreateRecord(domain string, record Record) (string, error)
 	}
 
 	return strconv.Itoa(response.Id), nil
+}
+
+func (client *Client) EditRecord(domain string, record Record) error {
+	type editReq struct {
+		Auth
+		Record
+	}
+
+	if record.isIgnored() {
+		return fmt.Errorf("cannot edit an ignored record: %s", record)
+	}
+
+	request := editReq{Auth: client.Auth, Record: record}
+	request.Name = trimDomain(record.Name, domain)
+
+	response := baseRes{}
+	return client.post(editUrl+"/"+domain+"/"+record.Id, request, &response)
 }
 
 func (client *Client) DeleteRecord(domain string, record Record) error {
