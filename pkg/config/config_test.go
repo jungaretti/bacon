@@ -3,11 +3,12 @@ package config
 import (
 	"bacon/pkg/porkbun"
 	"os"
+	"path/filepath"
 	"testing"
 )
 
 func TestValidConfig(t *testing.T) {
-	configFile, err := seedConfigToTempFile(`
+	configFile := seedConfigToTempFile(t, `
 domain: bacontest42.com
 records:
     - host: bacontest42.com
@@ -24,9 +25,6 @@ records:
       ttl: 600
       priority: 10
 `)
-	if err != nil {
-		t.Fatal("could not seed config to temp file", err)
-	}
 
 	config, err := ReadFile(configFile)
 	if err != nil {
@@ -39,18 +37,15 @@ records:
 }
 
 func TestInvalidConfig(t *testing.T) {
-	configFile, err := seedConfigToTempFile(`
+	configFile := seedConfigToTempFile(t, `
 domain: bacontest42.com
 records:
     - type: ALIAS
       ttl: 600
       content: pixie.porkbun.com
 `)
-	if err != nil {
-		t.Fatal("could not seed config to temp file", err)
-	}
 
-	_, err = ReadFile(configFile)
+	_, err := ReadFile(configFile)
 	if err == nil {
 		t.Fatal("expected error when config is invalid", err)
 	}
@@ -121,18 +116,13 @@ func TestRecordFromPorkbunWithoutPriority(t *testing.T) {
 	}
 }
 
-func seedConfigToTempFile(mockConfig string) (string, error) {
-	tempFile, err := os.CreateTemp("", "tmpfile-*")
-	if err != nil {
-		return "", err
+func seedConfigToTempFile(t *testing.T, mockConfig string) string {
+	t.Helper()
+
+	configFile := filepath.Join(t.TempDir(), "config.yml")
+	if err := os.WriteFile(configFile, []byte(mockConfig), 0600); err != nil {
+		t.Fatal("could not seed config to temp file", err)
 	}
 
-	defer tempFile.Close()
-
-	_, err = tempFile.WriteString(mockConfig)
-	if err != nil {
-		return "", err
-	}
-
-	return tempFile.Name(), nil
+	return configFile
 }
