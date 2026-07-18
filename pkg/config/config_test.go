@@ -8,18 +8,18 @@ import (
 
 func TestValidConfig(t *testing.T) {
 	configFile := seedConfigToTempFile(t, `
-domain: bacontest42.com
+domain: bacondemo.com
 records:
-    - host: bacontest42.com
+    - host: bacondemo.com
       type: ALIAS
       ttl: 600
       content: pixie.porkbun.com
-    - host: '*.bacontest42.com'
+    - host: '*.bacondemo.com'
       type: CNAME
       ttl: 600
       content: pixie.porkbun.com
     - type: MX
-      host: bacontest42.com
+      host: bacondemo.com
       content: in1-smtp.messagingengine.com
       ttl: 600
       priority: 10
@@ -37,7 +37,7 @@ records:
 
 func TestInvalidConfig(t *testing.T) {
 	configFile := seedConfigToTempFile(t, `
-domain: bacontest42.com
+domain: bacondemo.com
 records:
     - type: ALIAS
       ttl: 600
