@@ -17,29 +17,29 @@ const (
 )
 
 func newDeployCmd(client *porkbun.Client) *cobra.Command {
-	var shouldCreate bool
-	var shouldDelete bool
-	var shouldUpdate bool
+	var dryRun bool
+	var force bool
 
 	deploy := &cobra.Command{
 		Use:   "deploy <config-file>",
 		Short: "Deploy records from a config file",
 		Long: `Deploys DNS records from a YAML config file by updating records in place when
-possible, then deleting old records and creating new records.`,
+possible, then deleting old records and creating new records. Previews the
+deployment unless --force is specified.`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return deploy(client, args[0], shouldCreate, shouldDelete, shouldUpdate)
+			return deploy(client, args[0], dryRun, force)
 		},
 	}
 
-	deploy.Flags().BoolVarP(&shouldCreate, "create", "c", false, "create new records")
-	deploy.Flags().BoolVarP(&shouldDelete, "delete", "d", false, "delete old records")
-	deploy.Flags().BoolVarP(&shouldUpdate, "update", "u", false, "update changed records")
+	deploy.Flags().BoolVarP(&dryRun, "dryrun", "d", false, "preview the deployment without making changes")
+	deploy.Flags().BoolVarP(&force, "force", "f", false, "execute the deployment without confirmation")
+	deploy.MarkFlagsMutuallyExclusive("dryrun", "force")
 
 	return deploy
 }
 
-func deploy(client *porkbun.Client, configFile string, shouldCreate bool, shouldDelete bool, shouldUpdate bool) error {
+func deploy(client *porkbun.Client, configFile string, dryRun, force bool) error {
 	config, err := config.ReadFile(configFile)
 	if err != nil {
 		return fmt.Errorf("reading %v: %v", configFile, err)
@@ -56,60 +56,39 @@ func deploy(client *porkbun.Client, configFile string, shouldCreate bool, should
 	}
 
 	added, removed, updated, unchanged := porkbun.DiffRecords(from, to)
-	operations := buildOperations(added, removed, updated, unchanged, shouldCreate, shouldDelete, shouldUpdate)
-	results := executeOperations(client, config.Domain, operations)
-	printReport(results, shouldCreate, shouldDelete, shouldUpdate)
+	recordDeployment := deployment.NewRecordDeployment(added, removed, updated, unchanged)
+
+	var results []deployment.RecordOperationResult
+	if force {
+		results = recordDeployment.Execute(client, config.Domain)
+	} else if dryRun {
+		results = recordDeployment.Preview()
+	} else {
+		// Default to dry run
+		results = recordDeployment.Preview()
+	}
+	printReport(results)
 
 	for _, result := range results {
 		if result.Status == deployment.Failure {
 			return fmt.Errorf("couldn't %v record: %v", result.Type, result.Error)
 		}
 	}
+
 	return nil
 }
 
-func buildOperations(added, removed, updated, unchanged []porkbun.Record, shouldCreate, shouldDelete, shouldUpdate bool) []deployment.RecordOperation {
-	var operations []deployment.RecordOperation
-	for _, record := range removed {
-		operations = append(operations, deployment.RecordOperation{Type: deployment.Delete, Record: record, Planned: !shouldDelete})
-	}
-	for _, record := range updated {
-		operations = append(operations, deployment.RecordOperation{Type: deployment.Update, Record: record, Planned: !shouldUpdate})
-	}
-	for _, record := range added {
-		operations = append(operations, deployment.RecordOperation{Type: deployment.Create, Record: record, Planned: !shouldCreate})
-	}
-	for _, record := range unchanged {
-		operations = append(operations, deployment.RecordOperation{Type: deployment.Keep, Record: record})
-	}
-	return operations
-}
-
-func executeOperations(client *porkbun.Client, domain string, operations []deployment.RecordOperation) []deployment.RecordOperationResult {
-	var results []deployment.RecordOperationResult
-	for _, operation := range operations {
-		if operation.Planned {
-			results = append(results, deployment.RecordOperationResult{
-				Status: deployment.Planned,
-				Type:   operation.Type,
-				Record: operation.Record,
-			})
-			continue
-		}
-
-		result := operation.Execute(client, domain)
-		results = append(results, result)
-		if result.Status == deployment.Failure {
-			break
+func printReport(results []deployment.RecordOperationResult) {
+	executed := false
+	for _, result := range results {
+		if result.Status != deployment.Planned {
+			executed = true
 		}
 	}
-	return results
-}
 
-func printReport(results []deployment.RecordOperationResult, shouldCreate, shouldDelete, shouldUpdate bool) {
-	printSection(results, deployment.Delete, deleteSymbol, "Deleting", "Would delete", shouldDelete)
-	printSection(results, deployment.Update, updateSymbol, "Updating", "Would update", shouldUpdate)
-	printSection(results, deployment.Create, createSymbol, "Creating", "Would create", shouldCreate)
+	printSection(results, deployment.Delete, deleteSymbol, "Deleting", "Would delete", executed)
+	printSection(results, deployment.Update, updateSymbol, "Updating", "Would update", executed)
+	printSection(results, deployment.Create, createSymbol, "Creating", "Would create", executed)
 
 	fmt.Println("Keeping", countByType(results, deployment.Keep), "records:")
 	for _, result := range results {
@@ -118,12 +97,8 @@ func printReport(results []deployment.RecordOperationResult, shouldCreate, shoul
 		}
 	}
 
-	fullDeployment := shouldCreate && shouldDelete && shouldUpdate
-	partialDeployment := shouldCreate || shouldDelete || shouldUpdate
-	if fullDeployment {
+	if executed {
 		fmt.Println("Deployment complete!")
-	} else if partialDeployment {
-		fmt.Println("Partial deployment complete!")
 	} else {
 		fmt.Println("Mock deployment complete")
 	}
