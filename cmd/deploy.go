@@ -25,7 +25,7 @@ deployment unless --force is specified.`,
 		},
 	}
 
-	deploy.Flags().BoolVar(&dryRun, "dry-run", false, "preview the deployment without making changes")
+	deploy.Flags().BoolVar(&dryRun, "dry-run", true, "preview the deployment without making changes")
 	deploy.Flags().BoolVar(&force, "force", false, "execute the deployment without confirmation")
 	deploy.MarkFlagsMutuallyExclusive("dry-run", "force")
 
