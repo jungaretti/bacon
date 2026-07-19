@@ -22,20 +22,20 @@ const (
 	Failure OperationStatus = "failure"
 )
 
-type RecordOperation struct {
+type Operation struct {
 	Type   OperationType
 	Record porkbun.Record
 }
 
-type RecordOperationResult struct {
+type OperationResult struct {
 	Status OperationStatus `json:"status"`
 	Error  error           `json:"error,omitempty"`
 	Type   OperationType   `json:"operationType"`
 	Record porkbun.Record  `json:"record"`
 }
 
-func (op RecordOperation) Execute(client *porkbun.Client, domain string) RecordOperationResult {
-	var result RecordOperationResult
+func (op Operation) Execute(client *porkbun.Client, domain string) OperationResult {
+	var result OperationResult
 	result.Type = op.Type
 	result.Record = op.Record
 
@@ -75,41 +75,45 @@ func (op RecordOperation) Execute(client *porkbun.Client, domain string) RecordO
 	return result
 }
 
-type RecordDeployment struct {
-	Operations []RecordOperation
+type Deployment struct {
+	Operations []Operation
 }
 
-func NewRecordDeployment(added, removed, updated, unchanged []porkbun.Record) RecordDeployment {
-	var operations []RecordOperation
+type DeploymentResult struct {
+	Results []OperationResult
+}
+
+func NewDeployment(added, removed, updated, unchanged []porkbun.Record) Deployment {
+	var operations []Operation
 	for _, record := range removed {
-		operations = append(operations, RecordOperation{Type: Delete, Record: record})
+		operations = append(operations, Operation{Type: Delete, Record: record})
 	}
 	for _, record := range updated {
-		operations = append(operations, RecordOperation{Type: Update, Record: record})
+		operations = append(operations, Operation{Type: Update, Record: record})
 	}
 	for _, record := range added {
-		operations = append(operations, RecordOperation{Type: Create, Record: record})
+		operations = append(operations, Operation{Type: Create, Record: record})
 	}
 	for _, record := range unchanged {
-		operations = append(operations, RecordOperation{Type: Keep, Record: record})
+		operations = append(operations, Operation{Type: Keep, Record: record})
 	}
-	return RecordDeployment{Operations: operations}
+	return Deployment{Operations: operations}
 }
 
-func (deployment RecordDeployment) Preview() []RecordOperationResult {
-	var results []RecordOperationResult
+func (deployment Deployment) Preview() DeploymentResult {
+	var results []OperationResult
 	for _, operation := range deployment.Operations {
-		results = append(results, RecordOperationResult{
+		results = append(results, OperationResult{
 			Status: Planned,
 			Type:   operation.Type,
 			Record: operation.Record,
 		})
 	}
-	return results
+	return DeploymentResult{Results: results}
 }
 
-func (deployment RecordDeployment) Execute(client *porkbun.Client, domain string) []RecordOperationResult {
-	var results []RecordOperationResult
+func (deployment Deployment) Execute(client *porkbun.Client, domain string) DeploymentResult {
+	var results []OperationResult
 	for _, operation := range deployment.Operations {
 		result := operation.Execute(client, domain)
 		results = append(results, result)
@@ -117,5 +121,5 @@ func (deployment RecordDeployment) Execute(client *porkbun.Client, domain string
 			break
 		}
 	}
-	return results
+	return DeploymentResult{Results: results}
 }
