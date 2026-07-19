@@ -71,18 +71,20 @@ func operationSymbol(operationType OperationType) string {
 }
 
 func summarySentence(summary DeploymentSummary) string {
-	changeGroups := []struct {
+	type verbGroup struct {
 		operationType OperationType
 		plannedVerb   string
 		executedVerb  string
-	}{
+	}
+	groups := []verbGroup{
 		{Delete, "delete", "deleted"},
 		{Update, "update", "updated"},
 		{Create, "create", "created"},
+		{Keep, "keep", "kept"},
 	}
 
 	var changePhrases []string
-	for _, group := range changeGroups {
+	for _, group := range groups[:3] {
 		count := summary.OperationCounts[group.operationType]
 		if count == 0 {
 			continue
@@ -99,26 +101,46 @@ func summarySentence(summary DeploymentSummary) string {
 		keptPhrase = "kept " + pluralizeRecords(keptCount)
 	}
 
-	if len(changePhrases) == 0 && keptPhrase == "" {
+	var failurePhrases []string
+	for _, group := range groups {
+		count := summary.FailureCounts[group.operationType]
+		if count == 0 {
+			continue
+		}
+		failurePhrases = append(failurePhrases, "failed to "+group.plannedVerb+" "+pluralizeRecords(count))
+	}
+
+	sentence := ""
+	if len(changePhrases) > 0 {
+		if summary.DryRun {
+			sentence = "would " + strings.Join(changePhrases, ", ")
+			if keptPhrase != "" {
+				sentence += "; " + keptPhrase
+			}
+		} else {
+			phrases := changePhrases
+			if keptPhrase != "" {
+				phrases = append(phrases, keptPhrase)
+			}
+			sentence = strings.Join(phrases, ", ")
+		}
+	} else if keptPhrase != "" {
+		sentence = keptPhrase
+	}
+
+	if len(failurePhrases) > 0 {
+		failureClause := strings.Join(failurePhrases, ", ")
+		if sentence == "" {
+			sentence = failureClause
+		} else {
+			sentence += "; " + failureClause
+		}
+	}
+
+	if sentence == "" {
 		return "No records"
 	}
-	if len(changePhrases) == 0 {
-		return capitalize(keptPhrase)
-	}
-
-	if summary.DryRun {
-		sentence := "Would " + strings.Join(changePhrases, ", ")
-		if keptPhrase != "" {
-			sentence += "; " + keptPhrase
-		}
-		return sentence
-	}
-
-	phrases := changePhrases
-	if keptPhrase != "" {
-		phrases = append(phrases, keptPhrase)
-	}
-	return capitalize(strings.Join(phrases, ", "))
+	return capitalize(sentence)
 }
 
 func pluralizeRecords(count int) string {

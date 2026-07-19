@@ -4,6 +4,7 @@ import (
 	"bacon/pkg/config"
 	"bacon/pkg/deployment"
 	"bacon/pkg/porkbun"
+	"errors"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -77,7 +78,7 @@ func deploy(client *porkbun.Client, configFile string, force bool, output string
 
 	for _, result := range deploymentResult.Results {
 		if result.Status == deployment.Failure {
-			return fmt.Errorf("couldn't %v record: %v", result.Type, result.Error)
+			return errors.New(result.Error)
 		}
 	}
 

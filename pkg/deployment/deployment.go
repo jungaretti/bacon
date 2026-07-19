@@ -12,6 +12,7 @@ type Deployment struct {
 type DeploymentSummary struct {
 	DryRun          bool                  `json:"dryRun"`
 	OperationCounts map[OperationType]int `json:"operationCounts"`
+	FailureCounts   map[OperationType]int `json:"failureCounts,omitempty"`
 }
 
 type DeploymentResult struct {
@@ -70,14 +71,20 @@ func (deployment Deployment) Execute(client *porkbun.Client, domain string) Depl
 
 func newDeploymentResult(dryRun bool, results []OperationResult) DeploymentResult {
 	operationCounts := make(map[OperationType]int)
+	failureCounts := make(map[OperationType]int)
 	for _, result := range results {
-		operationCounts[result.Type]++
+		if result.Status == Failure {
+			failureCounts[result.Type]++
+		} else {
+			operationCounts[result.Type]++
+		}
 	}
 
 	return DeploymentResult{
 		Summary: DeploymentSummary{
 			DryRun:          dryRun,
 			OperationCounts: operationCounts,
+			FailureCounts:   failureCounts,
 		},
 		Results: results,
 	}

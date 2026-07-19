@@ -59,7 +59,7 @@ func (client *Client) AllRecords(domain string) ([]Record, error) {
 	response := listRes{}
 	err := client.post(retrieveUrl+"/"+domain, client.Auth, &response)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("retrieve records failed: %v", err)
 	}
 
 	return slices.DeleteFunc(response.Records, Record.isIgnored), nil
@@ -86,7 +86,7 @@ func (client *Client) CreateRecord(domain string, record Record) (string, error)
 	response := createRes{}
 	err := client.post(createUrl+"/"+domain, request, &response)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("create record failed: %v", err)
 	}
 
 	return strconv.Itoa(response.Id), nil
@@ -99,19 +99,29 @@ func (client *Client) EditRecord(domain string, record Record) error {
 	}
 
 	if record.isIgnored() {
-		return fmt.Errorf("cannot edit an ignored record: %s", record)
+		return fmt.Errorf("cannot edit ignored record: %s", record)
 	}
 
 	request := editReq{Auth: client.Auth, Record: record}
 	request.Name = trimDomain(record.Name, domain)
 
 	response := baseRes{}
-	return client.post(editUrl+"/"+domain+"/"+record.Id, request, &response)
+	err := client.post(editUrl+"/"+domain+"/"+record.Id, request, &response)
+	if err != nil {
+		return fmt.Errorf("update record failed: %v", err)
+	}
+
+	return nil
 }
 
 func (client *Client) DeleteRecord(domain string, record Record) error {
 	response := baseRes{}
-	return client.post(deleteUrl+"/"+domain+"/"+record.Id, client.Auth, &response)
+	err := client.post(deleteUrl+"/"+domain+"/"+record.Id, client.Auth, &response)
+	if err != nil {
+		return fmt.Errorf("delete record failed: %v", err)
+	}
+
+	return nil
 }
 
 // Trims a root domain from a longer subdomain. For example, trims
@@ -161,8 +171,10 @@ func (client *Client) post(url string, request any, response checkable) error {
 	}
 	defer res.Body.Close()
 
-	if res.StatusCode < 200 || res.StatusCode >= 300 {
-		return fmt.Errorf("received non-success status code: %d", res.StatusCode)
+	if res.StatusCode == 400 {
+		return fmt.Errorf("validation error")
+	} else if res.StatusCode != http.StatusOK {
+		return fmt.Errorf("error %d", res.StatusCode)
 	}
 
 	if err = json.NewDecoder(res.Body).Decode(response); err != nil {
