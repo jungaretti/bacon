@@ -2,47 +2,57 @@ package cmd
 
 import (
 	"bacon/pkg/config"
+	"bacon/pkg/deployment"
 	"bacon/pkg/porkbun"
+	"errors"
 	"fmt"
 
 	"github.com/spf13/cobra"
 )
 
-const (
-	createSymbol = "+"
-	updateSymbol = "~"
-	deleteSymbol = "-"
-	keepSymbol   = "="
-)
-
 func newDeployCmd(client *porkbun.Client) *cobra.Command {
-	var shouldCreate bool
-	var shouldDelete bool
-	var shouldUpdate bool
+	var dryRun bool
+	var force bool
+	var output string
 
 	deploy := &cobra.Command{
 		Use:   "deploy <config-file>",
 		Short: "Deploy records from a config file",
 		Long: `Deploys DNS records from a YAML config file by updating records in place when
-possible, then deleting old records and creating new records.`,
+possible, then deleting old records and creating new records. Previews the
+deployment unless --force is specified.`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return deploy(client, args[0], shouldCreate, shouldDelete, shouldUpdate)
+			return deploy(client, args[0], force, output)
 		},
 	}
 
-	deploy.Flags().BoolVarP(&shouldCreate, "create", "c", false, "create new records")
-	deploy.Flags().BoolVarP(&shouldDelete, "delete", "d", false, "delete old records")
-	deploy.Flags().BoolVarP(&shouldUpdate, "update", "u", false, "update changed records")
+	deploy.Flags().BoolVar(&dryRun, "dry-run", true, "preview the deployment without making changes")
+	deploy.Flags().BoolVar(&force, "force", false, "execute the deployment without confirmation")
+	deploy.MarkFlagsMutuallyExclusive("dry-run", "force")
+
+	deploy.Flags().StringVarP(&output, "output", "o", "table", "output format: table or json")
 
 	return deploy
 }
 
-func deploy(client *porkbun.Client, configFile string, shouldCreate bool, shouldDelete bool, shouldUpdate bool) error {
+func deploy(client *porkbun.Client, configFile string, force bool, output string) error {
+	var formatter deployment.Formatter
+	switch output {
+	case "table":
+		formatter = deployment.TableFormatter{}
+	case "json":
+		formatter = deployment.JSONFormatter{}
+	default:
+		return fmt.Errorf("unknown output format: %v", output)
+	}
+
 	config, err := config.ReadFile(configFile)
 	if err != nil {
 		return fmt.Errorf("reading %v: %v", configFile, err)
 	}
+
+	fmt.Print(formatter.FormatStart(config.Domain, !force))
 
 	from, err := client.AllRecords(config.Domain)
 	if err != nil {
@@ -55,70 +65,22 @@ func deploy(client *porkbun.Client, configFile string, shouldCreate bool, should
 	}
 
 	added, removed, updated, unchanged := porkbun.DiffRecords(from, to)
+	recordDeployment := deployment.NewDeployment(added, removed, updated, unchanged)
 
-	if shouldDelete {
-		fmt.Println("Deleting", len(removed), "records...")
-		for _, record := range removed {
-			err := client.DeleteRecord(config.Domain, record)
-			if err != nil {
-				return fmt.Errorf("couldn't delete record: %v", err)
-			}
-			fmt.Println(deleteSymbol, record)
-		}
+	var deploymentResult deployment.DeploymentResult
+	if force {
+		deploymentResult = recordDeployment.Execute(client, config.Domain)
 	} else {
-		fmt.Println("Would delete", len(removed), "records:")
-		for _, record := range removed {
-			fmt.Println(deleteSymbol, record)
+		deploymentResult = recordDeployment.Preview()
+	}
+
+	fmt.Print(formatter.FormatResult(deploymentResult))
+
+	for _, result := range deploymentResult.Results {
+		if result.Status == deployment.Failure {
+			return errors.New(result.Error)
 		}
 	}
 
-	if shouldUpdate {
-		fmt.Println("Updating", len(updated), "records...")
-		for _, record := range updated {
-			err := client.EditRecord(config.Domain, record)
-			if err != nil {
-				return fmt.Errorf("couldn't update record: %v", err)
-			}
-			fmt.Println(updateSymbol, record)
-		}
-	} else {
-		fmt.Println("Would update", len(updated), "records:")
-		for _, record := range updated {
-			fmt.Println(updateSymbol, record)
-		}
-	}
-
-	if shouldCreate {
-		fmt.Println("Creating", len(added), "records...")
-		for _, record := range added {
-			id, err := client.CreateRecord(config.Domain, record)
-			if err != nil {
-				return fmt.Errorf("couldn't create record: %v", err)
-			}
-
-			record.Id = id
-			fmt.Println(createSymbol, record)
-		}
-	} else {
-		fmt.Println("Would create", len(added), "records:")
-		for _, record := range added {
-			fmt.Println(createSymbol, record)
-		}
-	}
-
-	fmt.Println("Keeping", len(unchanged), "records:")
-	for _, record := range unchanged {
-		fmt.Println(keepSymbol, record)
-	}
-
-	fullDeployment := shouldCreate && shouldDelete && shouldUpdate
-	partialDeployment := shouldCreate || shouldDelete || shouldUpdate
-	if fullDeployment {
-		fmt.Println("Deployment complete!")
-	} else if partialDeployment {
-		fmt.Println("Partial deployment complete!")
-	} else {
-		fmt.Println("Mock deployment complete")
-	}
 	return nil
 }

@@ -1,8 +1,8 @@
 # Bacon 🥓
 
-Bacon deploys your DNS records from YAML config files to [Porkbun](https://porkbun.com/api/json/v3/documentation). You can use Bacon to deploy, backup, and restore your DNS records.
+Bacon deploys your DNS records from YAML config files to [Porkbun](https://porkbun.com/api/json/v3/documentation). You can use Bacon to deploy, back up, and restore your DNS records.
 
-![Demo of bacon deploy](https://user-images.githubusercontent.com/19893438/167231076-2f99e0ce-9ed7-40e4-9b1e-fc2fd578cd0f.gif)
+<img width="1120" height="893" alt="Demo of bacon deploy" src="https://github.com/user-attachments/assets/60ceb3f0-f7fe-4a8b-aac3-57ed1b14b48f" />
 
 ## Getting Started
 
@@ -28,7 +28,7 @@ See [jungaretti/dns](https://github.com/jungaretti/dns) for an example of DNS re
 
 Sign into Porkbun and [generate a new API keyset](https://porkbun.com/account/api) for your account. Read the ["Generating API Keys" section of Porkbun's docs](https://kb.porkbun.com/article/190-getting-started-with-the-porkbun-dns-api) for more detailed instructions. Be sure to enable API access for the domain(s) that you would like to manage with Bacon.
 
-Next, `export` the `PORKBUN_API_KEY` and `PORKBUN_SECRET_KEY` environment variables or add them to an `.env` file. Bacon uses these environment variables to authenticate with Porkbun. If the current directory contains an `.env` file, then Bacon will load its contents into environment variables. See [`.env.example`](https://github.com/jungaretti/bacon/blob/main/.env.example) for an example.
+Next, `export` the `PORKBUN_API_KEY` and `PORKBUN_SECRET_KEY` environment variables or add them to a `.env` file. Bacon uses these environment variables to authenticate with Porkbun. If the current directory contains a `.env` file, then Bacon will load its contents into environment variables. See [`.env.example`](https://github.com/jungaretti/bacon/blob/main/.env.example) for an example.
 
 You can use [`bacon ping`](#ping) to check your authentication configuration.
 
@@ -37,7 +37,7 @@ You can use [`bacon ping`](#ping) to check your authentication configuration.
 Bacon offers a few commands to help you deploy and save your DNS records:
 
 - `ping` to double-check your API keys (stored in environment variables)
-- `deploy <config>` to deploy DNS records from a YAML config file
+- `deploy <config-file>` to deploy DNS records from a YAML config file
 - `print <domain>` to print your DNS records in YAML format
 
 ### Commands
@@ -46,14 +46,15 @@ Bacon offers a few commands to help you deploy and save your DNS records:
 
 Verifies your API keys by pinging Porkbun.
 
-#### `deploy <config>`
+#### `deploy <config-file>`
 
-Deploys records from a domain's config file by deleting unknown records and creating new records. Defaults to a dry-run mode that doesn't modify your DNS records.
+Deploys records from a config file by deleting, updating, and creating records. Defaults to a dry-run mode that doesn't modify your DNS records.
 
 ##### Parameters
 
-- `--delete` disable dry-run deletions and delete outdated records
-- `--create` disable dry-run creations and create new records
+- `--dry-run` preview the deployment without making changes
+- `--force` execute the deployment without confirmation
+- `--output`, `-o` output format: `table` or `json` (default `table`)
 
 #### `print <domain>`
 
@@ -61,7 +62,7 @@ Prints records for a domain in YAML format.
 
 ##### Notes
 
-Use `>` to redirect output to a Bacon config file. For example, `bacon print example.com > example.com.yml`
+Use `>` to redirect output to a Bacon config file. For example, `bacon print example.com > example.com.yml`.
 
 ## Configuration
 
@@ -106,14 +107,14 @@ records:
 - `content` - Required.
 - `ttl` - Required. Minimum value: `600`.
 - `priority` - Optional. Allowed for `MX` and `SRV` records.
-- `notes` - Optional. Private notes in Porkbun that are not exposed via DNS
+- `notes` - Optional. Private notes in Porkbun that are not exposed via DNS.
 
 > Bacon ignores `NS` records and records whose host begins with `_acme-challenge`.
 
 #### Config
 
 - `domain` - Required.
-- `records`
+- `records` - Optional. DNS records to deploy for the domain.
 
 ## Development
 
