@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"bacon/pkg/config"
+	"bacon/pkg/deployment"
 	"bacon/pkg/porkbun"
 	"fmt"
 
@@ -55,60 +56,66 @@ func deploy(client *porkbun.Client, configFile string, shouldCreate bool, should
 	}
 
 	added, removed, updated, unchanged := porkbun.DiffRecords(from, to)
+	operations := buildOperations(added, removed, updated, unchanged, shouldCreate, shouldDelete, shouldUpdate)
+	results := executeOperations(client, config.Domain, operations)
+	printReport(results, shouldCreate, shouldDelete, shouldUpdate)
 
-	if shouldDelete {
-		fmt.Println("Deleting", len(removed), "records...")
-		for _, record := range removed {
-			err := client.DeleteRecord(config.Domain, record)
-			if err != nil {
-				return fmt.Errorf("couldn't delete record: %v", err)
-			}
-			fmt.Println(deleteSymbol, record)
-		}
-	} else {
-		fmt.Println("Would delete", len(removed), "records:")
-		for _, record := range removed {
-			fmt.Println(deleteSymbol, record)
+	for _, result := range results {
+		if result.Status == deployment.Failure {
+			return fmt.Errorf("couldn't %v record: %v", result.Type, result.Error)
 		}
 	}
+	return nil
+}
 
-	if shouldUpdate {
-		fmt.Println("Updating", len(updated), "records...")
-		for _, record := range updated {
-			err := client.EditRecord(config.Domain, record)
-			if err != nil {
-				return fmt.Errorf("couldn't update record: %v", err)
-			}
-			fmt.Println(updateSymbol, record)
-		}
-	} else {
-		fmt.Println("Would update", len(updated), "records:")
-		for _, record := range updated {
-			fmt.Println(updateSymbol, record)
-		}
+func buildOperations(added, removed, updated, unchanged []porkbun.Record, shouldCreate, shouldDelete, shouldUpdate bool) []deployment.RecordOperation {
+	var operations []deployment.RecordOperation
+	for _, record := range removed {
+		operations = append(operations, deployment.RecordOperation{Type: deployment.Delete, Record: record, Planned: !shouldDelete})
 	}
-
-	if shouldCreate {
-		fmt.Println("Creating", len(added), "records...")
-		for _, record := range added {
-			id, err := client.CreateRecord(config.Domain, record)
-			if err != nil {
-				return fmt.Errorf("couldn't create record: %v", err)
-			}
-
-			record.Id = id
-			fmt.Println(createSymbol, record)
-		}
-	} else {
-		fmt.Println("Would create", len(added), "records:")
-		for _, record := range added {
-			fmt.Println(createSymbol, record)
-		}
+	for _, record := range updated {
+		operations = append(operations, deployment.RecordOperation{Type: deployment.Update, Record: record, Planned: !shouldUpdate})
 	}
-
-	fmt.Println("Keeping", len(unchanged), "records:")
+	for _, record := range added {
+		operations = append(operations, deployment.RecordOperation{Type: deployment.Create, Record: record, Planned: !shouldCreate})
+	}
 	for _, record := range unchanged {
-		fmt.Println(keepSymbol, record)
+		operations = append(operations, deployment.RecordOperation{Type: deployment.Keep, Record: record})
+	}
+	return operations
+}
+
+func executeOperations(client *porkbun.Client, domain string, operations []deployment.RecordOperation) []deployment.RecordOperationResult {
+	var results []deployment.RecordOperationResult
+	for _, operation := range operations {
+		if operation.Planned {
+			results = append(results, deployment.RecordOperationResult{
+				Status: deployment.Planned,
+				Type:   operation.Type,
+				Record: operation.Record,
+			})
+			continue
+		}
+
+		result := operation.Execute(client, domain)
+		results = append(results, result)
+		if result.Status == deployment.Failure {
+			break
+		}
+	}
+	return results
+}
+
+func printReport(results []deployment.RecordOperationResult, shouldCreate, shouldDelete, shouldUpdate bool) {
+	printSection(results, deployment.Delete, deleteSymbol, "Deleting", "Would delete", shouldDelete)
+	printSection(results, deployment.Update, updateSymbol, "Updating", "Would update", shouldUpdate)
+	printSection(results, deployment.Create, createSymbol, "Creating", "Would create", shouldCreate)
+
+	fmt.Println("Keeping", countByType(results, deployment.Keep), "records:")
+	for _, result := range results {
+		if result.Type == deployment.Keep {
+			fmt.Println(keepSymbol, result.Record)
+		}
 	}
 
 	fullDeployment := shouldCreate && shouldDelete && shouldUpdate
@@ -120,5 +127,34 @@ func deploy(client *porkbun.Client, configFile string, shouldCreate bool, should
 	} else {
 		fmt.Println("Mock deployment complete")
 	}
-	return nil
+}
+
+func printSection(results []deployment.RecordOperationResult, operationType deployment.OperationType, symbol, executedVerb, plannedVerb string, executed bool) {
+	count := countByType(results, operationType)
+	if executed {
+		fmt.Println(executedVerb, count, "records...")
+	} else {
+		fmt.Println(plannedVerb, count, "records:")
+	}
+
+	for _, result := range results {
+		if result.Type != operationType {
+			continue
+		}
+		if result.Status == deployment.Failure {
+			fmt.Println(symbol, result.Record, "(failed:", fmt.Sprint(result.Error)+")")
+		} else {
+			fmt.Println(symbol, result.Record)
+		}
+	}
+}
+
+func countByType(results []deployment.RecordOperationResult, operationType deployment.OperationType) int {
+	count := 0
+	for _, result := range results {
+		if result.Type == operationType {
+			count++
+		}
+	}
+	return count
 }
