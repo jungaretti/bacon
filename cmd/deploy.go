@@ -51,6 +51,8 @@ func deploy(client *porkbun.Client, configFile string, force bool, output string
 		return fmt.Errorf("reading %v: %v", configFile, err)
 	}
 
+	fmt.Print(formatter.FormatStart(config.Domain, !force))
+
 	from, err := client.AllRecords(config.Domain)
 	if err != nil {
 		return fmt.Errorf("fetching existing records: %v", err)
@@ -71,7 +73,7 @@ func deploy(client *porkbun.Client, configFile string, force bool, output string
 		deploymentResult = recordDeployment.Preview()
 	}
 
-	fmt.Print(formatter.Format(deploymentResult))
+	fmt.Print(formatter.FormatResult(deploymentResult))
 
 	for _, result := range deploymentResult.Results {
 		if result.Status == deployment.Failure {

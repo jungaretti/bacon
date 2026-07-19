@@ -1,5 +1,6 @@
 package deployment
 
 type Formatter interface {
-	Format(deploymentResult DeploymentResult) string
+	FormatStart(domain string, dryRun bool) string
+	FormatResult(deploymentResult DeploymentResult) string
 }

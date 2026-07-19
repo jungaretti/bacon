@@ -10,14 +10,14 @@ type TableFormatter struct{}
 
 var _ Formatter = TableFormatter{}
 
-const (
-	createSymbol = "+"
-	updateSymbol = "~"
-	deleteSymbol = "-"
-	keepSymbol   = "="
-)
+func (formatter TableFormatter) FormatStart(domain string, dryRun bool) string {
+	if dryRun {
+		return fmt.Sprintf("Dry-run deployment of %v:\n", domain)
+	}
+	return fmt.Sprintf("Deploying %v...\n", domain)
+}
 
-func (formatter TableFormatter) Format(deploymentResult DeploymentResult) string {
+func (formatter TableFormatter) FormatResult(deploymentResult DeploymentResult) string {
 	results := deploymentResult.Results
 
 	hasError := false
@@ -55,13 +55,13 @@ func (formatter TableFormatter) Format(deploymentResult DeploymentResult) string
 func operationSymbol(operationType OperationType) string {
 	switch operationType {
 	case Create:
-		return createSymbol
+		return "+"
 	case Update:
-		return updateSymbol
+		return "~"
 	case Delete:
-		return deleteSymbol
+		return "-"
 	case Keep:
-		return keepSymbol
+		return "="
 	}
 	return "?"
 }
