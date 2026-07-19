@@ -12,6 +12,7 @@ import (
 func newDeployCmd(client *porkbun.Client) *cobra.Command {
 	var dryRun bool
 	var force bool
+	var output string
 
 	deploy := &cobra.Command{
 		Use:   "deploy <config-file>",
@@ -21,7 +22,7 @@ possible, then deleting old records and creating new records. Previews the
 deployment unless --force is specified.`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return deploy(client, args[0], force)
+			return deploy(client, args[0], force, output)
 		},
 	}
 
@@ -29,10 +30,22 @@ deployment unless --force is specified.`,
 	deploy.Flags().BoolVar(&force, "force", false, "execute the deployment without confirmation")
 	deploy.MarkFlagsMutuallyExclusive("dry-run", "force")
 
+	deploy.Flags().StringVarP(&output, "output", "o", "table", "output format: table or json")
+
 	return deploy
 }
 
-func deploy(client *porkbun.Client, configFile string, force bool) error {
+func deploy(client *porkbun.Client, configFile string, force bool, output string) error {
+	var formatter deployment.Formatter
+	switch output {
+	case "table":
+		formatter = deployment.TableFormatter{}
+	case "json":
+		formatter = deployment.JSONFormatter{}
+	default:
+		return fmt.Errorf("unknown output format: %v", output)
+	}
+
 	config, err := config.ReadFile(configFile)
 	if err != nil {
 		return fmt.Errorf("reading %v: %v", configFile, err)
@@ -58,7 +71,6 @@ func deploy(client *porkbun.Client, configFile string, force bool) error {
 		deploymentResult = recordDeployment.Preview()
 	}
 
-	formatter := deployment.TextFormatter{}
 	fmt.Print(formatter.Format(deploymentResult))
 
 	for _, result := range deploymentResult.Results {
