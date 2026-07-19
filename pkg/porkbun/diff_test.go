@@ -308,3 +308,107 @@ func TestDiffRecordsChangedNotes(t *testing.T) {
 		t.Error("expected no unchanged, got", len(unchanged))
 	}
 }
+
+func TestDiffRecordsDeleteTxt(t *testing.T) {
+	from := []Record{
+		{
+			Id:      "123",
+			Name:    "bacondemo.com",
+			Type:    "TXT",
+			TTL:     "600",
+			Content: "v=spf1 include:spf.messagingengine.com ?all",
+		},
+		{
+			Id:      "456",
+			Name:    "bacondemo.com",
+			Type:    "TXT",
+			TTL:     "600",
+			Content: "MS=ms52729443",
+		},
+	}
+
+	to := []Record{
+		{
+			Id:      "123",
+			Name:    "bacondemo.com",
+			Type:    "TXT",
+			TTL:     "600",
+			Content: "v=spf1 include:spf.messagingengine.com ?all",
+		},
+	}
+
+	added, removed, updated, unchanged := DiffRecords(from, to)
+
+	if len(added) != 0 {
+		t.Error("expected no added, got", len(added))
+	}
+
+	if len(removed) != 1 {
+		t.Error("expected 1 removed, got", len(removed))
+	}
+	if removed[0].Id != "456" {
+		t.Error("expected remove to keep ID 456, got", removed[0].Id)
+	}
+
+	if len(updated) != 0 {
+		t.Error("expected no updated, got", len(updated))
+	}
+
+	if len(unchanged) != 1 {
+		t.Error("expected 1 unchanged, got", len(unchanged))
+	}
+}
+
+func TestDiffRecordsDeleteChangeTxt(t *testing.T) {
+	from := []Record{
+		{
+			Id:      "123",
+			Name:    "bacondemo.com",
+			Type:    "TXT",
+			TTL:     "600",
+			Content: "v=spf1 include:spf.messagingengine.com ?all",
+		},
+		{
+			Id:      "456",
+			Name:    "bacondemo.com",
+			Type:    "TXT",
+			TTL:     "600",
+			Content: "MS=ms52729443",
+		},
+	}
+
+	to := []Record{
+		{
+			Id:      "123",
+			Name:    "bacondemo.com",
+			Type:    "TXT",
+			TTL:     "600",
+			Content: "v=spf1 include:spf.messagingengine.com ?all",
+			Notes:   "Fastmail",
+		},
+	}
+
+	added, removed, updated, unchanged := DiffRecords(from, to)
+
+	if len(added) != 0 {
+		t.Error("expected no added, got", len(added))
+	}
+
+	if len(removed) != 1 {
+		t.Error("expected 1 removed, got", len(removed))
+	}
+	if removed[0].Id != "456" {
+		t.Error("expected remove to keep ID 456, got", removed[0].Id)
+	}
+
+	if len(updated) != 1 {
+		t.Error("expected 1 updated, got", len(updated))
+	}
+	if updated[0].Id != "123" {
+		t.Error("expected update to keep ID 123, got", updated[0].Id)
+	}
+
+	if len(unchanged) != 0 {
+		t.Error("expected no unchanged, got", len(unchanged))
+	}
+}
