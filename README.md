@@ -2,7 +2,7 @@
 
 Bacon deploys your DNS records from YAML config files to [Porkbun](https://porkbun.com/api/json/v3/documentation). You can use Bacon to deploy, back up, and restore your DNS records.
 
-![Demo of bacon deploy](https://user-images.githubusercontent.com/19893438/167231076-2f99e0ce-9ed7-40e4-9b1e-fc2fd578cd0f.gif)
+<img width="800" height="583" alt="Demo of bacon deploy" src="https://github.com/user-attachments/assets/7f4b0d39-876d-4351-83a6-23c46f2c1f5a" />
 
 ## Getting Started
 
