@@ -7,12 +7,12 @@ import (
 )
 
 type Record struct {
-	Name     string `yaml:"host"`
-	Type     string `yaml:"type"`
-	Ttl      int    `yaml:"ttl"`
-	Data     string `yaml:"content"`
-	Priority int    `yaml:"priority,omitempty"`
-	Notes    string `yaml:"notes,omitempty"`
+	Name     string `yaml:"host" json:"host"`
+	Type     string `yaml:"type" json:"type"`
+	Ttl      int    `yaml:"ttl" json:"ttl"`
+	Data     string `yaml:"content" json:"content"`
+	Priority int    `yaml:"priority,omitempty" json:"priority,omitempty"`
+	Notes    string `yaml:"notes,omitempty" json:"notes,omitempty"`
 }
 
 func (r Record) ToPorkbun() porkbun.Record {

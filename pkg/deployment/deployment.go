@@ -1,6 +1,7 @@
 package deployment
 
 import (
+	"bacon/pkg/config"
 	"bacon/pkg/porkbun"
 )
 
@@ -38,11 +39,19 @@ func NewDeployment(added, removed, updated, unchanged []porkbun.Record) Deployme
 func (deployment Deployment) Preview() DeploymentResult {
 	var results []OperationResult
 	for _, operation := range deployment.Operations {
-		results = append(results, OperationResult{
+		result := OperationResult{
 			Status: Planned,
 			Type:   operation.Type,
-			Record: operation.Record,
-		})
+		}
+
+		record, err := config.RecordFromPorkbun(operation.Record)
+		if err != nil {
+			result.Status = Failure
+			result.Error = err.Error()
+		} else {
+			result.Record = record
+		}
+		results = append(results, result)
 	}
 	return newDeploymentResult(true, results)
 }

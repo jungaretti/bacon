@@ -38,10 +38,14 @@ func (formatter TableFormatter) FormatResult(deploymentResult DeploymentResult) 
 		}
 		for _, result := range results {
 			record := result.Record
+			priority := ""
+			if record.Priority != 0 {
+				priority = fmt.Sprint(record.Priority)
+			}
 			if hasError {
-				fmt.Fprintf(writer, "%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\n", operationSymbol(result.Type), record.Name, record.Type, record.Content, record.TTL, record.Priority, record.Notes, result.Error)
+				fmt.Fprintf(writer, "%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\n", operationSymbol(result.Type), record.Name, record.Type, record.Data, record.Ttl, priority, record.Notes, result.Error)
 			} else {
-				fmt.Fprintf(writer, "%v\t%v\t%v\t%v\t%v\t%v\t%v\n", operationSymbol(result.Type), record.Name, record.Type, record.Content, record.TTL, record.Priority, record.Notes)
+				fmt.Fprintf(writer, "%v\t%v\t%v\t%v\t%v\t%v\t%v\n", operationSymbol(result.Type), record.Name, record.Type, record.Data, record.Ttl, priority, record.Notes)
 			}
 		}
 		writer.Flush()

@@ -1,6 +1,7 @@
 package deployment
 
 import (
+	"bacon/pkg/config"
 	"bacon/pkg/porkbun"
 	"fmt"
 )
@@ -31,24 +32,29 @@ type OperationResult struct {
 	Status OperationStatus `json:"status"`
 	Error  string          `json:"error,omitempty"`
 	Type   OperationType   `json:"operationType"`
-	Record porkbun.Record  `json:"record"`
+	Record config.Record   `json:"record"`
 }
 
 func (op Operation) Execute(client *porkbun.Client, domain string) OperationResult {
 	var result OperationResult
 	result.Type = op.Type
-	result.Record = op.Record
+
+	record, err := config.RecordFromPorkbun(op.Record)
+	if err != nil {
+		result.Status = Failure
+		result.Error = err.Error()
+		return result
+	}
+	result.Record = record
 
 	switch op.Type {
 	case Create:
-		id, err := client.CreateRecord(domain, op.Record)
+		_, err := client.CreateRecord(domain, op.Record)
 		if err != nil {
 			result.Status = Failure
 			result.Error = err.Error()
 		} else {
 			result.Status = Success
-			// Set the newly created record's ID
-			result.Record.Id = id
 		}
 	case Update:
 		err := client.EditRecord(domain, op.Record)
