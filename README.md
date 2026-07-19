@@ -53,6 +53,7 @@ Deploys records from a config file by deleting, updating, and creating records. 
 ##### Parameters
 
 - `--dry-run` preview the deployment without making changes
+- `--confirm` preview and confirm the deployment (not compatible with `--output json`)
 - `--force` execute the deployment without confirmation
 - `--output`, `-o` output format: `table` or `json` (default `table`)
 
