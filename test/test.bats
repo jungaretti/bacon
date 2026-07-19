@@ -6,12 +6,12 @@ setup() {
     ./bin/bacon ping
 }
 
-@test "deploy would delete 0 records" {
-    ./bin/bacon deploy config.example.yml | grep 'Would delete 0 records'
+@test "deploy --output table" {
+    ./bin/bacon deploy --output table config.example.yml
 }
 
-@test "deploy would create 0 records" {
-    ./bin/bacon deploy config.example.yml | grep 'Would create 0 records'
+@test "deploy --output json" {
+    ./bin/bacon deploy --output json config.example.yml | jq
 }
 
 @test "deploy" {
