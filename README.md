@@ -37,7 +37,7 @@ You can use [`bacon ping`](#ping) to check your authentication configuration.
 Bacon offers a few commands to help you deploy and save your DNS records:
 
 - `ping` to double-check your API keys (stored in environment variables)
-- `deploy <config>` to deploy DNS records from a YAML config file
+- `deploy <config-file>` to deploy DNS records from a YAML config file
 - `print <domain>` to print your DNS records in YAML format
 
 ### Commands
@@ -46,14 +46,15 @@ Bacon offers a few commands to help you deploy and save your DNS records:
 
 Verifies your API keys by pinging Porkbun.
 
-#### `deploy <config>`
+#### `deploy <config-file>`
 
-Deploys records from a domain's config file by deleting unknown records and creating new records. Defaults to a dry-run mode that doesn't modify your DNS records.
+Deploys records from a config file by deleting, updating, and creating records. Defaults to a dry-run mode that doesn't modify your DNS records.
 
 ##### Parameters
 
-- `--delete` disable dry-run deletions and delete outdated records
-- `--create` disable dry-run creations and create new records
+- `--dry-run` preview the deployment without making changes
+- `--force` execute the deployment without confirmation
+- `--output`, `-o` output format: `table` or `json` (default `table`)
 
 #### `print <domain>`
 
