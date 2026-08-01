@@ -52,7 +52,7 @@ func (formatter TableFormatter) FormatResult(deploymentResult DeploymentResult) 
 		fmt.Fprintln(&builder)
 	}
 
-	fmt.Fprintln(&builder, summarySentence(deploymentResult.Summary))
+	fmt.Fprint(&builder, summaryLines(deploymentResult.Summary))
 	return builder.String()
 }
 
@@ -70,7 +70,7 @@ func operationSymbol(operationType OperationType) string {
 	return "?"
 }
 
-func summarySentence(summary DeploymentSummary) string {
+func summaryLines(summary DeploymentSummary) string {
 	type verbGroup struct {
 		operationType OperationType
 		plannedVerb   string
@@ -83,64 +83,24 @@ func summarySentence(summary DeploymentSummary) string {
 		{Keep, "keep", "kept"},
 	}
 
-	var changePhrases []string
-	for _, group := range groups[:3] {
-		count := summary.OperationCounts[group.operationType]
-		if count == 0 {
-			continue
-		}
-		verb := group.executedVerb
-		if summary.DryRun {
-			verb = group.plannedVerb
-		}
-		changePhrases = append(changePhrases, verb+" "+pluralizeRecords(count))
-	}
-
-	keptPhrase := ""
-	if keptCount := summary.OperationCounts[Keep]; keptCount > 0 {
-		keptPhrase = "kept " + pluralizeRecords(keptCount)
-	}
-
-	var failurePhrases []string
+	var builder strings.Builder
 	for _, group := range groups {
-		count := summary.FailureCounts[group.operationType]
-		if count == 0 {
-			continue
-		}
-		failurePhrases = append(failurePhrases, "failed to "+group.plannedVerb+" "+pluralizeRecords(count))
-	}
-
-	sentence := ""
-	if len(changePhrases) > 0 {
-		if summary.DryRun {
-			sentence = "would " + strings.Join(changePhrases, ", ")
-			if keptPhrase != "" {
-				sentence += "; " + keptPhrase
+		if count := summary.OperationCounts[group.operationType]; count > 0 {
+			phrase := group.executedVerb + " " + pluralizeRecords(count)
+			if summary.DryRun && group.operationType != Keep {
+				phrase = "would " + group.plannedVerb + " " + pluralizeRecords(count)
 			}
-		} else {
-			phrases := changePhrases
-			if keptPhrase != "" {
-				phrases = append(phrases, keptPhrase)
-			}
-			sentence = strings.Join(phrases, ", ")
+			fmt.Fprintf(&builder, "%v %v\n", operationSymbol(group.operationType), phrase)
 		}
-	} else if keptPhrase != "" {
-		sentence = keptPhrase
-	}
-
-	if len(failurePhrases) > 0 {
-		failureClause := strings.Join(failurePhrases, ", ")
-		if sentence == "" {
-			sentence = failureClause
-		} else {
-			sentence += "; " + failureClause
+		if count := summary.FailureCounts[group.operationType]; count > 0 {
+			fmt.Fprintf(&builder, "%v failed to %v %v\n", operationSymbol(group.operationType), group.plannedVerb, pluralizeRecords(count))
 		}
 	}
 
-	if sentence == "" {
-		return "No records"
+	if builder.Len() == 0 {
+		return "No records\n"
 	}
-	return capitalize(sentence)
+	return builder.String()
 }
 
 func pluralizeRecords(count int) string {
@@ -148,11 +108,4 @@ func pluralizeRecords(count int) string {
 		return "1 record"
 	}
 	return fmt.Sprintf("%d records", count)
-}
-
-func capitalize(sentence string) string {
-	if sentence == "" {
-		return sentence
-	}
-	return strings.ToUpper(sentence[:1]) + sentence[1:]
 }
