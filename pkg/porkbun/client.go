@@ -22,25 +22,26 @@ const (
 	deleteUrl   string = baseUrl + "/dns/delete"
 )
 
-const (
-	// Porkbun returns 5XX errors if we send requests too quickly
-	requestRateLimit  = time.Second
-	requestRetryLimit = 3
-)
-
 type Auth struct {
 	ApiKey       string `json:"apikey"`
 	SecretApiKey string `json:"secretapikey"`
 }
 
 type Client struct {
-	Auth        Auth
+	Auth Auth
+	// The minimum duration between requests
+	rateLimit time.Duration
+	// The maximum number of times to retry a request
+	retryLimit  int
 	nextRequest time.Time
 }
 
 func NewClient(apiKey, secretApiKey string) *Client {
 	return &Client{
 		Auth: Auth{ApiKey: apiKey, SecretApiKey: secretApiKey},
+		// Porkbun imposes an undocumented rate limit of 1 request per second
+		rateLimit:  time.Second,
+		retryLimit: 3,
 	}
 }
 
@@ -135,7 +136,7 @@ func trimDomain(name string, domain string) string {
 
 func (client *Client) throttle() {
 	time.Sleep(time.Until(client.nextRequest))
-	client.nextRequest = time.Now().Add(requestRateLimit)
+	client.nextRequest = time.Now().Add(client.rateLimit)
 }
 
 func post[T any](client *Client, url string, request any) (T, error) {
@@ -153,8 +154,8 @@ func post[T any](client *Client, url string, request any) (T, error) {
 
 	var res *http.Response
 	for attempt := 0; ; attempt++ {
-		if attempt >= requestRetryLimit {
-			return response, fmt.Errorf("request failed after %d attempts", requestRetryLimit)
+		if attempt >= client.retryLimit {
+			return response, fmt.Errorf("request failed after %d attempts", client.retryLimit)
 		}
 
 		client.throttle()
