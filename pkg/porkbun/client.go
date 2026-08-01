@@ -151,11 +151,24 @@ func post[T any](client *Client, url string, request any) (T, error) {
 		return response, err
 	}
 
-	client.throttle()
+	var res *http.Response
+	for attempt := 0; ; attempt++ {
+		if attempt >= requestRetryLimit {
+			return response, fmt.Errorf("request failed after %d attempts", requestRetryLimit)
+		}
 
-	res, err := http.Post(url, "application/json", bytes.NewReader(jsonData))
-	if err != nil {
-		return response, fmt.Errorf("making POST request: %v", err)
+		client.throttle()
+
+		res, err = http.Post(url, "application/json", bytes.NewReader(jsonData))
+		if err != nil {
+			return response, fmt.Errorf("making POST request: %v", err)
+		}
+
+		if res.StatusCode != http.StatusServiceUnavailable {
+			break
+		}
+
+		res.Body.Close()
 	}
 	defer res.Body.Close()
 
