@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"slices"
 	"strconv"
@@ -41,23 +42,16 @@ func NewClient(apiKey, secretApiKey string) *Client {
 }
 
 func (client *Client) Ping() error {
-	type pingRes struct {
-		baseRes
-		YourIp string `json:"yourIp"`
-	}
-
-	response := pingRes{}
-	return client.post(pingUrl, client.Auth, &response)
+	_, err := post[struct{}](client, pingUrl, client.Auth)
+	return err
 }
 
 func (client *Client) AllRecords(domain string) ([]Record, error) {
 	type listRes struct {
-		baseRes
 		Records []Record `json:"records"`
 	}
 
-	response := listRes{}
-	err := client.post(retrieveUrl+"/"+domain, client.Auth, &response)
+	response, err := post[listRes](client, retrieveUrl+"/"+domain, client.Auth)
 	if err != nil {
 		return nil, fmt.Errorf("retrieve records failed: %v", err)
 	}
@@ -77,7 +71,6 @@ func (client *Client) CreateRecord(domain string, record Record) (string, error)
 	}
 
 	type createRes struct {
-		baseRes
 		Id int `json:"id"`
 	}
 
@@ -88,8 +81,7 @@ func (client *Client) CreateRecord(domain string, record Record) (string, error)
 	request := createReq{Auth: client.Auth, Record: record}
 	request.Name = trimDomain(record.Name, domain)
 
-	response := createRes{}
-	err := client.post(createUrl+"/"+domain, request, &response)
+	response, err := post[createRes](client, createUrl+"/"+domain, request)
 	if err != nil {
 		return "", fmt.Errorf("create record failed: %v", err)
 	}
@@ -110,8 +102,7 @@ func (client *Client) EditRecord(domain string, record Record) error {
 	request := editReq{Auth: client.Auth, Record: record}
 	request.Name = trimDomain(record.Name, domain)
 
-	response := baseRes{}
-	err := client.post(editUrl+"/"+domain+"/"+record.Id, request, &response)
+	_, err := post[struct{}](client, editUrl+"/"+domain+"/"+record.Id, request)
 	if err != nil {
 		return fmt.Errorf("update record failed: %v", err)
 	}
@@ -120,8 +111,7 @@ func (client *Client) EditRecord(domain string, record Record) error {
 }
 
 func (client *Client) DeleteRecord(domain string, record Record) error {
-	response := baseRes{}
-	err := client.post(deleteUrl+"/"+domain+"/"+record.Id, client.Auth, &response)
+	_, err := post[struct{}](client, deleteUrl+"/"+domain+"/"+record.Id, client.Auth)
 	if err != nil {
 		return fmt.Errorf("delete record failed: %v", err)
 	}
@@ -140,51 +130,54 @@ func trimDomain(name string, domain string) string {
 	return strings.TrimSuffix(name, "."+domain)
 }
 
-type checkable interface {
-	checkStatus() error
-}
-
-type baseRes struct {
-	Status  string `json:"status"`
-	Message string `json:"message"`
-}
-
-func (r baseRes) checkStatus() error {
-	if r.Status == "SUCCESS" {
-		return nil
-	}
-
-	return fmt.Errorf("unsuccessful Porkbun request: %s", r.Message)
-}
-
 func (client *Client) throttle() {
 	time.Sleep(time.Until(client.nextRequest))
 	client.nextRequest = time.Now().Add(rateLimit)
 }
 
-func (client *Client) post(url string, request any, response checkable) error {
+func post[T any](client *Client, url string, request any) (T, error) {
+	type baseRes struct {
+		Status  string `json:"status"`
+		Message string `json:"message"`
+	}
+
+	var response T
+
 	jsonData, err := json.Marshal(request)
 	if err != nil {
-		return err
+		return response, err
 	}
 
 	client.throttle()
 
 	res, err := http.Post(url, "application/json", bytes.NewReader(jsonData))
 	if err != nil {
-		return fmt.Errorf("making POST request: %v", err)
+		return response, fmt.Errorf("making POST request: %v", err)
 	}
 	defer res.Body.Close()
 
 	if res.StatusCode == 400 {
-		return fmt.Errorf("validation error")
+		return response, fmt.Errorf("validation error")
 	} else if res.StatusCode != http.StatusOK {
-		return fmt.Errorf("error %d", res.StatusCode)
+		return response, fmt.Errorf("error %d", res.StatusCode)
 	}
 
-	if err = json.NewDecoder(res.Body).Decode(response); err != nil {
-		return fmt.Errorf("unmarshaling JSON body: %v", err)
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		return response, fmt.Errorf("reading response body: %v", err)
 	}
 
-	return response.checkStatus()
+	base := baseRes{}
+	if err = json.Unmarshal(body, &base); err != nil {
+		return response, fmt.Errorf("unmarshaling JSON body: %v", err)
+	}
+	if base.Status != "SUCCESS" {
+		return response, fmt.Errorf("unsuccessful Porkbun request: %s", base.Message)
+	}
+
+	if err = json.Unmarshal(body, &response); err != nil {
+		return response, fmt.Errorf("unmarshaling JSON body: %v", err)
+	}
+
+	return response, nil
 }
