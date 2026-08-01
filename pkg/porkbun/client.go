@@ -22,8 +22,11 @@ const (
 	deleteUrl   string = baseUrl + "/dns/delete"
 )
 
-// Porkbun returns 5XX errors if we send requests too quickly
-const rateLimit = time.Second
+const (
+	// Porkbun returns 5XX errors if we send requests too quickly
+	requestRateLimit  = time.Second
+	requestRetryLimit = 3
+)
 
 type Auth struct {
 	ApiKey       string `json:"apikey"`
@@ -132,7 +135,7 @@ func trimDomain(name string, domain string) string {
 
 func (client *Client) throttle() {
 	time.Sleep(time.Until(client.nextRequest))
-	client.nextRequest = time.Now().Add(rateLimit)
+	client.nextRequest = time.Now().Add(requestRateLimit)
 }
 
 func post[T any](client *Client, url string, request any) (T, error) {
